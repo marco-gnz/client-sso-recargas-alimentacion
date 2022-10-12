@@ -1,9 +1,9 @@
 <template>
   <div class="tabs is-centered">
     <ul>
-      <li :class="currentRouteName === '/acceso/administrador' ?  'is-active'  : '' "><a href="/acceso/administrador">Acceso administrador</a></li>
-      <li :class="currentRouteName === '/acceso/mis-datos' ?  'is-active'  : '' "><a href="/acceso/mis-datos">Acceso a consulta de mis recargas</a></li>
-      <li :class="currentRouteName === '/acceso/recuperar-contrasena' ?  'is-active'  : '' "><a href="/acceso/recuperar-contrasena">Recuperar mi contraseña</a></li>
+      <li :class="currentRouteName === '/acceso/administrador' ?  'is-active'  : '' "><nuxt-link to="/acceso/administrador">Acceso administrador</nuxt-link></li>
+      <li :class="currentRouteName === '/acceso/mis-datos' ?  'is-active'  : '' "><nuxt-link to="/acceso/mis-datos">Acceso a consulta de mis recargas</nuxt-link></li>
+      <li :class="currentRouteName === '/acceso/recuperar-contrasena' ?  'is-active'  : '' "><nuxt-link to="/acceso/recuperar-contrasena">Recuperar mi contraseña</nuxt-link></li>
     </ul>
 </div>
 </template>

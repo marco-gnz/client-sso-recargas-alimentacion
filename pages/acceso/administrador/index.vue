@@ -6,17 +6,15 @@
           <div class="column pt-6 is-centered">
             <Menu />
             <div class="field">
-              <p class="control has-icons-left has-icons-right">
                 <label class="label">Ingrese correo electrónico</label>
                 <input v-model="login.email" class="input is-rounded" type="email" placeholder="Ingrese correo electrónico">
-              </p>
               <p v-if="errors.email" class="help is-danger">{{errors.email[0]}}</p>
             </div>
             <div class="field">
-              <p class="control has-icons-left">
+              <div class="control has-icons-left has-icons-right">
                 <label class="label">Ingrese contraseña</label>
                 <input v-model="login.password" class="input is-rounded" type="password" placeholder="Ingrese contraseña">
-              </p>
+              </div>
               <p v-if="errors.password" class="help is-danger">{{errors.password[0]}}</p>
             </div>
             <div class="field">

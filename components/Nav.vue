@@ -2,56 +2,43 @@
   <div>
     <nav class="navbar is-white is-fixed-top" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
-        <a class="navbar-item" href="/">
+        <a class="navbar-item">
           <img src="~/assets/img/sso-logo.png" width="30" height="28"> <strong>NOM SISTEMA</strong>
         </a>
-
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </a>
       </div>
-
-      <div id="navbarBasicExample" class="navbar-menu">
-        <template v-if="$auth.loggedIn">
-          <div class="navbar-start">
-            <a class="navbar-item" href="/admin/recargas">
-              Recargas
+      <div class="navbar-menu">
+        <no-ssr>
+          <div class="navbar-start" v-show="$auth.loggedIn">
+            <a class="navbar-item">
+                <nuxt-link to="/admin/recargas">Recargas</nuxt-link>
             </a>
+
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link">
                 Usuarios
               </a>
-
               <div class="navbar-dropdown">
-                <a class="navbar-item" href="/admin/usuarios/funcionarios">
-                  Funcionarios
+                <a class="navbar-item">
+                    Funcionarios
                 </a>
                 <a class="navbar-item">
-                  Administradores
+                    Administradores
                 </a>
               </div>
             </div>
-          </div>
-        </template>
 
-        <div class="navbar-end">
-          <template v-if="!$auth.loggedIn">
-            <div class="navbar-item">
-              <div class="buttons">
-                <a class="button is-light" href="/acceso/administrador">
-                  Ingresar
-                </a>
-              </div>
+            <a class="navbar-item">
+              <nuxt-link to="/admin/recargas/enviar">Enviar recarga</nuxt-link>
+            </a>
           </div>
-          </template>
-          <template v-else>
+        </no-ssr>
+        <client-only>
+          <div class="navbar-end" v-if="$auth.loggedIn">
             <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link">
+              <a class="navbar-link is-arrowless">
                 {{$auth.user.name}}
               </a>
-              <div class="navbar-dropdown is-right">
+              <div class="navbar-dropdown">
                 <a class="navbar-item">
                   Mi perfil
                 </a>
@@ -61,8 +48,8 @@
                 </div>
               </div>
             </div>
-          </template>
-        </div>
+          </div>
+        </client-only>
       </div>
     </nav>
   </div>

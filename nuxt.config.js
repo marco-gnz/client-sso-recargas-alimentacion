@@ -19,6 +19,7 @@ export default {
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
+    '@/assets/css/general.css',
     '@/assets/stylesheets/main.sass',
     './node_modules/element-ui/lib/theme-chalk/index.css'
   ],
@@ -26,6 +27,7 @@ export default {
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     '@/plugins/element-ui',
+    '@/plugins/luxon',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

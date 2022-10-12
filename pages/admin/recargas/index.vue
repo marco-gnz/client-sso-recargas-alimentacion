@@ -30,76 +30,81 @@
       </div>
       <div class="card p-6 m-6">
         <div class="columns">
-          <!-- <div class="column"><button class="button modal-button is-link is-inverted is-pulled-right"> Ingresar nuevo mes</button></div> -->
-          <nuxt-link :to="{name:'admin-recargas-ingresar'}">Ingresar nueva recarga</nuxt-link>
+          <nuxt-link class="button modal-button is-link is-inverted is-pulled-right" :to="{name:'admin-recargas-ingresar'}">Ingresar nueva recarga</nuxt-link>
         </div>
-        <table class="table is-striped is-narrow is-hoverable is-fullwidth">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Año</th>
-              <th>Mes</th>
-              <th>N° funcionarios</th>
-              <th>N° vigentes</th>
-              <th>N° no vigentes</th>
-              <th>Total pagado</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th>#3678</th>
-              <th>2021</th>
-              <td>enero</td>
-              <td>720</td>
-              <td>710</td>
-              <td>10</td>
-              <td>$42.934.736</td>
-              <td><el-tag size="mini" type="success">ESTADO</el-tag></td>
-              <td>
-                <el-dropdown>
-                    <span class="el-dropdown-link">Acción<i class="el-icon-arrow-down el-icon--right"></i></span>
-                    <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item  icon="el-icon-document-copy">Ver más</el-dropdown-item>
-                    </el-dropdown-menu>
-                </el-dropdown>
-              </td>
-            </tr>
-            <tr class="is-selected">
-              <th>#2172</th>
-              <th>2021</th>
-              <td>febero</td>
-              <td>722</td>
-              <td>712</td>
-              <td>8</td>
-              <td>$43.115.274</td>
-              <td><el-tag size="mini" type="warning">ESTADO</el-tag></td>
-              <td>
-                <el-dropdown>
-                    <span class="el-dropdown-link">Acción<i class="el-icon-arrow-down el-icon--right"></i></span>
-                    <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item  icon="el-icon-document-copy">Ver más</el-dropdown-item>
-                    </el-dropdown-menu>
-                </el-dropdown>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <template v-if="recargas.length">
+          <table class="table is-striped is-narrow is-hoverable is-fullwidth">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Establecimiento</th>
+                <th>Año</th>
+                <th>Mes</th>
+                <th>N° vigentes</th>
+                <th>N° no vigentes</th>
+                <th>Total monto</th>
+                <th>Habilitado</th>
+                <th>Estado actual</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(recarga, index) in recargas" :key="index"  @click.prevent="redirectToRecarga(recarga)" class="click">
+                <th>#{{recarga.codigo}}</th>
+                <th>{{recarga.establecimiento != null ? recarga.establecimiento.sigla : '--'}}</th>
+                <th>{{recarga.anio}}</th>
+                <th>{{recarga.mes}}</th>
+                <td>{{recarga.n_funcionarios_vigentes}}</td>
+                <td>{{recarga.n_funcionarios_no_vigentes}}</td>
+                <td>${{recarga.total_pagado}}</td>
+                <td @click.prevent.stop="">
+                  <template>
+                    <el-tooltip :content="`Habilitado: ${!recarga.active ? `No` : `Si`}`" placement="top">
+                        <el-switch :active-value="!recarga.active" :inactive-value="recarga.active" @change="editStatus(recarga.id)" active-color="#13ce66" v-loading.fullscreen.lock="loadingSpinner"></el-switch>
+                    </el-tooltip>
+                  </template>
+                </td>
+                <td><el-tag size="mini" type="success">ESTADO</el-tag></td>
+                <td @click.prevent.stop="">
+                  <el-dropdown>
+                      <span class="el-dropdown-link">Acción<i class="el-icon-arrow-down el-icon--right"></i></span>
+                      <el-dropdown-menu slot="dropdown">
+                          <el-dropdown-item  icon="el-icon-document-copy">Ver más</el-dropdown-item>
+                      </el-dropdown-menu>
+                  </el-dropdown>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+        <template v-else>
+          <div class="col-md-12">
+              <el-empty :image-size="90">
+                  <div class="row" slot="description">
+                  <div class="col-md-12"><span>No se encontraron recargas...</span></div>
+                  </div>
+              </el-empty>
+          </div>
+        </template>
       </div>
     </div>
     <div class="modal" :class="modalOpen ? 'is-active' : '' ">
       <ModalAdd />
     </div>
+    <div v-if="showModal" class="modal-route">
+      <div class="modal-content">
+        <nuxt-child></nuxt-child>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import {mapGetters, mapMutations} from 'vuex';
+import {mapActions, mapGetters, mapMutations} from 'vuex';
 import ModalAdd from '../../../components/admin/recargas/modal-add.vue';
 export default {
     name: "IndexPage",
-    middleware: "auth",
+    middleware: 'auth',
     head() {
         return {
             title: "Recargas"
@@ -125,7 +130,7 @@ export default {
                 },
             ],
             value: "",
-            showModalFlag: false
+            showModalFlag: false,
         };
     },
     beforeRouteLeave(to, from, next) {
@@ -136,22 +141,46 @@ export default {
             next();
         }
     },
+    mounted(){
+      this.getEstablecimientos();
+      this.getRecargas();
+    },
     computed:{
       ...mapGetters({
-        modalOpen:'recargas/modaladd/openModal'
-      })
+        modalOpen:'recargas/recargas/openModal',
+        recargas:'recargas/recargas/recargas',
+        establecimientos:'modulos/modulos/establecimientos',
+        loadingSpinner:'recargas/recargas/fullScreenLoading',
+      }),
+      showModal() {
+        return this.$route.matched.length;
+      }
     },
     methods: {
         ...mapMutations({
-          changeStatusModal: "recargas/modaladd/SET_OPEN",
+          changeStatusModal: "recargas/recargas/SET_OPEN",
         }),
-        displayProductModal(route) {
+        ...mapActions({
+            getRecargas: 'recargas/recargas/getRecargas',
+            getEstablecimientos: 'modulos/modulos/getEstablecimientos',
+            changeStatusRecarga: 'recargas/recargas/changeStatusRecarga',
+        }),
+        redirectToRecarga:function(recarga){
+          this.$router.push({
+            name:'admin-recargas-id',
+            params:{id:recarga.codigo}
+          });
+        },
+        async editStatus(id){
+          this.changeStatusRecarga(id);
+        },
+        displayProductModal:function(route) {
             console.log("open!");
             /* this.showModalFlag = true; */
             this.changeStatusModal(true);
             window.history.pushState({}, null, route.path);
         },
-        hideProductModal() {
+        hideProductModal:function() {
             this.activeModal = null;
             window.history.pushState({}, null, this.$route.path);
         }
@@ -159,3 +188,6 @@ export default {
     components: { ModalAdd }
 }
 </script>
+<style>
+
+</style>

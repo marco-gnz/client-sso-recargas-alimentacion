@@ -1,0 +1,13 @@
+.element-select{
+  width: 100% !important;
+  margin: auto !important;
+}
+
+.click:hover{
+  cursor: pointer;
+}
+
+.element-style{
+  width: 100%;
+  margin: auto;
+}
