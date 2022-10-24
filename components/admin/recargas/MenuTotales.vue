@@ -27,8 +27,8 @@
       </div>
       <div class="level-item has-text-centered">
         <div>
-          <p class="heading">Estado</p>
-          <span class="tag is-warning is-large">INGRESADA</span>
+          <p class="heading">Último estado</p>
+          <span class="tag is-warning is-large">{{recarga.last_estado != null ? recarga.last_estado.estado.nombre : '--'}}</span>
         </div>
       </div>
     </nav>
@@ -37,7 +37,7 @@
 
 <script>
 export default {
-
+  props:['recarga']
 }
 </script>
 

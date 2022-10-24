@@ -5,10 +5,10 @@
         <nuxt-link :to="`/admin/recargas/${codigo}`"><span class="icon is-small"><i class="el-icon-info"></i></span>Información general</nuxt-link>
       </li>
       <li :class="currentRouteName === `/admin/recargas/${codigo}/carga-datos` ?  'is-active'  : '' ">
-        <nuxt-link :to="`/admin/recargas/${codigo}/carga-datos`"><span class="icon is-small"><i class="el-icon-upload"></i></span>Carga de datos</nuxt-link>
+        <nuxt-link :to="`/admin/recargas/${codigo}/carga-datos`"><span class="icon is-small"><i class="el-icon-upload"></i></span>Carga masiva de datos</nuxt-link>
       </li>
-      <li :class="currentRouteName === `/admin/recargas/${codigo}/archivos` ?  'is-active'  : '' ">
-        <nuxt-link :to="`/admin/recargas/${codigo}`"><span class="icon is-small"><i class="el-icon-date"></i></span>Tabla resumen</nuxt-link>
+      <li :class="currentRouteName === `/admin/recargas/${codigo}/resumen` ?  'is-active'  : '' ">
+        <nuxt-link :to="`/admin/recargas/${codigo}/resumen`"><span class="icon is-small"><i class="el-icon-date"></i></span>Tabla resumen</nuxt-link>
       </li>
 
       <!-- <li>

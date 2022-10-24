@@ -64,7 +64,7 @@
                     </el-tooltip>
                   </template>
                 </td>
-                <td><el-tag size="mini" type="success">ESTADO</el-tag></td>
+                <td><el-tag size="mini" type="success">{{recarga.last_estado.estado.nombre}}</el-tag></td>
                 <td @click.prevent.stop="">
                   <el-dropdown>
                       <span class="el-dropdown-link">Acción<i class="el-icon-arrow-down el-icon--right"></i></span>
