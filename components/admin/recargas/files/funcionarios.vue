@@ -7,9 +7,8 @@
           <p class="modal-card-title">Carga masiva de funcionarios</p>
           <button class="delete" aria-label="close" @click.prevent="hideProductModal"></button>
         </header>
-
         <section class="modal-card-body p-6">
-          <el-steps :active="paso" align-center>
+          <el-steps :active="paso" align-center finish-status="success">
             <el-step title="Paso 1" description="Descripción de columnas"></el-step>
             <el-step title="Paso 2" description="Seleccionar archivo"></el-step>
             <el-step title="Paso 3" description="Verificar datos"></el-step>
@@ -18,44 +17,33 @@
         </section>
         <section v-if="paso === 0" class="modal-card-body">
           <h6>Las siguientes columnas son compatibles para realizar la carga masiva de datos.</h6>
-          <el-table
-            :data="tableData"
-            style="width: 100%">
-            <el-table-column
-              prop="orden"
-              label="Orden"
-              width="180"
-              column-key="orden"
-            >
-            </el-table-column>
-            <el-table-column
-              prop="nombre_columna"
-              label="Nombre columna"
-              width="180"
-              column-key="nombre_columna"
-            >
-            </el-table-column>
-            <el-table-column
-              prop="format"
-              label="Formato"
-              width="180">
-            </el-table-column>
-            <el-table-column
-              prop="tag"
-              label="Requerida"
-              width="100"
-              filter-placement="bottom-end">
-              <template slot-scope="scope">
-                <el-tag
-                  :type="scope.row.tag ? 'success' : 'warning'"
-                  disable-transitions>{{`${scope.row.tag ? 'Si' : 'No'}`}}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="description"
-              label="Descripción">
-            </el-table-column>
-          </el-table>
+          <div class="columns">
+            <div class="column is-half">
+              <label class="label">Posición columnas (2 max)</label>
+              <input type="number" class="input is-rounded" @input="updateValue" :value="row_columnas">
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>Nombre columna</th>
+                <th>Formato</th>
+                <th>Requerida</th>
+                <th>Descripción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(columna, index) in columnas" :key="index">
+                <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna"></td>
+                <td>{{columna.formato}}</td>
+                <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{`${columna.required ? 'Si' : 'No'}`}}</el-tag></td>
+                <td>{{columna.descripcion}}</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+
         </section>
         <section v-if="paso === 1" class="modal-card-body">
           <div class="columns">
@@ -128,7 +116,7 @@
                 </table>
               </template>
               <template v-if="errors_file != null">
-                <el-result icon="error" title="Error al analizar archivo">
+                <el-result icon="error" title="Error al cargar archivo">
                   <template slot="extra">
                     {{`${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}`}}
                     <table class="table is-fullwidth">
@@ -152,6 +140,13 @@
                   </template>
                 </el-result>
               </template>
+              <template v-if="!successImport">
+                <el-result icon="error" title="Error al cargar archivo">
+                  <template slot="extra">
+                    <span>Existe un error en el archivo. Favor volver y analizar nuevamente.</span>
+                  </template>
+                </el-result>
+              </template>
             </div>
           </div>
         </section>
@@ -167,7 +162,7 @@
           <button v-if="paso === 3 && successImport" @click.prevent="hideProductModal" class="button is-rounded">Cerrar</button>
           <button :disabled="paso === 0" v-if="paso != 3" @click.prevent="volver" class="button is-rounded">Volver</button>
           <button v-if="paso < 2" :disabled="disabledButton" @click.prevent="siguiente" v-loading.fullscreen.lock="loadingSpinner" class="button is-info is-rounded">Siguiente</button>
-          <button v-if="paso === 2" class="button is-primary is-rounded" v-loading.fullscreen.lock="loadingSpinner" @click.prevent="loadAndStoreFuncionario">Cargar datos</button>
+          <button :disabled="!successImport" v-if="paso === 2" class="button is-primary is-rounded" v-loading.fullscreen.lock="loadingSpinner" @click.prevent="loadAndStoreFuncionario">Cargar datos</button>
         </footer>
       </div>
     </div>
@@ -181,38 +176,11 @@ export default {
     return{
       url:process.env.BASE_URL,
       imageUrl:'',
-      tableData: [{
-          orden:'A1',
-          nombre_columna: 'rut',
-          format: 'Numérico',
-          tag: true,
-          description: 'Rut de funcionario'
-        }, {
-          orden:'B1',
-          nombre_columna: 'dv',
-          format: 'Texto',
-          tag: true,
-          description: 'Dígito verificador'
-        },{
-          orden:'C1',
-          nombre_columna: 'nombres',
-          format: 'Texto',
-          tag: true,
-          description: 'Nombre de funcionario'
-        }, {
-          orden:'D1',
-          nombre_columna: 'apellidos',
-          format: 'Texto',
-          tag: true,
-          description: 'Apellidos de funcionario'
-        },{
-          orden:'E1',
-          nombre_columna: 'email',
-          format: 'Email',
-          tag: false,
-          description: 'Dirección de correo electrónico'
-        }]
+      columnas:[]
     };
+  },
+  mounted(){
+    this.getColumnsFuncionarios();
   },
   computed:{
     ...mapGetters({
@@ -223,8 +191,16 @@ export default {
       filas: "recargas/datos/filas",
       funcionarios: "recargas/datos/funcionarios",
       successImport: "recargas/datos/successImport",
-      successMessagge: "recargas/datos/successMessagge",
+      successMessagge: "recargas/datos/successMessagge"
       }),
+      row_columnas:{
+        get() {
+          return this.$store.state.modulos.columnasexcel.row_columnas_funcionarios;
+        },
+        set(newValue) {
+          this.$store.commit('modulos/columnasexcel/SET_COLUMNA_FUNCIONARIOS', newValue);
+        }
+      },
       errors_file:{
         get() {
           return this.$store.state.recargas.datos.errors_file;
@@ -257,23 +233,31 @@ export default {
     ...mapActions({
       loadFileAction:'recargas/datos/uploadFileFuncionarios',
       uploadFuncionariosStoreAction:'recargas/datos/uploadFuncionariosStore',
-      closeModal:'recargas/datos/closeModal'
+      closeModal:'recargas/datos/closeModal',
+
     }),
+    async getColumnsFuncionarios(){
+      const url       = '/api/admin/modulos/columnas/funcionarios';
+      const response  = await this.$axios.$get(url);
+      this.columnas   = response;
+    },
+    updateValue(event) {
+      const value = event.target.value
+      if (String(value).length <= 2) {
+        this.row_columnas = value
+      }
+      this.$forceUpdate()
+    },
     hideProductModal:function(){
       this.closeModal();
     },
-    /* loadFile:function(event){
-      console.log(event.target.files[0]);
-      this.file_funcionario = event.target.files[0];
-      if(this.file_funcionario){
-        this.uploadFileHtml();
-      }
-    }, */
     uploadFileHtml:function(){
       if(this.file_funcionario){
         const data = {
           codigo_recarga:this.recarga.codigo,
-          file:this.file_funcionario
+          file:this.file_funcionario,
+          columnas:this.columnas,
+          row_columnas:this.row_columnas
         };
         this.loadFileAction(data);
       }else{
@@ -284,7 +268,9 @@ export default {
       if(this.file_funcionario){
         const data = {
           codigo_recarga:this.recarga.codigo,
-          file:this.file_funcionario
+          file:this.file_funcionario,
+          columnas:this.columnas,
+          row_columnas:this.row_columnas
         };
         this.uploadFuncionariosStoreAction(data);
       }else{
@@ -292,13 +278,11 @@ export default {
       }
     },
     handleAvatarSuccess(res, file) {
-      console.log(file);
       this.file_funcionario = file.raw;
       this.imageUrl = URL.createObjectURL(file.raw);
       if(this.file_funcionario){
         this.uploadFileHtml();
       }
-
     },
     beforeAvatarUpload(file) {
       const isXLSX = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -354,5 +338,10 @@ export default {
   .existe{
     outline: 1px rgba(221, 110, 110, 0.342) solid !important;
     background-color: rgba(221, 110, 110, 0.342) !important;
+  }
+  .table .is-scrollable tbody{
+    overflow-y: scroll;
+      width: auto;
+      position: absolute;
   }
 </style>

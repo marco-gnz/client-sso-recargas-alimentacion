@@ -86,10 +86,12 @@ export const actions = {
     commit('SET_POSITION_PASO_MODAL_FUNCIONARIO', 0);
   },
   async uploadFileFuncionarios({ commit }, data){
-    console.log(data);
     commit('SET_LOADING', true);
     let formData = new FormData();
     formData.append('file', data.file);
+    formData.append('codigo_recarga', data.codigo_recarga);
+    formData.append('columnas', JSON.stringify(data.columnas));
+    formData.append('row_columnas', data.row_columnas);
     const url = `/api/admin/recargas/recarga/masivo/funcionarios`;
 
     this.$axios.$post(url, formData, {
@@ -101,14 +103,12 @@ export const actions = {
       if(response.status === 'Success'){
         commit('SET_ERRORS_FILE', null);
         commit('SET_FILAS', response.data[0]);
-        const ignore = [0];
+        commit('SET_SUCCESS_IMPORT', true);
         commit('SET_FUNCIONARIOS', response.data);
       }else{
         commit('SET_FUNCIONARIOS', []);
         commit('SET_ERRORS_FILE', response[1]);
       }
-      console.log(response);
-
     }).catch(error => {
       commit('SET_FUNCIONARIOS', []);
       commit('SET_LOADING', false);
@@ -123,15 +123,17 @@ export const actions = {
     let formData = new FormData();
     formData.append('file', data.file);
     formData.append('codigo_recarga', data.codigo_recarga);
+    formData.append('columnas', JSON.stringify(data.columnas));
+    formData.append('row_columnas', data.row_columnas);
     const url = `/api/admin/recargas/recarga/masivo/funcionarios/import`;
 
-    this.$axios.$post(url, formData, {
+    await this.$axios.$post(url, formData, {
       headers:{
         'Content-Type': 'multipart/form-data'
       }
     }).then(response => {
-      commit('SET_LOADING', false);
       console.log(response.data);
+      commit('SET_LOADING', false);
       if(response.status === 'Success'){
         commit('SET_ERRORS_FILE', null);
         commit('SET_SUCCESS_IMPORT', true);
@@ -143,6 +145,7 @@ export const actions = {
       }else{
         commit('SET_ERRORS_FILE', response[1]);
         commit('SET_SUCCESS_IMPORT', false);
+        commit('SET_FUNCIONARIOS', []);
       }
 
     }).catch(error => {
