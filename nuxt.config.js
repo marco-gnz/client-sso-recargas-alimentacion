@@ -28,6 +28,8 @@ export default {
   plugins: [
     '@/plugins/element-ui',
     '@/plugins/luxon',
+    '@/plugins/uppercase',
+    '@/plugins/lowercase',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

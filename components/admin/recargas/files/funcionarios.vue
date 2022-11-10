@@ -35,7 +35,7 @@
               </thead>
               <tbody>
                 <tr v-for="(columna, index) in columnas" :key="index">
-                  <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna" v-uppercase></td>
+                  <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna" v-lowercase></td>
                   <td>{{columna.formato}}</td>
                   <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{`${columna.required ? 'Si' : 'No'}`}}</el-tag></td>
                   <td>{{columna.descripcion}}</td>
