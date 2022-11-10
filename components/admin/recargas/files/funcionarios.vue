@@ -25,25 +25,24 @@
           </div>
           <div class="table-container">
             <table class="table is-fullwidth">
-            <thead>
-              <tr>
-                <th>Nombre columna</th>
-                <th>Formato</th>
-                <th>Requerida</th>
-                <th>Descripción</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(columna, index) in columnas" :key="index">
-                <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna"></td>
-                <td>{{columna.formato}}</td>
-                <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{`${columna.required ? 'Si' : 'No'}`}}</el-tag></td>
-                <td>{{columna.descripcion}}</td>
-              </tr>
-            </tbody>
+              <thead>
+                <tr>
+                  <th>Nombre columna</th>
+                  <th>Formato</th>
+                  <th>Requerida</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(columna, index) in columnas" :key="index">
+                  <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna" v-uppercase></td>
+                  <td>{{columna.formato}}</td>
+                  <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{`${columna.required ? 'Si' : 'No'}`}}</el-tag></td>
+                  <td>{{columna.descripcion}}</td>
+                </tr>
+              </tbody>
           </table>
           </div>
-
         </section>
         <section v-if="paso === 1" class="modal-card-body">
           <div class="columns">
@@ -63,6 +62,13 @@
                   <el-result icon="success" title="Archivo analizado correctamente" :subTitle="`${funcionarios.length} ${funcionarios.length > 1 ? `registros analizados` : `registros analizado`}`">
                     <template slot="extra">
                       <el-button type="danger" size="medium" @click.prevent="removeFile">Remover archivo</el-button>
+                    </template>
+                  </el-result>
+                </template>
+                <template v-if="errorColumn.status === 'Error'">
+                  <el-result icon="error" :title="errorColumn.message" subTitle="Favor verificar nuevamente el nombre de las columnas en el paso anterior.">
+                    <template slot="extra">
+                      <el-button type="danger" size="medium">Remover archivo</el-button>
                     </template>
                   </el-result>
                 </template>
@@ -191,7 +197,8 @@ export default {
       filas: "recargas/datos/filas",
       funcionarios: "recargas/datos/funcionarios",
       successImport: "recargas/datos/successImport",
-      successMessagge: "recargas/datos/successMessagge"
+      successMessagge: "recargas/datos/successMessagge",
+      errorColumn: "recargas/datos/errorsColumn",
       }),
       row_columnas:{
         get() {
@@ -219,10 +226,9 @@ export default {
       },
       disabledButton(){
         let value = false;
-
         if(this.paso === 1 && !this.file_funcionario){
           value = true;
-        }else if(this.paso === 1 && this.errors_file){
+        }else if((this.paso === 1 && this.errors_file) || (this.paso === 1 && this.errorColumn)){
           value = true;
         }
 

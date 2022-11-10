@@ -9,7 +9,8 @@ export const state = () => ({
   filas:[],
   funcionarios:[],
   success_import:false,
-  message_success:''
+  message_success:'',
+  errors_column:''
 });
 
 export const mutations = {
@@ -45,6 +46,9 @@ export const mutations = {
   },
   SET_SUCCESS_MESSAGE_IMPORT(state, value){
     state.message_success = value;
+  },
+  SET_ERROR_COLUMN(state, value){
+    state.errors_column = value;
   }
 };
 
@@ -76,16 +80,31 @@ export const getters = {
   successMessagge(state){
     return state.message_success;
   },
+  errorsColumn(state){
+    return state.errors_column;
+  }
 };
 
 export const actions = {
-  closeModal({ commit }){
-    commit('SET_MODAL_FUNCIONARIOS', false);
+  successLoadFile({ commit }){
     commit('SET_FUNCIONARIOS', []);
     commit('SET_ERRORS_FILE', null);
+    commit('SET_SUCCESS_IMPORT', true);
+    commit('SET_ERROR_COLUMN', '');
+  },
+  errorsLoadFile({ commit }){
+    commit('SET_FUNCIONARIOS', []);
+    commit('SET_FILE_FUNCIONARIOS', '');
+  },
+  successStoreFile({ commit }){
+    commit('SET_SUCCESS_IMPORT', true);
+    commit('SET_FILE_FUNCIONARIOS', '');
+  },
+  closeModal({ commit }){
+    commit('SET_MODAL_FUNCIONARIOS', false);
     commit('SET_POSITION_PASO_MODAL_FUNCIONARIO', 0);
   },
-  async uploadFileFuncionarios({ commit }, data){
+  async uploadFileFuncionarios({ commit, dispatch }, data){
     commit('SET_LOADING', true);
     let formData = new FormData();
     formData.append('file', data.file);
@@ -101,15 +120,15 @@ export const actions = {
     }).then(response => {
       commit('SET_LOADING', false);
       if(response.status === 'Success'){
-        commit('SET_ERRORS_FILE', null);
+        dispatch('successLoadFile');
         commit('SET_FILAS', response.data[0]);
-        commit('SET_SUCCESS_IMPORT', true);
         commit('SET_FUNCIONARIOS', response.data);
       }else{
-        commit('SET_FUNCIONARIOS', []);
+        dispatch('errorsLoadFile');
         commit('SET_ERRORS_FILE', response[1]);
       }
     }).catch(error => {
+      commit('SET_ERROR_COLUMN', error.response.data);
       commit('SET_FUNCIONARIOS', []);
       commit('SET_LOADING', false);
       commit('SET_ERRORS_FILE', error[1]);
@@ -117,7 +136,7 @@ export const actions = {
     });
   },
 
-  async uploadFuncionariosStore({ commit }, data){
+  async uploadFuncionariosStore({ commit, dispatch }, data){
     commit('SET_LOADING', true);
 
     let formData = new FormData();
@@ -132,24 +151,20 @@ export const actions = {
         'Content-Type': 'multipart/form-data'
       }
     }).then(response => {
-      console.log(response.data);
       commit('SET_LOADING', false);
       if(response.status === 'Success'){
-        commit('SET_ERRORS_FILE', null);
-        commit('SET_SUCCESS_IMPORT', true);
+        dispatch('successLoadFile');
         commit('SET_FILE_FUNCIONARIOS', '');
-        commit('SET_POSITIVE_PASO_MODAL_FUNCIONARIO');
-        commit('SET_FUNCIONARIOS', []);
         commit('SET_POSITION_PASO_MODAL_FUNCIONARIO', 3);
         commit('SET_SUCCESS_MESSAGE_IMPORT', response.message);
       }else{
+        dispatch('errorsLoadFile');
         commit('SET_ERRORS_FILE', response[1]);
         commit('SET_SUCCESS_IMPORT', false);
-        commit('SET_FUNCIONARIOS', []);
       }
 
     }).catch(error => {
-      commit('SET_FUNCIONARIOS', []);
+      dispatch('errorsLoadFile');
       commit('SET_LOADING', false);
       commit('SET_ERRORS_FILE', error[1]);
       commit('SET_SUCCESS_IMPORT', false);
