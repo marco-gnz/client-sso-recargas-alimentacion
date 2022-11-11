@@ -3,26 +3,44 @@
     <nav class="level is-mobile">
       <div class="level-item has-text-centered">
         <div>
-          <p class="heading">Funcionarios</p>
-          <p class="title">721</p>
+          <p class="heading">Días en mes</p>
+          <p class="title">{{recarga.total_dias_mes}}</p>
         </div>
       </div>
       <div class="level-item has-text-centered">
+        <div>
+          <p class="heading">Días hábiles</p>
+          <p class="title">{{recarga.total_dias_habiles}}</p>
+        </div>
+      </div>
+      <div class="level-item has-text-centered">
+        <div>
+          <p class="heading">Monto día</p>
+          <p class="title">{{`$${Intl.NumberFormat('de-DE').format(recarga.monto_dia)}`}}</p>
+        </div>
+      </div>
+      <!-- <div class="level-item has-text-centered">
         <div>
           <p class="heading">Días de ausentismo</p>
           <p class="title">3.142</p>
         </div>
-      </div>
-      <div class="level-item has-text-centered">
+      </div> -->
+      <!-- <div class="level-item has-text-centered">
         <div>
           <p class="heading">Días a cancelar</p>
           <p class="title">11.758</p>
+        </div>
+      </div> -->
+      <div class="level-item has-text-centered">
+        <div>
+          <p class="heading">Funcionarios</p>
+          <p class="title">{{recarga.users_count}}</p>
         </div>
       </div>
       <div class="level-item has-text-centered">
         <div>
           <p class="heading">Monto total</p>
-          <p class="title">$30.540.000</p>
+          <p class="title">--</p>
         </div>
       </div>
       <div class="level-item has-text-centered">

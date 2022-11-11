@@ -70,7 +70,7 @@ export default {
           this.$router.push("/");
           this.$notify.success({
           message: `Bienvenido(a) ${
-            this.$auth.user.nombre
+            this.$auth.user.nombres
           }!`,
           showClose: true,
         });

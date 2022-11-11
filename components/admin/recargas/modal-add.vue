@@ -34,7 +34,7 @@
                   <p v-if="errors && errors.fecha" class="help is-danger">{{errors.fecha[0]}}</p>
                 </div>
                 <div class="field">
-                  <label class="label">Ingrese cantidad de días habiles en el mes</label>
+                  <label class="label">Ingrese cantidad de días hábiles en el mes</label>
                   <input v-model="form_total_dias_habiles" class="input" type="number" placeholder="Ingrese cantidad de días habiles">
                   <p v-if="errors && errors.total_dias_habiles" class="help is-danger">{{errors.total_dias_habiles[0]}}</p>
                 </div>

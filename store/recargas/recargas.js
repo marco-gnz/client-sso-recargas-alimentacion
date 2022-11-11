@@ -87,7 +87,6 @@ export const getters = {
 export const actions = {
   async getRecargas({ commit }){
     const response = await this.$axios.$get('/api/admin/recargas/response');
-    console.log(response);
     commit('SET_RECARGAS', response.data);
   },
 
@@ -161,7 +160,6 @@ export const actions = {
 
   async updateDatosPrincipales({commit, state}, id){
     try {
-      console.log(state.form.total_dias_habiles);
       commit('SET_LOADING', true);
       const url = `/api/admin/recargas/recarga/datos-principales/${id}`;
       const newValues = {
