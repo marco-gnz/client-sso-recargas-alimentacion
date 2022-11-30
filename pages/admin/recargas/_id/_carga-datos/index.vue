@@ -6,6 +6,7 @@
       <Funcionarios v-if="openModalFuncionarios" />
       <Validaciones v-if="openModalGrupos" :codigo="$route.params.id" />
       <Ausentismos v-if="openModalAusentismos" :codigo="$route.params.id" />
+      <turnos :codigo="$route.params.id" />
       <div class="card p-6 m-6">
         <MenuRecarga :codigo="$route.params.id" />
         <div class="columns">
@@ -22,7 +23,13 @@
             </div>
           </div>
           <div class="column is-one-quarter">
-            <h5 class="title is-5">3. Carga de ausentismos</h5>
+            <h5 class="title is-5">3. Definir turno de funcionarios</h5>
+            <div class="field">
+              <button @click.prevent="clickOpenModalTurnos" class="button is-link is-rounded">Definir turnos</button>
+            </div>
+          </div>
+          <div class="column is-one-quarter">
+            <h5 class="title is-5">4. Carga de ausentismos</h5>
             <div class="field">
               <button :disabled="!recarga.disabled_reglas" @click.prevent="clickOpenModalAusentismos" class="button is-link is-rounded">Cargar ausentismos</button>
             </div>
@@ -40,9 +47,10 @@ import MenuTotales from '../../../../../components/admin/recargas/MenuTotales.vu
 import Funcionarios from '../../../../../components/admin/recargas/files/funcionarios.vue';
 import Validaciones from '../../../../../components/admin/recargas/grupos/validaciones.vue';
 import Ausentismos from '../../../../../components/admin/recargas/files/ausentismos.vue';
+import Turnos from '../../../../../components/admin/recargas/files/turnos.vue';
 export default {
     middleware: 'auth',
-    components: { MenuRecarga, MenuTotales, Funcionarios, Validaciones, Ausentismos },
+    components: { MenuRecarga, MenuTotales, Funcionarios, Validaciones, Ausentismos, Turnos },
     head() {
         return {
             title: `Carga de datos #${this.$route.params.id}`
@@ -87,6 +95,10 @@ export default {
         },
         clickOpenModalAusentismos:function(){
           this.$store.commit('recargas/ausentismos/SET_MODAL', true);
+        },
+        clickOpenModalTurnos:function(){
+          console.log('clic!');
+          this.$store.commit('recargas/turnos/SET_MODAL', true);
         }
     }
 }

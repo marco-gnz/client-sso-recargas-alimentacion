@@ -1,6 +1,7 @@
 export const state = () => ({
   row_columnas_funcionarios:1,
-  row_columnas_grupo_uno:1
+  row_columnas_grupo_uno:1,
+  row_columnas_turnantes:1
 });
 
 export const mutations = {
@@ -9,7 +10,10 @@ export const mutations = {
   },
   SET_COLUMNA_GRUPO_UNO(state, row){
     state.row_columnas_grupo_uno = row;
-  }
+  },
+  SET_COLUMNA_TURNOS(state, row){
+    state.row_columnas_turnantes = row;
+  },
 };
 
 export const getters = {
@@ -18,5 +22,8 @@ export const getters = {
   },
   rowColumnasGrupoUno(state){
     return state.row_columnas_grupo_uno;
+  },
+  rowColumnasTurnos(state){
+    return state.row_columnas_turnantes;
   }
 };
