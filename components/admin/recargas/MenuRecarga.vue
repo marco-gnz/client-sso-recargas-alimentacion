@@ -10,14 +10,12 @@
       <li :class="currentRouteName === `/admin/recargas/${codigo}/resumen` ?  'is-active'  : '' ">
         <nuxt-link :to="`/admin/recargas/${codigo}/resumen`"><span class="icon is-small"><i class="el-icon-date"></i></span>Tabla resumen</nuxt-link>
       </li>
-
-      <!-- <li>
-        <nuxt-link><span class="icon is-small"><i class="el-icon-info"></i></span>Información general</nuxt-link>
-      </li> -->
-     <!--  <li :class="currentRouteName === `/admin/recargas/${codigo}` ?  'is-active'  : '' "><nuxt-link :to="`/admin/recargas/${codigo}`">Información general</nuxt-link></li>
-      <li :class="currentRouteName === '/acceso/mis-datos' ?  'is-active'  : '' "><nuxt-link to="/acceso/mis-datos">Carga de archivos</nuxt-link></li>
-      <li :class="currentRouteName === '/acceso/recuperar-contrasena' ?  'is-active'  : '' "><nuxt-link to="/acceso/recuperar-contrasena">Resumen</nuxt-link></li>
-      <li :class="currentRouteName === '/acceso/recuperar-contrasena' ?  'is-active'  : '' "><nuxt-link to="/acceso/recuperar-contrasena">Notificaciones</nuxt-link></li> -->
+      <li :class="currentRouteName === `/admin/recargas/${codigo}/extras` ?  'is-active'  : '' ">
+        <nuxt-link :to="`/admin/recargas/${codigo}/resumen`"><span class="icon is-small"><i class="el-icon-warning-outline"></i></span>Retroactivos (9)</nuxt-link>
+      </li>
+      <li :class="currentRouteName === `/admin/recargas/${codigo}/reajustes` ?  'is-active'  : '' ">
+        <nuxt-link :to="`/admin/recargas/${codigo}/resumen`"><span class="icon is-small"><i class="el-icon-setting"></i></span>Reajuste de remuneración (17)</nuxt-link>
+      </li>
     </ul>
   </div>
 </template>

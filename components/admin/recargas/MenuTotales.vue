@@ -19,18 +19,6 @@
           <p class="title">{{`$${Intl.NumberFormat('de-DE').format(recarga.monto_dia)}`}}</p>
         </div>
       </div>
-      <!-- <div class="level-item has-text-centered">
-        <div>
-          <p class="heading">Días de ausentismo</p>
-          <p class="title">3.142</p>
-        </div>
-      </div> -->
-      <!-- <div class="level-item has-text-centered">
-        <div>
-          <p class="heading">Días a cancelar</p>
-          <p class="title">11.758</p>
-        </div>
-      </div> -->
       <div class="level-item has-text-centered">
         <div>
           <p class="heading">Funcionarios</p>
@@ -40,7 +28,7 @@
       <div class="level-item has-text-centered">
         <div>
           <p class="heading">Monto total</p>
-          <p class="title">--</p>
+          <p class="title">{{recarga.monto_total}}</p>
         </div>
       </div>
       <div class="level-item has-text-centered">
