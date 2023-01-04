@@ -36,7 +36,6 @@ export const actions = {
       const url = '/api/admin/recargas/recarga/masivo/reglas/store';
 
       this.$axios.$post(url, {reglas:data}).then(response => {
-        console.log(response);
         commit('SET_LOADING', false);
         if(response.status = 'success'){
           commit('SET_ERRORS', {});
