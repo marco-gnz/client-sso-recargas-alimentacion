@@ -4,7 +4,7 @@
       <div class="modal-background"></div>
       <div class="modal-card" style="width: 80%;">
         <header class="modal-card-head">
-          <p class="modal-card-title">Carga masiva de funcionarios</p>
+          <p class="modal-card-title">Carga/actualización masiva de funcionarios</p>
           <button class="delete" aria-label="close" @click.prevent="hideProductModal"></button>
         </header>
         <section class="modal-card-body p-6">

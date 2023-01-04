@@ -60,6 +60,10 @@
                     </tbody>
                   </table>
                 </template>
+                <template v-if="grupo_value && !reglas.length">
+                  <el-result icon="error" title="Sin tipos de ausentismo" subTitle="Favor definir reglas para este grupo de ausentismo.">
+                  </el-result>
+                </template>
               </div>
             </div>
           </div>
@@ -263,7 +267,7 @@ export default {
     disabledButton(){
       let value = false;
 
-      if(this.paso === 0 && !this.grupo_value){
+      if((this.paso === 0 && !this.grupo_value) || (this.paso === 0 && !this.reglas.length)){
         value = true;
       }else if(this.paso === 2 && !this.file_ausentismo){
         value = true;

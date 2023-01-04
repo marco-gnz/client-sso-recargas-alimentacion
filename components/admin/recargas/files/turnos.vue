@@ -168,7 +168,6 @@ export default {
       loadingSpinner:'recargas/turnos/fullScreenLoading',
       turnos: "recargas/turnos/turnos",
       filas: "recargas/turnos/filas",
-      successImport: "recargas/turnos/successImport",
       successMessagge: "recargas/turnos/successMessagge",
     }),
     row_turnantes:{

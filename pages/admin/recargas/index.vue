@@ -175,7 +175,6 @@ export default {
           this.changeStatusRecarga(id);
         },
         displayProductModal:function(route) {
-            console.log("open!");
             /* this.showModalFlag = true; */
             this.changeStatusModal(true);
             window.history.pushState({}, null, route.path);

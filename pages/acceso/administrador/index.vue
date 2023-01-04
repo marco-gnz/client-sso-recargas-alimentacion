@@ -66,7 +66,6 @@ export default {
           await this.$auth.loginWith("laravelSanctum", {
             data: this.login,
           });
-          console.log('log!');
           this.$router.push("/");
           this.$notify.success({
           message: `Bienvenido(a) ${

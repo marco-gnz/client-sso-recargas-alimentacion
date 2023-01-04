@@ -133,7 +133,6 @@ export default {
 
       await this.$axios.$get(url).then(response => {
         this.grupos = response;
-        console.log(response);
       }).catch(error => {
         console.log(error);
       });
