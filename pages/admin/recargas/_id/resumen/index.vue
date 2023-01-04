@@ -18,15 +18,13 @@
                   <tr>
                     <th>Beneficio</th>
                     <template v-if="!loadGrupoUno">
-                      <th>Rut</th>
-                    </template>
-                    <template v-if="!loadGrupoUno">
                       <th>Nombres</th>
                     </template>
                     <template v-else>
                       <th>Apellidos</th>
                     </template>
                     <th>Turno</th>
+                    <th>DL</th>
                     <template v-if="(recarga.total_grupos != null)">
                       <th>
                         <el-link :underline="false" :disabled="(recarga.total_grupos[0].total_ausentismos > 0 ? false : true)" @click.prevent="openGrupo(1)" :type="loadGrupoUno ? 'warning' : 'info' ">{{recarga.total_grupos[0].nombre_grupo}} <i :class="loadGrupoUno ? 'el-icon-minus' : 'el-icon-plus' "></i></el-link>
@@ -62,11 +60,9 @@
                 <tfoot>
                   <tr>
                     <th></th>
-                    <template v-if="!loadGrupoUno">
-                      <th></th>
-                    </template>
                     <th></th>
                     <th></th>
+                    <th>0</th>
                     <th><abbr>{{(recarga.total_grupos != null) && (recarga.total_grupos[0].total_ausentismos)}}</abbr></th>
                     <template v-if="(recarga.total_grupos != null) && (loadGrupoUno)">
                       <td v-for="(tipo, index) in recarga.total_grupos[0].tipos_ausentismos" :key="index"></td>
@@ -80,9 +76,6 @@
                   </tr>
                   <tr>
                     <th></th>
-                    <template v-if="!loadGrupoUno">
-                      <th></th>
-                    </template>
                     <th></th>
                     <th></th>
                     <th><abbr><el-button size="mini" icon="el-icon-delete" circle></el-button></abbr></th>
@@ -105,28 +98,37 @@
                       </el-tooltip>
                     </td>
                     <template v-if="!loadGrupoUno">
-                      <td>{{funcionario.rut_completo}}</td>
-                    </template>
-                    <template v-if="!loadGrupoUno">
                       <td>{{funcionario.nombre_completo}}</td>
                     </template>
                     <template v-else>
                       <td>{{funcionario.apellidos}}</td>
                     </template>
-                    <td><el-tag size="mini" :type="funcionario.turno != null ? (funcionario.turno ? 'warning' : 'success') : 'danger' " disable-transitions>{{`${funcionario.turno != null ? `${funcionario.turno ? 'Si' : 'No'}` : `--`}`}}</el-tag></td>
-                    <td><strong>{{funcionario.total_grupos[0].total_ausentismos}}</strong></td>
+                    <td><el-tag size="mini" :type="funcionario.turno != null ? (funcionario.turno ? 'warning' : 'success') : 'danger' " disable-transitions>{{`${funcionario.turno != null ? `${funcionario.turno ? 'Si' : 'No'}` : `Error`}`}}</el-tag></td>
+                    <td>{{funcionario.dias_libres}}</td>
+                    <td><strong :class="funcionario.total_grupos[0].total_ausentismos > recarga.total_dias_mes ? 'has-text-danger' : '' ">{{funcionario.total_grupos[0].total_ausentismos}}</strong></td>
                     <template v-if="loadGrupoUno">
                       <td v-for="(tipo, index) in funcionario.total_grupos[0].tipos_ausentismos" :key="index">{{tipo.total}}</td>
                     </template>
                     <td><strong>{{funcionario.total_grupos[1].total_ausentismos}}</strong></td>
                     <td><strong>{{funcionario.total_grupos[2].total_ausentismos}}</strong></td>
-                    <td>{{funcionario.dias_cancelar}}</td>
+                    <td><strong :class="(funcionario.dias_cancelar <= 0 ? 'has-text-danger' : '' )">{{funcionario.dias_cancelar}}</strong></td>
                     <td>{{(funcionario.tipo_pago != null ? funcionario.tipo_pago : '--')}}</td>
-                    <td>{{`$${Intl.NumberFormat('de-DE').format(funcionario.total_cancelar)}`}}</td>
-                    <td><nuxt-link  :to="`/admin/recargas/${$route.params.id}/funcionario/${funcionario.uuid}/turnos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link></td>
+                    <td><strong :class="(funcionario.total_cancelar <= 0 ? 'has-text-danger' : (funcionario.total_cancelar > recarga.monto_estimado_mes ? 'has-background-danger-dark' : 'has-text-link'))">{{`$${Intl.NumberFormat('de-DE').format(funcionario.total_cancelar)}`}}</strong></td>
+                    <td>
+                      <nuxt-link  :to="`/admin/recargas/${$route.params.id}/resumen/${funcionario.uuid}/turnos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
+                      <el-tooltip class="item" effect="dark" content="Reajustes ingresados" placement="top-start">
+                        <span><i class="el-icon-warning-outline has-text-danger"></i></span>
+                      </el-tooltip>
+                      <el-tooltip class="item" effect="dark" content="Retroactivo" placement="top-start">
+                        <strong class="has-text-danger">R</strong>
+                      </el-tooltip>
+                    </td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div class="buttons">
+              <button class="button is-info is-light"><span><i class="el-icon-download"></i></span><span>Descargar planilla</span></button>
             </div>
           </div>
         </div>

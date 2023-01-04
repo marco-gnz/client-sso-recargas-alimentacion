@@ -26,7 +26,6 @@ export default {
   },
   methods:{
     paramsjaja(){
-      console.log(this.$route.params);
     }
   }
 }
