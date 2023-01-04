@@ -2,7 +2,8 @@ export const state = () => ({
   establecimientos: [],
   tipos_ausentismos :[],
   grupos_ausentismos:[],
-  meridianos:[]
+  meridianos:[],
+  tipos_asistencia_turnos:[]
 });
 
 export const mutations = {
@@ -21,6 +22,9 @@ export const mutations = {
   SET_LOADING(state, value){
     state.full_screen_loading = value;
   },
+  SET_TIPOS_ASISTENCIA_TURNOS(state, value){
+    state.tipos_asistencia_turnos = value;
+  },
 };
 
 export const getters = {
@@ -35,6 +39,9 @@ export const getters = {
   },
   meridianos(state){
     return state.meridianos;
+  },
+  tiposAsistenciaTurnos(state){
+    return state.tipos_asistencia_turnos;
   }
 };
 
@@ -54,6 +61,10 @@ export const actions = {
   async getMeridianos({ commit }){
     const response = await this.$axios.$get('/api/admin/modulos/meridianos/response');
     commit('SET_MERIDIANOS', response);
+  },
+  async getTiposAsistenciaTurnos({ commit }){
+    const response = await this.$axios.$get('/api/admin/modulos/tipos-asistencia-turnos/response');
+    commit('SET_TIPOS_ASISTENCIA_TURNOS', response);
   }
 };
 

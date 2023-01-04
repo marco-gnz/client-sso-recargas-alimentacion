@@ -7,6 +7,9 @@
       <li :class="currentRouteName === `/admin/recargas/${codigo}/carga-datos` ?  'is-active'  : '' ">
         <nuxt-link :to="`/admin/recargas/${codigo}/carga-datos`"><span class="icon is-small"><i class="el-icon-upload"></i></span>Carga masiva de datos</nuxt-link>
       </li>
+      <li :class="currentRouteName === `/admin/recargas/${codigo}/asistencia` ?  'is-active'  : '' ">
+        <nuxt-link :to="`/admin/recargas/${codigo}/asistencia`"><span class="icon is-small"><i class="el-icon-s-claim"></i></span>Planilla asistencia</nuxt-link>
+      </li>
       <li :class="currentRouteName === `/admin/recargas/${codigo}/resumen` ?  'is-active'  : '' ">
         <nuxt-link :to="`/admin/recargas/${codigo}/resumen`"><span class="icon is-small"><i class="el-icon-date"></i></span>Tabla resumen</nuxt-link>
       </li>
@@ -15,6 +18,9 @@
       </li>
       <li :class="currentRouteName === `/admin/recargas/${codigo}/reajustes` ?  'is-active'  : '' ">
         <nuxt-link :to="`/admin/recargas/${codigo}/resumen`"><span class="icon is-small"><i class="el-icon-setting"></i></span>Reajuste de remuneración (17)</nuxt-link>
+      </li>
+      <li :class="currentRouteName === `/admin/recargas/${codigo}/reajustes` ?  'is-active'  : '' ">
+        <nuxt-link :to="`/admin/recargas/${codigo}/resumen`"><span class="icon is-small"><i class="el-icon-bell"></i></span>Panel de advertencia</nuxt-link>
       </li>
     </ul>
   </div>
