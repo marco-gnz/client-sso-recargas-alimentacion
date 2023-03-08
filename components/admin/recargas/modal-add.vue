@@ -22,9 +22,9 @@
                   <p v-if="errors && errors.establecimiento_id" class="help is-danger">{{errors.establecimiento_id != null ? errors.establecimiento_id[0] : ''}}</p>
                 </div>
                 <div class="field">
-                  <label class="label">Seleccione año y mes de recarga</label>
+                  <label class="label">Seleccione año y mes de pago de beneficio</label>
                   <el-date-picker
-                    v-model="form_fecha"
+                    v-model="form_fecha_beneficio"
                     format="MM-yyyy"
                     value-format="yyyy-MM-dd"
                     class="element-select is-rounded"
@@ -34,12 +34,19 @@
                   <p v-if="errors && errors.fecha" class="help is-danger">{{errors.fecha[0]}}</p>
                 </div>
                 <div class="field">
-                  <label class="label">Ingrese cantidad de días hábiles en el mes</label>
-                  <input v-model="form_total_dias_habiles" class="input" type="number" placeholder="Ingrese cantidad de días habiles">
-                  <p v-if="errors && errors.total_dias_habiles" class="help is-danger">{{errors.total_dias_habiles[0]}}</p>
+                  <label class="label">Seleccione año y mes de ausentismos</label>
+                  <el-date-picker
+                    v-model="form_fecha_calculo"
+                    format="MM-yyyy"
+                    value-format="yyyy-MM-dd"
+                    class="element-select is-rounded"
+                    type="month"
+                    placeholder="Seleccione año y mes ">
+                  </el-date-picker>
+                  <p v-if="errors && errors.fecha" class="help is-danger">{{errors.fecha[0]}}</p>
                 </div>
                 <div class="field">
-                  <label class="label">Ingrese monto a cancelar por día</label>
+                  <label class="label">Monto a cancelar por día</label>
                   <input v-model="form_monto_dia" class="input" type="number" placeholder="Ingrese monto a cancelar">
                   <p v-if="errors && errors.monto_dia" class="help is-danger">{{errors.monto_dia[0]}}</p>
                 </div>
@@ -78,20 +85,20 @@ export default {
         this.$store.commit('recargas/recargas/SET_ESTABLECIMIENTO', newValue);
       }
     },
-    form_fecha:{
+    form_fecha_beneficio:{
       get() {
-        return this.$store.state.recargas.recargas.form.fecha;
+        return this.$store.state.recargas.recargas.form.fecha_beneficio;
       },
       set(newValue) {
-        this.$store.commit('recargas/recargas/SET_FECHA', newValue);
+        this.$store.commit('recargas/recargas/SET_FECHA_BENEFICIO', newValue);
       }
     },
-    form_total_dias_habiles:{
+    form_fecha_calculo:{
       get() {
-        return this.$store.state.recargas.recargas.form.total_dias_habiles;
+        return this.$store.state.recargas.recargas.form.fecha_calculo;
       },
       set(newValue) {
-        this.$store.commit('recargas/recargas/SET_TOTAL_DIAS_HABILES', newValue);
+        this.$store.commit('recargas/recargas/SET_FECHA_CALCULO', newValue);
       }
     },
     form_monto_dia:{
