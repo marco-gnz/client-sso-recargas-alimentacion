@@ -2,7 +2,8 @@ export const state = () => ({
   row_columnas_funcionarios:1,
   row_columnas_grupo_uno:1,
   row_columnas_turnantes:1,
-  row_columnas_asistencia:1
+  row_columnas_asistencia:1,
+  row_columnas_viaticos:1
 });
 
 export const mutations = {
@@ -18,6 +19,9 @@ export const mutations = {
   SET_COLUMNA_ASISTENCIA(state, row){
     state.row_columnas_asistencia = row;
   },
+  SET_COLUMNA_VIATICOS(state, row){
+    state.row_columnas_viaticos = row;
+  },
 };
 
 export const getters = {
@@ -32,5 +36,8 @@ export const getters = {
   },
   rowColumnasAsistencia(state){
     return state.row_columnas_asistencia;
+  },
+  rowColumnasViaticos(state){
+    return state.row_columnas_viaticos;
   }
 };
