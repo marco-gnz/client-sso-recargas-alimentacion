@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Hero title="Listado de recargas" subtitle="Listado de todas las recargas registradas en sistema" />
+    <!-- <Hero title="Listado de recargas" subtitle="Listado de todas las recargas registradas en sistema" /> -->
     <div class="container.is-fullhd">
       <div class="card p-6 m-6">
         <div class="columns">
@@ -38,10 +38,8 @@
               <tr>
                 <th>Código</th>
                 <th>Establecimiento</th>
-                <th>Año</th>
-                <th>Mes</th>
-                <th>N° vigentes</th>
-                <th>N° no vigentes</th>
+                <th>Beneficio</th>
+                <th>N° de funcionarios</th>
                 <th>Total monto</th>
                 <th>Habilitado</th>
                 <th>Estado actual</th>
@@ -49,13 +47,12 @@
               </tr>
             </thead>
             <tbody>
+
               <tr v-for="(recarga, index) in recargas" :key="index"  @click.prevent="redirectToRecarga(recarga)" class="click">
-                <th>#{{recarga.codigo}}</th>
-                <th>{{recarga.establecimiento != null ? recarga.establecimiento.sigla : '--'}}</th>
-                <th>{{recarga.anio}}</th>
-                <th>{{recarga.mes}}</th>
-                <td>{{recarga.n_funcionarios_vigentes}}</td>
-                <td>{{recarga.n_funcionarios_no_vigentes}}</td>
+                <td>#{{recarga.codigo}}</td>
+                <td>{{recarga.establecimiento != null ? recarga.establecimiento.sigla : '--'}}</td>
+                <td>{{recarga.mes_beneficio}}/{{recarga.anio_beneficio}}</td>
+                <td>{{recarga.users_count}}</td>
                 <td>${{recarga.total_pagado}}</td>
                 <td @click.prevent.stop="">
                   <template>

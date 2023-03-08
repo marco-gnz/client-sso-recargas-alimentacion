@@ -12,7 +12,9 @@
             <a class="navbar-item">
                 <nuxt-link to="/admin/recargas">Recargas</nuxt-link>
             </a>
-
+            <a class="navbar-item">
+              <nuxt-link to="/admin/recargas/enviar">Enviar recarga</nuxt-link>
+            </a>
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link">
                 Usuarios
@@ -26,13 +28,15 @@
                 </a>
               </div>
             </div>
-
             <a class="navbar-item">
-              <nuxt-link to="/admin/recargas/enviar">Enviar recarga</nuxt-link>
+                <nuxt-link to="/admin/recargas">Registro de tarjetas</nuxt-link>
             </a>
           </div>
         </no-ssr>
         <client-only>
+          <span class="navbar-item">
+            <p class="is-italic">Último acceso el {{DateTime.now().toFormat('ff')}}</p>
+          </span>
           <div class="navbar-end" v-if="$auth.loggedIn">
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link is-arrowless">

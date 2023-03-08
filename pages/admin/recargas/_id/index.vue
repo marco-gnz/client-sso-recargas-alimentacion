@@ -1,25 +1,16 @@
 <template>
   <div v-loading.fullscreen.lock="loadingSpinner" element-loading-text="Cargando datos..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
     <template v-if="recarga">
-      <Hero  :title="`Recarga #${$route.params.id} - Información general`" :subtitle="`${recarga.establecimiento != null ? recarga.establecimiento.nombre : ''} para el mes de ${recarga.mes} año ${recarga.anio}.`" />
+      <Hero namepage="Información general" :recarga="recarga" />
     </template>
     <div class="container.is-fullhd">
       <MenuTotales :recarga="recarga" />
       <template v-if="recarga">
-        <div class="card p-6 m-6">
+        <div class="card p-2 m-2">
           <MenuRecarga :codigo="$route.params.id" />
           <div class="columns">
-            <div class="column is-one-quarter box">
+            <div class="column is-one-fifth box">
               <h5 class="title is-5">Datos principales de recarga</h5>
-              <div class="field">
-                <label class="label">Días en el mes</label>
-                <span>{{recarga.total_dias_mes}}</span>
-              </div>
-              <div class="field">
-                <label class="label">Cantidad de días habiles en el mes</label>
-                <input v-model="form_total_dias_habiles" class="input" type="email" placeholder="Ingrese cantidad de días habiles">
-                <p v-if="errors.total_dias_habiles" class="help is-danger">{{errors.total_dias_habiles[0]}}</p>
-              </div>
               <div class="field">
                 <label class="label">Monto a cancelar por día</label>
                 <input v-model="form_monto_dia" class="input" type="email" placeholder="Ingrese cantidad de días habiles">
@@ -33,33 +24,60 @@
             </div>
             <div class="column is-half box">
               <h5 class="title is-5">Reglas de ausentismos</h5>
-              <template v-if="(recarga.reglas) && (recarga.reglas.length)">
+              <template v-if="(reglas) && (reglas.length)">
                 <table class="table is-striped is-narrow is-hoverable is-fullwidth">
                   <thead>
                     <tr>
-                      <th>Tip. ausentismo</th>
+                      <th>Ausentismo</th>
                       <th>Grupo</th>
+                      <th>Turnante</th>
                       <th>Regla</th>
+                      <th>N° ausentismos</th>
+                      <th>Acción</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(regla, index) in recarga.reglas" :key="index">
-                      <td>{{`${regla.tipo_ausentismo != null ? regla.tipo_ausentismo.nombre : '--'}`}}</td>
+                    <tr v-for="(regla, index) in reglas" :key="index">
+                      <td>{{`${regla.nombre_tipo_ausentismo != null ? regla.nombre_tipo_ausentismo : '--'}`}}</td>
                       <td>
-                        <el-tooltip class="item" effect="dark" :content="`${regla.grupo_ausentismo.descripcion}`" placement="top-start">
-                          <span class="tag is-light" :class="regla.grupo_ausentismo.id === 1 ? 'is-link' : (regla.grupo_ausentismo.id === 2 ? 'is-warning' : 'is-danger') ">{{`${regla.grupo_ausentismo != null ? regla.grupo_ausentismo.nombre : '--'}`}}</span>
-                        </el-tooltip>
-
+                        <span class="tag is-light" :class="regla.numero_grupo === 1 ? 'is-link' : (regla.numero_grupo === 2 ? 'is-warning' : 'is-danger') ">{{`${regla.nombre_grupo != null ? regla.nombre_grupo : '--'}`}}</span>
                       </td>
                       <td>
-                        <template v-if="regla.grupo_id === 1">
+                        <span class="tag" :class="(regla.value_turno_funcionario != null ? `${regla.value_turno_funcionario ? 'is-warning' : 'is-info'}` : 'is-light')">{{ (regla.value_turno_funcionario != null ? `${regla.value_turno_funcionario ? 'Si' : 'No'}` : 'N/A') }}</span>
+                      </td>
+                      <td>
+                        <template v-if="regla.numero_grupo === 1">
                           DC
                         </template>
-                        <template v-if="regla.grupo_id === 2">
-                          {{`${regla.meridianos.length ? regla.meridianos.map(m => m.nombre).join(' - ') : '--'}`}}
+                        <template v-if="regla.numero_grupo === 2">
+                          {{ regla.meridianos ? regla.meridianos : '--' }}
                         </template>
-                        <template v-if="regla.grupo_id === 3">
-                          {{`${regla.hora_inicio != null && regla.hora_termino != null ? `${DateTime.fromISO(regla.hora_inicio).toFormat('T')} / ${DateTime.fromISO(regla.hora_termino).toFormat('T')}` : '--'}`}}
+                        <template v-if="regla.numero_grupo === 3">
+                          {{ regla.hora_inicio ? `${regla.hora_inicio} / ${regla.hora_termino} hrs.` : '--' }}
+                        </template>
+                      </td>
+                      <td>
+                        <div class="columns">
+                          <div class="column">
+                            <p :class="(regla.count_ausentismos <= 0 ? 'has-text-danger-dark' : '')">{{ regla.count_ausentismos }}</p>
+                          </div>
+                          <div class="column">
+                            <i v-if="regla.count_ausentismos <= 0" class="el-icon-warning-outline has-text-danger-dark"></i>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <template v-if="regla.count_ausentismos <= 0">
+                          <el-popconfirm
+                              @confirm="deleteReglaAction(regla.id)"
+                              confirm-button-text='Si, eliminar'
+                              cancel-button-text='No'
+                              icon="el-icon-info"
+                              icon-color="red"
+                              title="¿Eliminar regla?"
+                              >
+                              <el-button v-loading.fullscreen.lock="loadingSpinner" type="danger" slot="reference" icon="el-icon-delete" size="mini" circle></el-button>
+                          </el-popconfirm>
                         </template>
                       </td>
                     </tr>
@@ -74,17 +92,50 @@
                 </el-empty>
               </template>
             </div>
-            <div class="column is-half box">
-              <h5 class="title is-5">Seguimiento</h5>
-              <el-timeline>
-                <el-timeline-item
-                  v-for="(e, index) in recarga.seguimiento"
-                  :color="index === 0 ? `#dc3545` : '#35495e'"
-                  :key="index"
-                  :timestamp="`${DateTime.fromISO(e.created_at).toFormat('ff')} ${e.user_by != null ? `- ${e.user_by.nombres} ${e.user_by.apellidos}` : ``}`">
-                  {{e.estado.nombre}}
-                </el-timeline-item>
-              </el-timeline>
+            <div class="column box">
+              <h5 class="title is-5">Feriados asociados</h5>
+              <template v-if="(feriados) && (feriados.length)">
+                <table class="table is-striped is-narrow is-hoverable is-fullwidth">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Nombre</th>
+                      <th>Irrenunciable</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(feriado, index) in feriados" :key="index">
+                      <td>
+                        <el-tooltip class="item" effect="dark" :content="feriado.fecha_larga" placement="top-start">
+                          <p>{{ feriado.fecha_corta }}</p>
+                        </el-tooltip>
+                      </td>
+                      <td>{{ feriado.nombre }}</td>
+                      <td>{{ feriado.irrenunciable }}</td>
+                      <td>
+                        <el-popconfirm
+                            @confirm="deleteFeriadoAction(index, feriado.id)"
+                            confirm-button-text='Si, eliminar'
+                            cancel-button-text='No'
+                            icon="el-icon-info"
+                            icon-color="red"
+                            title="¿Eliminar feriado?"
+                            >
+                            <el-button v-loading.fullscreen.lock="loadingSpinner" type="danger" slot="reference" icon="el-icon-delete" size="mini" circle></el-button>
+                        </el-popconfirm>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+              <template v-else>
+                <el-empty :image-size="50">
+                    <div class="row" slot="description">
+                    <div class="col-md-12"><span>Sin feriados asociados...</span></div>
+                    </div>
+                </el-empty>
+              </template>
             </div>
           </div>
       </div>
@@ -117,6 +168,8 @@ export default {
             loadingSpinner: "recargas/recargas/fullScreenLoading",
             recarga: "recargas/recargas/recarga",
             errors:'recargas/recargas/errors',
+            feriados:'recargas/recargas/feriados',
+            reglas:'recargas/recargas/reglas'
         }),
         form_total_dias_habiles:{
           get() {
@@ -129,7 +182,7 @@ export default {
         },
         form_monto_dia:{
           get() {
-            return this.recarga.monto_dia;
+            return this.recarga.value_monto_dia;
           },
           set(newValue) {
             this.disabledButtonEdit = false;
@@ -141,6 +194,8 @@ export default {
         ...mapActions({
             getRecarga: "recargas/recargas/returnRecarga",
             updateDatosPrincipales: "recargas/recargas/updateDatosPrincipales",
+            deleteFeriadoInRecarga:'recargas/recargas/deleteFeriadoInRecarga',
+            deleteRegla:'recargas/recargas/deleteReglaInRecarga'
         }),
         editarGeneral:function(){
           this.$confirm(`Al editar los días habiles y el monto a cancelar por día, se realizará un proceso para recalcular masivamente la Tabla Resumen con los nuevos datos editados. ¿Desea editar y sincronizar los datos?`, 'Advertencia', {
@@ -150,7 +205,16 @@ export default {
           }).then(() => {
             this.updateDatosPrincipales(this.recarga.id);
           });
-
+        },
+        deleteReglaAction:function(id_regla){
+          this.deleteRegla(id_regla);
+        },
+        deleteFeriadoAction:function(index, id_recarga){
+          const data = {
+            id_recarga:id_recarga,
+            codigo_recarga:this.$route.params.id
+          };
+          this.deleteFeriadoInRecarga(data);
         }
     },
     components: { MenuRecarga, MenuTotales }
