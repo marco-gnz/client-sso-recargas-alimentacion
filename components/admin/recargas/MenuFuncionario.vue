@@ -5,25 +5,28 @@
         <nuxt-link class="button is-danger is-rounded" :to="`/admin/recargas/${$route.params.id}/resumen`"><span class="icon is-small"><i class="el-icon-arrow-left"></i></span> <span>Tabla resumen</span></nuxt-link>
       </div>
       <div class="column">
-        <div class="tabs ">
+        <div class="tabs">
           <ul>
             <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/turnos` ?  'is-active'  : '' ">
-              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/turnos`"><span class="icon is-small"><i class="el-icon-s-operation"></i></span>Turnos ({{funcionario.turnos_count}})</nuxt-link>
+              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/turnos`"><span class="icon is-small"><i class="el-icon-s-operation"></i></span>Asignaciones ({{funcionario.turnos_count}})</nuxt-link>
+            </li>
+            <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/contratos` ?  'is-active'  : '' ">
+              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/contratos`"><span class="icon is-small"><i class="el-icon-s-order"></i></span>Contratos ({{ funcionario.contratos_count }})</nuxt-link>
             </li>
             <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/asistencia` ?  'is-active'  : '' ">
-              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/asistencia`"><span class="icon is-small"><i class="el-icon-s-claim"></i></span>Planilla asistencia</nuxt-link>
+              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/asistencia`"><span class="icon is-small"><i class="el-icon-s-claim"></i></span>Asistencia ({{funcionario.dias_libres}})</nuxt-link>
             </li>
             <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/ausentismos` ?  'is-active'  : '' ">
               <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/ausentismos?grupo=${1}` "><span class="icon is-small"><i class="el-icon-close"></i></span>Ausentismos ({{funcionario.ausentismos_count}})</nuxt-link>
             </li>
-            <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/retroactivos` ?  'is-active'  : '' ">
-              <nuxt-link to=""><span class="icon is-small"><i class="el-icon-warning-outline"></i></span>Retroactivos (0)</nuxt-link>
+            <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/viaticos` ?  'is-active'  : '' ">
+              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/viaticos` "><span class="icon is-small"><i class="el-icon-shopping-cart-full"></i></span>Viáticos ({{funcionario.viaticos_count}})</nuxt-link>
             </li>
             <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/reajustes` ?  'is-active'  : '' ">
-              <nuxt-link to=""><span class="icon is-small"><i class="el-icon-setting"></i></span>Reajustes (0)</nuxt-link>
+              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/reajustes`"><span class="icon is-small"><i class="el-icon-setting"></i></span>Ajustes ({{ funcionario.reajustes_count }})</nuxt-link>
             </li>
-            <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/observaciones` ?  'is-active'  : '' ">
-              <nuxt-link to=""><span class="icon is-small"><i class="el-icon-chat-line-square"></i></span>Observaciones (0)</nuxt-link>
+            <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/cartola` ?  'is-active'  : '' ">
+              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/cartola`"><span class="icon is-small"><i class="el-icon-s-check has-background-white has-text-danger"></i></span>Cartola</nuxt-link>
             </li>
           </ul>
         </div>
