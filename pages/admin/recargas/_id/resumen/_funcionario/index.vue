@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Hero :title="`Recarga #${$route.params.id} - 'Nombre Apellidos - funcionario -' `" />
+    <!-- <Hero :title="`Recarga #${$route.params.id} - 'Nombre Apellidos - funcionario -' `" /> -->
     <div class="container.is-fullhd">
       <MenuTotalesFuncionario />
       <div class="card p-6 m-6">

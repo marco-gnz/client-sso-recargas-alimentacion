@@ -13,7 +13,8 @@ export const state = () => ({
   filas:[],
   success_import:false,
   message_success:'',
-  errors_column:''
+  errors_column:'',
+  cookie_grupo:1
 });
 
 export const mutations = {
@@ -106,7 +107,7 @@ export const actions = {
   },
   errorsLoadFile({ commit }){
     commit('SET_FILE', '');
-    commit('SET_GRUPO', '');
+    /* commit('SET_GRUPO', ''); */
     commit('SET_AUSENTISMOS', []);
     commit('SET_FILAS', []);
   },
@@ -120,6 +121,11 @@ export const actions = {
   closeModal({ commit }){
     commit('SET_MODAL', false);
     commit('SET_POSITION_PASO_MODAL', 0);
+    commit('SET_FILE', '');
+    commit('SET_GRUPO', '');
+    commit('SET_REGLAS', []);
+    commit('SET_ERRORS_FILE', null);
+    commit('SET_ERROR_COLUMN', '');
   },
   async getReglas({ commit }, data){
     commit('SET_LOADING_REGLAS', true);
@@ -136,6 +142,7 @@ export const actions = {
     });
   },
   async uploadFileAusentismo({ commit, dispatch }, data){
+    console.log(data);
     commit('SET_LOADING', true);
     let formData = new FormData();
     formData.append('codigo', data.recarga_codigo);
@@ -143,7 +150,17 @@ export const actions = {
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
-    const url = '/api/admin/recargas/recarga/masivo/grupo/uno';
+
+    let grupo_selected = null;
+    if(data.grupo_id === 1){
+      grupo_selected = 'uno';
+    }else if(data.grupo_id === 2){
+      grupo_selected = 'dos';
+    }else if(data.grupo_id === 3){
+      grupo_selected = 'tres';
+    }
+
+    const url = `/api/admin/recargas/recarga/masivo/grupo/${grupo_selected}`;
 
     await this.$axios.$post(url, formData, {
       headers:{
@@ -168,8 +185,16 @@ export const actions = {
     });
   },
   async storeFileGrupoUno({ commit, dispatch }, data){
+    let grupo_selected = null;
+    if(data.grupo_id === 1){
+      grupo_selected = 'uno';
+    }else if(data.grupo_id === 2){
+      grupo_selected = 'dos';
+    }else if(data.grupo_id === 3){
+      grupo_selected = 'tres';
+    }
     commit('SET_LOADING', true);
-    const url = '/api/admin/recargas/recarga/masivo/grupo/uno/import';
+    const url = `/api/admin/recargas/recarga/masivo/grupo/${grupo_selected}/import`;
 
     let formData = new FormData();
     formData.append('codigo', data.recarga_codigo);

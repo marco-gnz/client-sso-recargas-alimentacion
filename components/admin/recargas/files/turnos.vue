@@ -4,7 +4,7 @@
       <div class="modal-background"></div>
       <div class="modal-card" style="width: 80%;">
         <header class="modal-card-head">
-          <p class="modal-card-title">Carga y validación masiva de funcionarios turnantes y no turnantes</p>
+          <p class="modal-card-title">Carga masiva de asignaciones de 3° y 4° turno.</p>
           <button class="delete" aria-label="close" @click.prevent="hideTurnosModal"></button>
         </header>
 

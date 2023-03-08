@@ -1,27 +1,26 @@
 <template>
   <div v-loading.fullscreen.lock="loadingSpinner" element-loading-text="Cargando datos..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
-    <Hero :title="`Recarga #${$route.params.id} - Ausentismos`" :subtitle="`${funcionario != null ? `${funcionario.nombre_completo} (${funcionario.rut_completo})` : ''}`" />
+    <template v-if="(funcionario)">
+      <HeroUser namepage="Ausentismos" :funcionario="funcionario" :recarga="recarga" />
+    </template>
     <div class="container.is-fullhd">
-      <MenuTotalesFuncionario />
+      <MenuTotalesFuncionario :funcionario="funcionario" />
       <div class="card p-6 m-6">
         <MenuFuncionario />
         <div class="card p-6 m-6">
           <div class="columns">
-            <div class="column is-two-fifths">
-              <div class="buttons">
-                <button class="button is-info is-inverted">Ingresar nuevo registro</button>
-              </div>
-            </div>
-            <div class="column">
-              <div class="tabs is-toggle is-toggle-rounded is-small">
+            <div class="column is-full">
+              <div class="tabs is-toggle is-toggle-rounded is-small is-centered">
                 <ul>
-                  <li v-for="(grupo, index) in grupos" :key="index" :class="(parseInt($route.query.grupo) === grupo.id ? 'is-active' : '')" @click.prevent="changeGrupoAusentismo">
+                  <li v-for="(grupo, index) in funcionario.grupos_ausentismo" :key="index" :class="(parseInt($route.query.grupo) === grupo.id ? 'is-active' : '')" @click.prevent="changeGrupoAusentismo">
                     <el-tooltip :hide-after="0" class="item" effect="dark" :content="grupo.descripcion" placement="top-start">
                       <nuxt-link :disabled="parseInt($route.query.grupo) === grupo.id" :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/ausentismos?grupo=${grupo.id}`">
-                      <span>{{ grupo.nombre }}</span>
-                    </nuxt-link>
+                        <span class="icon is-small">
+                          <i class="el-icon-link"></i>
+                        </span>
+                        <span>{{ grupo.nombre }} <strong>({{ grupo.ausentismos_count }})</strong></span>
+                      </nuxt-link>
                     </el-tooltip>
-
                   </li>
                 </ul>
               </div>
@@ -34,32 +33,48 @@
                   <table class="table is-striped is-narrow is-hoverable is-fullwidth" v-loading="loadingTableAusentismos" element-loading-text="Cargando resultados...">
                     <thead>
                       <tr>
-                        <th>Fechas ausentismo</th>
-                        <th>Total días</th>
+                        <template v-if="(grupo_selected != 3)">
+                          <th>Fechas ausentismo</th>
+                        </template>
                         <th>Fechas en periodo</th>
-                        <th>Total días</th>
+                        <template v-if="(grupo_selected === 3)">
+                          <th>Hora ausentismo</th>
+                          <th>Total horas</th>
+                        </template>
+                          <th>Días habiles</th>
                         <th>Grupo ausentismo</th>
                         <th>Tipo de ausentismo</th>
-                        <th>Acciones</th>
+                        <template v-if="(grupo_selected === 3)">
+                          <th>Descuento</th>
+                        </template>
+                        <template v-if="(grupo_selected === 2)">
+                          <th>Meridiano</th>
+                        </template>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(ausentismo, index) in ausentismos" :key="index">
-                        <td><strong>{{ausentismo.fecha_inicio}}</strong> / <strong>{{ausentismo.fecha_termino}}</strong></td>
-                        <td>{{ausentismo.total_dias_ausentismo}}</td>
-                        <td>{{ausentismo.fecha_inicio_periodo}} / {{ausentismo.fecha_termino_periodo}}</td>
-                        <td>{{ausentismo.total_dias_ausentismo_periodo}}</td>
+                        <template v-if="(grupo_selected != 3)">
+                          <td>{{ausentismo.fecha_inicio}} / {{ausentismo.fecha_termino}} ({{ausentismo.total_dias_ausentismo}}d)</td>
+                        </template>
+                        <td><strong>{{ausentismo.fecha_inicio_periodo}}</strong> / <strong>{{ausentismo.fecha_termino_periodo}} ({{ausentismo.total_dias_ausentismo_periodo}}d)</strong></td>
+                        <template v-if="(grupo_selected === 3)">
+                          <td>{{ ausentismo.hora_inicio }} / {{ ausentismo.hora_termino }}</td>
+                          <td>{{ ausentismo.total_horas }}</td>
+                        </template>
+                        <td>{{ausentismo.total_dias_habiles_periodo}}</td>
                         <td>{{ausentismo.nombre_grupo_ausentismo}}</td>
-                        <td>{{ausentismo.nombre_tipo_ausentismo}}</td>
-                        <td>
-                          <el-dropdown>
-                              <span class="el-dropdown-link">Acción<i class="el-icon-arrow-down el-icon--right"></i></span>
-                              <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item icon="el-icon-edit">Editar</el-dropdown-item>
-                                <el-dropdown-item icon="el-icon-delete">Eliminar</el-dropdown-item>
-                              </el-dropdown-menu>
-                          </el-dropdown>
+                        <td class="click">
+                          <el-tooltip class="item" effect="dark" :content="`${ausentismo.hora_inicio_regla != null ? `No corresponde beneficio entre ${ausentismo.hora_inicio_regla} y ${ausentismo.hora_termino_regla} hrs.` : ``}`" placement="top-start">
+                            <span>{{ausentismo.nombre_tipo_ausentismo}}</span>
+                          </el-tooltip>
                         </td>
+                        <template v-if="(grupo_selected === 3)">
+                          <td><el-tag effect="dark" size="mini" :type="(ausentismo.tiene_descuento ? 'danger' : 'success')">{{ ausentismo.tiene_descuento ? 'Si' : 'No' }}</el-tag></td>
+                        </template>
+                        <template v-if="(grupo_selected === 2)">
+                          <td>{{ ausentismo.nombre_meridiano != null ? ausentismo.nombre_meridiano : '--' }}</td>
+                        </template>
                       </tr>
                     </tbody>
                   </table>
@@ -102,20 +117,17 @@ export default {
     this.getFuncionario(this.$route.params, this.$route.params.funcionario);
     this.getAusentismos(data);
   },
-  mounted(){
-    this.getGruposAusentismos()
-  },
   computed:{
     ...mapGetters({
       loadingSpinner: "recargas/funcionario/fullScreenLoading",
       funcionario:'recargas/funcionario/funcionario',
       loadingTableAusentismos:'recargas/funcionario/loadingTableAusentismos',
       ausentismos:'recargas/funcionario/ausentismos',
-      grupos:'modulos/modulos/gruposAusentismos',
+      recarga:'recargas/funcionario/recarga'
     }),
     grupo_selected:{
       get() {
-        return this.$store.state.recargas.funcionario.grupo_selected_ausentismo;
+        return parseInt(this.$route.query.grupo);
       },
       set(newValue) {
         this.$store.commit('recargas/funcionario/SET_GRUPO_SELECTED_AUSENTISMO', newValue);
@@ -125,8 +137,7 @@ export default {
   methods:{
     ...mapActions({
       getFuncionario:'recargas/funcionario/getFuncionario',
-      getAusentismos:'recargas/funcionario/getAusentismos',
-      getGruposAusentismos: 'modulos/modulos/getGruposAusentismos',
+      getAusentismos:'recargas/funcionario/getAusentismos'
     }),
     changeGrupoAusentismo:function(){
       const data = {

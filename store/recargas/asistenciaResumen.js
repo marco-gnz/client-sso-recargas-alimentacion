@@ -6,8 +6,25 @@ export const state = () => ({
     asistencias:[],
     modal_edit_asistencia:false,
     asistenciaSelected:{
-        tipo_asistencia_turno_id:''
-    }
+        tipo_asistencia_turno_id:'',
+        observacion:''
+    },
+    asistenciaModal:'',
+    errors:{},
+    loading_asistencia:false,
+    recarga:'',
+    filtro:{
+      input:''
+    },
+    pagination: {
+      total: 0,
+      current_page: 0,
+      per_page: 0,
+      last_page: 0,
+      from: 0,
+      to: 0
+    },
+    offset: 3,
 });
 
 export const mutations = {
@@ -29,6 +46,9 @@ export const mutations = {
     SET_TIPO_ASISTENCIA_TURNO(state, value){
         state.asistenciaSelected.tipo_asistencia_turno_id = value;
     },
+    SET_TIPO_OBSERVACION_TURNO(state, value){
+      state.asistenciaSelected.observacion = value;
+    },
     SET_ASISTENCIA(state, value){
         const indice = state.asistencias.findIndex(a => a.id === value.id);
         state.asistencias.splice(indice, 1, value);
@@ -36,7 +56,28 @@ export const mutations = {
     SET_ASISTENCIA_FUNCIONARIO(state, value){
       const indice = state.asistencias.findIndex(a => a.id === value.id);
       state.asistencias.splice(indice, 1, value);
-  }
+    },
+    SET_ERRORS(state, value){
+        state.errors = value;
+    },
+    SET_ASISTENCIA_MODAL(state, value){
+      state.asistenciaModal = value;
+    },
+    SET_LOADING_ASISTENCIA(state, value){
+      state.loading_asistencia = value;
+    },
+    SET_RECARGA(state, value){
+      state.recarga = value;
+    },
+    SET_CURRENT_PAGE(state, value){
+      state.pagination.current_page = value;
+    },
+    SET_PAGINATION(state, value){
+      state.pagination = value;
+    },
+    SET_FILTRO_INPUT(state, value){
+      state.filtro.input = value;
+    },
 };
 
 
@@ -55,6 +96,24 @@ export const getters = {
     },
     setLoadingAction(state){
         return state.loading_actions;
+    },
+    errors(state){
+        return state.errors;
+    },
+    asistencia(state){
+      return state.asistenciaModal;
+    },
+    loadingAsistencia(state){
+      return state.loading_asistencia;
+    },
+    recarga(state){
+      return state.recarga;
+    },
+    pagination(state){
+      return state.pagination;
+    },
+    offset(state){
+      return state.offset;
     }
 };
 
@@ -62,32 +121,50 @@ export const actions = {
     successUpdate({ commit }){
         commit('SET_MODAL_EDIT', false);
     },
-    async getAsistenciaFuncionario({ commit }, data){
+    async getAsistenciaFuncionario({ commit}, data){
       commit('SET_LOADING_TABLE', true);
       const url = `/api/admin/recargas/recarga/${data.id}/funcionario/${data.funcionario}/asistencias`;
       await this.$axios.$get(url).then(response => {
         commit('SET_LOADING_TABLE', false);
         if(response.status === 'Success'){
-          commit('SET_ASISTENCIAS', response.data);
+          commit('SET_ASISTENCIAS', response.asistencias);
+          commit('SET_RECARGA', response.recarga);
         }
       }).catch(error => {
         commit('SET_LOADING_TABLE', false);
         console.log(error);
       });
     },
-    async getAsistenciasRecarga({commit}, data){
+    async getAsistenciasRecarga({commit, state}, data){
         commit('SET_LOADING', true);
-        const url = `/api/admin/recargas/recarga/${data}/asistencias`;
+        const url = `/api/admin/recargas/recarga/${data}/asistencias?page=${state.pagination.current_page}`;
 
-        await this.$axios.$get(url).then(response => {
+        await this.$axios.$get(url, {params:state.filtro}).then(response => {
             commit('SET_LOADING', false);
             if(response.status === 'Success'){
-                commit('SET_ASISTENCIAS', response.data);
+                commit('SET_ASISTENCIAS', response.users);
+                commit('SET_PAGINATION', response.pagination);
             }
         }).catch(error => {
             commit('SET_LOADING', false);
             console.log(error);
         });
+    },
+    async findAsistencia({ commit }, data){
+      commit('SET_LOADING_ASISTENCIA', true);
+      const url = `/api/admin/asistencias/${data}`;
+
+      await this.$axios.$get(url).then(response => {
+        commit('SET_LOADING_ASISTENCIA', false);
+        console.log(response);
+        if(response.status === 'Success'){
+          commit('SET_TIPO_ASISTENCIA_TURNO', response.data.tipo_asistencia_turno_id);
+          commit('SET_ASISTENCIA_MODAL', response.data);
+        }
+      }).catch(error => {
+        commit('SET_LOADING_ASISTENCIA', false);
+        console.log(error);
+      });
     },
     async updateAsistencia({commit, dispatch}, data){
         commit('SET_LOADING_ACTIONS', true);
@@ -98,12 +175,15 @@ export const actions = {
             if(response.status === 'Success'){
                 commit('SET_ASISTENCIA', response.data);
                 dispatch('successUpdate');
+                commit('SET_TIPO_OBSERVACION_TURNO', '');
+                commit('SET_ERRORS', {});
                 Notification.success(
                     {type: "success", title: response.title, message: response.message}
                 );
             }
         }).catch(error => {
             commit('SET_LOADING_ACTIONS', false);
+            commit('SET_ERRORS', error.response.data.errors);
             console.log(error);
         });
     }

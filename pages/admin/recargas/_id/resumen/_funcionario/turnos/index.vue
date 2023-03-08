@@ -1,16 +1,13 @@
 <template>
   <div v-loading.fullscreen.lock="loadingSpinner" element-loading-text="Cargando datos..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
-    <Hero :title="`Recarga #${$route.params.id} - Turnos`" :subtitle="`${funcionario != null ? `${funcionario.nombre_completo} (${funcionario.rut_completo})` : ''}`" />
+    <template v-if="(funcionario)">
+      <HeroUser namepage="Asignaciones" :funcionario="funcionario" :recarga="recarga" />
+    </template>
     <div class="container.is-fullhd">
-      <menu-totales-funcionario />
+      <MenuTotalesFuncionario :funcionario="funcionario" />
       <div class="card p-6 m-6">
         <MenuFuncionario/>
         <div class="card p-6 m-6">
-          <div class="columns">
-            <div class="buttons">
-              <button class="button is-info is-inverted">Ingresar nuevo registro</button>
-            </div>
-          </div>
           <div class="columns">
             <div class="column">
               <div class="table-container pt-2">
@@ -19,39 +16,22 @@
                     <thead>
                       <tr>
                         <th>Proceso</th>
-                        <th>Calidad</th>
-                        <th>Planta</th>
-                        <th>Establecimiento</th>
-                        <th>Unidad</th>
-                        <th>Año / Mes</th>
+                        <th>Año/Mes</th>
                         <th>A. 3° turno</th>
                         <th>B. asignación turno</th>
                         <th>A. 4° turno</th>
                         <th>Turno</th>
-                        <th>Acciones</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(turno, index) in turnos" :key="index">
                         <td>{{turno.nombre_proceso}}</td>
-                        <td>{{turno.nombre_calidad}}</td>
-                        <td>{{turno.nombre_planta}}</td>
-                        <td>{{turno.nombre_establecimiento}}</td>
-                        <td>{{turno.nombre_unidad}}</td>
-                        <td>{{turno.anio}} / {{turno.mes}}</td>
+                        <td>{{turno.anio}}/{{turno.mes}}</td>
                         <td><span :class="turno.asignacion_tercer_turno > 0 ? 'has-text-danger' : '' ">{{turno.asignacion_tercer_turno}}</span></td>
                         <td><span :class="turno.bonificacion_asignacion_turno > 0 ? 'has-text-danger' : '' ">{{turno.bonificacion_asignacion_turno}}</span></td>
                         <td><span :class="turno.asignacion_cuarto_turno > 0 ? 'has-text-danger' : '' ">{{turno.asignacion_cuarto_turno}}</span></td>
                         <td><el-tag size="mini" :type="turno.es_turnante ? 'warning' : 'success'" disable-transitions>{{`${turno.es_turnante ? 'Si' : 'No'}`}}</el-tag></td>
-                        <td>
-                          <el-dropdown>
-                              <span class="el-dropdown-link">Acción<i class="el-icon-arrow-down el-icon--right"></i></span>
-                              <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item icon="el-icon-edit">Editar</el-dropdown-item>
-                                <el-dropdown-item icon="el-icon-delete">Eliminar</el-dropdown-item>
-                              </el-dropdown-menu>
-                          </el-dropdown>
-                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -93,7 +73,8 @@ export default {
       loadingSpinner: "recargas/funcionario/fullScreenLoading",
       funcionario:'recargas/funcionario/funcionario',
       turnos:'recargas/funcionario/turnos',
-      loadingTableTurnos:'recargas/funcionario/loadingTableTurnos'
+      loadingTableTurnos:'recargas/funcionario/loadingTableTurnos',
+      recarga:'recargas/funcionario/recarga'
     })
   },
   methods:{

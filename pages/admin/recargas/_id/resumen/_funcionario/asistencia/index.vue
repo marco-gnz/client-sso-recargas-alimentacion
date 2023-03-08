@@ -1,52 +1,86 @@
 <template>
   <div>
     <div v-loading.fullscreen.lock="loadingSpinner" element-loading-text="Cargando datos..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
-        <Hero :title="`Recarga #${$route.params.id} - Asistencia`" :subtitle="`${funcionario != null ? `${funcionario.nombre_completo} (${funcionario.rut_completo})` : ''}`" />
-        <div class="container.is-fullhd">
-            <MenuTotalesFuncionario />
-            <ModalEditTurnoAsistencia :asistencia="asistenciaSelected" />
-            <div class="card p-6 m-6">
-                <MenuFuncionario />
-                    <div class="columns">
-                        <div class="column">
-                            <div class="table-container pt-2">
-                                <template v-if="(asistencias) && (asistencias.length)">
-                                    <table class="table is-striped is-narrow is-hoverable is-fullwidth" v-loading="loadingTableAsistencia" element-loading-text="Cargando asistencia...">
-                                        <thead>
-                                            <tr>
-                                                <td v-for="(columna, index) in columnas_asistencia" :key="index"><i>{{columna.nombre_columna}}</i></td>
-                                                <th>TL</th>
-                                                <th>TN</th>
-                                                <th>DL</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="(asistencia, index) in asistencias" :key="index">
-                                                <td class="is-clickable" :class="(indexClickedAsistencia === index ? 'is-selected' : '')" v-for="(turno, index) in asistencia.asistencias_list" :key="index" @click.prevent="editAsistencia(index, turno)"><span :class="(turno.tipo_asistencia_turno.id === 3 ? 'has-text-danger has-text-weight-bold' : (turno.tipo_asistencia_turno.id === 1 ? 'has-text-link' : 'has-text-primary') )">{{turno.tipo_asistencia_turno.nombre}}</span></td>
-                                                <td><strong>{{asistencia.total_turno_largo}}</strong></td>
-                                                <td><strong>{{asistencia.total_turno_nocturno}}</strong></td>
-                                                <td><span class="has-text-weight-bold" :class="(asistencia.total_dias_libres <= 0 || asistencia.total_dias_libres >= 31 ? 'has-text-white has-background-danger-dark' : '')">{{asistencia.total_dias_libres}}</span></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </template>
-                                <template v-else>
-                                    <el-empty :image-size="90">
-                                        <div class="row" slot="description">
-                                        <div class="col-md-12"><span>Sin resultados...</span></div>
-                                        </div>
-                                    </el-empty>
-                                </template>
+      <template v-if="(funcionario)">
+        <HeroUser namepage="Asistencia (Días libres)" :funcionario="funcionario" :recarga="recarga" />
+      </template>
+      <div class="container.is-fullhd">
+          <MenuTotalesFuncionario :funcionario="funcionario" />
+          <ModalEditTurnoAsistencia v-if="modalEditAsistencia" />
+          <div class="card p-6 m-6">
+              <MenuFuncionario />
+                  <div class="columns">
+                      <div class="column">
+                          <div class="table-container pt-2">
+                              <template v-if="(asistencias) && (asistencias.length && asistencias[0].asistencias_list.length)">
+                                  <table class="table is-striped is-narrow is-hoverable is-fullwidth" v-loading="loadingTableAsistencia" element-loading-text="Cargando asistencia...">
+                                      <thead>
+                                          <tr>
+                                              <td v-for="(columna, index) in columnas_asistencia" :key="index">
+                                                <el-tooltip :content="columna.descripcion" placement="top">
+                                                <i :class="(columna.is_week_day ? 'has-text-danger' : '')">{{columna.nombre_columna}}</i>
+                                              </el-tooltip>
+                                              </td>
+                                              <th>L</th>
+                                              <th>N</th>
+                                              <th>X</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody>
+                                          <tr v-for="(asistencia, index) in asistencias" :key="index">
+                                              <nuxt-link tag="td" v-for="(tipo, index) in asistencia.asistencias_list" :key="index" :class="(indexClickedAsistencia === index ? 'is-selected' : (tipo.exist_contrato ? 'has-background-danger-light is-clickable' : ''))" :event="(tipo.exist_contrato ? 'click' : '')" @click.native="editAsistencia(index, tipo)" :to="{path: `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/asistencia`, query: { id: tipo.uuid }}">
+                                                <el-badge type="warning" :hidden="tipo.observaciones_count <= 0" :value="tipo.observaciones_count" class="item">
+                                                  <span :class="(tipo.tipo_asistencia_turno.id === 3 ? 'has-text-danger has-text-weight-bold' : (tipo.tipo_asistencia_turno.id === 1 ? 'has-text-link' : 'has-text-primary') )">
+                                                    <span :class="(tipo.exist_asistencia && tipo.tipo_asistencia_turno.nombre != 'X'  ? 'tag is-black' : (tipo.exist_asistencia && tipo.tipo_asistencia_turno.nombre === 'X' ? 'tag is-light' : ''))">{{tipo.tipo_asistencia_turno.nombre}}</span>
+                                                  </span>
+                                                </el-badge>
+                                              </nuxt-link>
+                                              <td>
+                                                <el-tooltip class="item" effect="dark" :content="`Total: ${asistencia.total_asistencia.largo.total_general}`" placement="right-start">
+                                                  <span class="has-text-weight-bold" >{{asistencia.total_asistencia.largo.total_en_contrato}}</span>
+                                                </el-tooltip>
+                                              </td>
+                                              <td>
+                                                <el-tooltip class="item" effect="dark" :content="`Total: ${asistencia.total_asistencia.nocturno.total_general}`" placement="right-start">
+                                                  <span class="has-text-weight-bold" >{{asistencia.total_asistencia.nocturno.total_en_contrato}}</span>
+                                                </el-tooltip>
+                                              </td>
+                                              <td :class="(asistencia.total_asistencia.libre.total_en_contrato <= 0 || asistencia.total_asistencia.libre.total_en_contrato >= recarga.total_dias_mes_calculo ? 'has-text-white has-background-danger-dark' : '')">
+                                                <el-tooltip class="item" effect="dark" :content="`Total: ${asistencia.total_asistencia.libre.total_general}`" placement="right-start">
+                                                  <span class="has-text-weight-bold" >{{asistencia.total_asistencia.libre.total_en_contrato}}</span>
+                                                </el-tooltip>
+                                              </td>
+                                          </tr>
+                                      </tbody>
+                                  </table>
+                              </template>
+                              <template v-else>
+                                  <el-empty :image-size="90">
+                                      <div class="row" slot="description">
+                                      <div class="col-md-12"><span>Sin resultados...</span></div>
+                                      </div>
+                                  </el-empty>
+                              </template>
+                          </div>
+                          <div class="columns is-centered">
+                              <div class="column is-one-fifth" v-for="(tipo, index) in tiposAsistenciaTurnos" :key="index">
+                                  <span :class="(tipo.id === 3 ? 'has-text-danger' : (tipo.id === 1 ? 'has-text-link' : 'has-text-primary'))"><i class="el-icon-s-open"></i> {{tipo.descripcion}} ({{tipo.nombre}})</span>
+                              </div>
+                          </div>
+                          <div class="notification is-black is-light">
+                            <div class="columns">
+                              <div class="column">
+                                Días destacados en color <span class="has-text-danger has-text-weight-semibold">rojo</span>, representan contrato(s) en el periodo.
+                              </div>
+                              <div class="column">
+                                Días destacados con insignia <strong class="has-background-warning">amarilla</strong>, representan observaciones(s) de modificación.
+                              </div>
                             </div>
-                            <div class="columns is-centered">
-                                <div class="column is-one-fifth" v-for="(tipo, index) in tiposAsistenciaTurnos" :key="index">
-                                    <span :class="(tipo.id === 3 ? 'has-text-danger' : (tipo.id === 1 ? 'has-text-link' : 'has-text-primary'))"><i class="el-icon-s-open"></i> {{tipo.descripcion}} ({{tipo.nombre}})</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-            </div>
-        </div>
+                          </div>
+                      </div>
+                  </div>
+          </div>
+      </div>
     </div>
   </div>
 </template>
@@ -67,8 +101,7 @@ export default {
     data(){
         return{
             indexClickedAsistencia:undefined,
-            columnas_asistencia:[],
-            asistenciaSelected:''
+            columnas_asistencia:[]
         };
     },
     created(){
@@ -80,18 +113,31 @@ export default {
         this.getFuncionario(this.$route.params, this.$route.params.funcionario);
         this.getTiposAsistenciaTurnos();
         this.getAsistencia(data);
+        if(this.$route.query.id){
+            this.modalEdit = true;
+          }
     },
     mounted(){
         this.getColumnsAsistencia();
     },
     computed:{
         ...mapGetters({
+            modalEditAsistencia: "recargas/asistenciaResumen/modalEditAsistencia",
             loadingSpinner: "recargas/funcionario/fullScreenLoading",
             loadingTableAsistencia:'recargas/asistenciaResumen/loadingTable',
             funcionario:'recargas/funcionario/funcionario',
             tiposAsistenciaTurnos:'modulos/modulos/tiposAsistenciaTurnos',
             asistencias:'recargas/asistenciaResumen/asistencias',
-        })
+            recarga:'recargas/asistenciaResumen/recarga'
+        }),
+        modalEdit:{
+          get() {
+            return this.$store.state.recargas.asistenciaResumen.modal_edit_asistencia;
+          },
+          set(newValue) {
+            this.$store.commit('recargas/asistenciaResumen/SET_MODAL_EDIT', newValue);
+          }
+        },
     },
     methods:{
         ...mapActions({
@@ -114,10 +160,10 @@ export default {
             }
         },
         editAsistencia:function(index, asistencia){
+          if(asistencia.exist_contrato){
             this.changeColorSelected(index);
-            this.asistenciaSelected = asistencia;
             this.$store.commit('recargas/asistenciaResumen/SET_MODAL_EDIT', true);
-            this.$store.commit('recargas/asistenciaResumen/SET_TIPO_ASISTENCIA_TURNO', this.asistenciaSelected.tipo_asistencia_turno.id);
+          }
         }
     }
 }
