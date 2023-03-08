@@ -22,3 +22,11 @@
   color: #fff;
 }
 
+.required:after {
+  content:" *";
+  color: red;
+}
+.row-selected{
+  background-color: rgba(25, 25, 255, .1);
+}
+
