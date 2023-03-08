@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="modal is-large" :class="openModalAusentismos ? 'is-active' : '' ">
-      <div class="modal-background"></div>
+      <div class="modal-background" @click.prevent="hideAusentismosModal"></div>
       <div class="modal-card" style="width: 80%;">
         <header class="modal-card-head">
           <p class="modal-card-title">Carga masiva de grupo de ausentismos</p>
@@ -39,12 +39,16 @@
                     <thead>
                       <tr>
                         <th>Tipo de ausentismo</th>
+                        <th>Turnante</th>
                         <th>Regla</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(regla, index) in reglas" :key="index">
                         <td>{{regla.tipo_ausentismo.nombre}}</td>
+                        <td>
+                          <span class="tag" :class="(regla.turno_funcionario != null ? `${regla.turno_funcionario ? 'is-warning' : 'is-info'}` : 'is-light')">{{ regla.turno_funcionario != null ? `${regla.turno_funcionario ? 'SI' : 'NO'}` : `N/A`}}</span>
+                        </td>
                         <td>
                           <template v-if="grupo_value === 1">
                             DC
@@ -78,22 +82,22 @@
           </div>
           <div class="table-container">
             <table class="table is-fullwidth">
-              <thead>
-                <tr>
-                  <th>Nombre columna</th>
-                  <th>Formato</th>
-                  <th>Requerida</th>
-                  <th>Descripción</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(columna, index) in columnas_grupo_uno" :key="index">
-                  <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna" v-lowercase></td>
-                  <td>{{columna.formato}}</td>
-                  <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{`${columna.required ? 'Si' : 'No'}`}}</el-tag></td>
-                  <td>{{columna.descripcion}}</td>
-                </tr>
-              </tbody>
+                <thead>
+                  <tr>
+                    <th>Nombre columna</th>
+                    <th>Formato</th>
+                    <th>Requerida</th>
+                    <th>Descripción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(columna, index) in columnas_grupo" :key="index">
+                    <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna" v-lowercase></td>
+                    <td>{{columna.formato}}</td>
+                    <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{`${columna.required ? 'Si' : 'No'}`}}</el-tag></td>
+                    <td>{{columna.descripcion}}</td>
+                  </tr>
+                </tbody>
             </table>
           </div>
         </section>
@@ -126,10 +130,8 @@
                   </el-result>
                 </template>
                 <template v-if="errors_file != null">
-                    <el-result icon="error" title="Error al analizar archivo">
+                    <el-result icon="error" title="Error al analizar archivo" :sub-title="`${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}`">
                       <template slot="extra">
-                        <el-button type="danger" size="medium">Remover archivo</el-button>
-                        {{`${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}`}}
                         <table class="table is-fullwidth">
                           <thead>
                             <tr>
@@ -169,7 +171,7 @@
                   </thead>
                   <tbody>
                     <tr v-for="(ausentismo, index) in ausentismos" :key="index">
-                      <th v-for="(a, index) in ausentismo" :key="index">{{a}}</th>
+                      <td v-for="(a, index) in ausentismo" :key="index">{{a}}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -211,12 +213,8 @@ export default {
     return{
       radio1:'',
       grupo_select:[],
-      columnas_grupo_uno:[]
-
+      columnas_grupo:[]
     };
-  },
-  mounted(){
-    this.getColumnsGrupoUno();
   },
   computed:{
     ...mapGetters({
@@ -286,9 +284,19 @@ export default {
       storeFileGrupoUnoAction:'recargas/ausentismos/storeFileGrupoUno',
     }),
     async getColumnsGrupoUno(){
-      const url       = '/api/admin/modulos/columnas/grupo-uno';
-      const response  = await this.$axios.$get(url);
-      this.columnas_grupo_uno   = response;
+      const url             = '/api/admin/modulos/columnas/grupo-uno';
+      const response        = await this.$axios.$get(url);
+      this.columnas_grupo   = response;
+    },
+    async getColumnsGrupoDos(){
+      const url             = '/api/admin/modulos/columnas/grupo-dos';
+      const response        = await this.$axios.$get(url);
+      this.columnas_grupo   = response;
+    },
+    async getColumnsGrupoTres(){
+      const url             = '/api/admin/modulos/columnas/grupo-tres';
+      const response        = await this.$axios.$get(url);
+      this.columnas_grupo   = response;
     },
     getReglasGrupo:function(){
       const data = {
@@ -296,11 +304,14 @@ export default {
         recarga_codigo:this.codigo
       };
       if(this.grupo_value === 1){
-        this.grupo_select = this.columnas_grupo_uno;
+        /* this.grupo_select = this.columnas_grupo_uno; */
+        this.getColumnsGrupoUno();
       }else if (this.grupo_value === 2){
-        this.grupo_select = this.columnas_grupo_dos;
-      }else{
-        this.grupo_select = this.columnas_grupo_tres;
+        /* this.grupo_select = this.columnas_grupo_dos; */
+        this.getColumnsGrupoDos();
+      }else if (this.grupo_value === 3){
+        /* this.grupo_select = this.columnas_grupo_tres; */
+        this.getColumnsGrupoTres();
       }
       this.getReglasGrupoAction(data);
     },
@@ -310,7 +321,7 @@ export default {
           recarga_codigo:this.codigo,
           grupo_id:this.grupo_value,
           file:this.file_ausentismo,
-          columnas:this.columnas_grupo_uno,
+          columnas:this.columnas_grupo,
           row_columnas:this.row_grupo_uno
         };
         this.loadFileAction(data);
@@ -337,7 +348,7 @@ export default {
           recarga_codigo:this.codigo,
           grupo_id:this.grupo_value,
           file:this.file_ausentismo,
-          columnas:this.columnas_grupo_uno,
+          columnas:this.columnas_grupo,
           row_columnas:this.row_grupo_uno
         };
       this.storeFileGrupoUnoAction(data);

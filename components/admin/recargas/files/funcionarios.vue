@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="modal is-large" :class="openModalFuncionarios ? 'is-active' : '' ">
-      <div class="modal-background"></div>
+      <div class="modal-background" @click.prevent="hideProductModal"></div>
       <div class="modal-card" style="width: 80%;">
         <header class="modal-card-head">
           <p class="modal-card-title">Carga/actualización masiva de funcionarios</p>

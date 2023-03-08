@@ -1,6 +1,7 @@
 export const state = () => ({
   establecimientos: [],
   tipos_ausentismos :[],
+  tipos_incrementos :[],
   grupos_ausentismos:[],
   meridianos:[],
   tipos_asistencia_turnos:[]
@@ -12,6 +13,9 @@ export const mutations = {
   },
   SET_TIPOS_AUSENTISMOS(state, tipos_ausentismos){
     state.tipos_ausentismos = tipos_ausentismos;
+  },
+  SET_TIPOS_INCREMENTOS(state, tipos_incrementos){
+    state.tipos_incrementos = tipos_incrementos;
   },
   SET_GRUPOS_AUSENTISMOS(state, grupos_ausentismos){
     state.grupos_ausentismos = grupos_ausentismos;
@@ -34,6 +38,9 @@ export const getters = {
   tiposAusentismos(state){
     return state.tipos_ausentismos;
   },
+  tiposIncrementos(state){
+    return state.tipos_incrementos;
+  },
   gruposAusentismos(state){
     return state.grupos_ausentismos;
   },
@@ -53,6 +60,10 @@ export const actions = {
   async getTiposAusentismos({ commit }){
     const response = await this.$axios.$get('/api/admin/modulos/tipos-ausentismos/response');
     commit('SET_TIPOS_AUSENTISMOS', response);
+  },
+  async getTiposIncrementos({ commit }){
+    const response = await this.$axios.$get('/api/admin/modulos/tipos-incrementos/response');
+    commit('SET_TIPOS_INCREMENTOS', response);
   },
   async getGruposAusentismos({ commit }){
     const response = await this.$axios.$get('/api/admin/modulos/grupos-ausentismos/response');
