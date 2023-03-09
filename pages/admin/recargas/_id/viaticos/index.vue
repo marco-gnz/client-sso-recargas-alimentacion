@@ -27,6 +27,7 @@
                   <thead>
                     <tr>
                       <th>Nombres</th>
+                      <th>Existe contrato</th>
                       <th>Fechas</th>
                       <th>Fechas periodo</th>
                       <th>Días habiles</th>
@@ -41,6 +42,7 @@
                       <tbody>
                         <tr v-for="(viatico, index) in viaticos" :key="index">
                           <td>{{ viatico.funcionario_nombres ? viatico.funcionario_nombres : '--'}}</td>
+                          <td><span class="tag" :class="(viatico.existe_funcionario ? 'is-success' : 'is-danger')">{{ viatico.existe_funcionario ? 'Si' : 'No' }}</span></td>
                           <td>{{ viatico.fecha_inicio ? viatico.fecha_inicio : '--'}} / {{ viatico.fecha_termino ? viatico.fecha_termino : '--'}} (<strong>{{ viatico.total_dias }}</strong>d)</td>
                           <td>{{ viatico.fecha_inicio_periodo ? viatico.fecha_inicio_periodo : '--'}} / {{ viatico.fecha_termino_periodo ? viatico.fecha_termino_periodo : '--'}}</td>
                           <td class="has-text-weight-semibold" :class="(viatico.total_dias_habiles_periodo <= 0 ? 'has-text-danger-dark' : '')">{{ viatico.total_dias_habiles_periodo }}</td>

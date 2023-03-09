@@ -59,7 +59,7 @@
                       <td>
                         <div class="columns">
                           <div class="column">
-                            <p :class="(regla.count_ausentismos <= 0 ? 'has-text-danger-dark' : '')">{{ regla.count_ausentismos }}</p>
+                            <p :class="(regla.count_ausentismos <= 0 ? 'has-text-danger-dark' : 'has-text-weight-semibold')">{{ regla.count_ausentismos }}</p>
                           </div>
                           <div class="column">
                             <i v-if="regla.count_ausentismos <= 0" class="el-icon-warning-outline has-text-danger-dark"></i>

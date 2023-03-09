@@ -22,7 +22,7 @@
                         </el-input>
                       </div>
                     </div>
-                    <div class="table-container pt-2">
+                    <div class="table-container pt-2" v-loading.fullscreen.lock="loading && !asistencias.length">
                       <span v-if="(pagination)" class="tag is-info is-light">{{ `${pagination.total} ${pagination.total > 1 ? `resultados` : `resultado`}` }}</span>
                         <template v-if="asistencias.length">
                             <table class="table is-striped is-narrow is-hoverable is-fullwidth" v-loading="loading" element-loading-text="Cargando asistencia...">

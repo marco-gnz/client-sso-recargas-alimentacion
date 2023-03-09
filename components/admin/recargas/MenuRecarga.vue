@@ -10,11 +10,14 @@
       <li :class="currentRouteName === `/admin/recargas/${codigo}/contratos` ?  'is-active'  : '' ">
         <nuxt-link :to="`/admin/recargas/${codigo}/contratos`"><span class="icon is-small"><i class="el-icon-s-order"></i></span>Contratos ({{ recarga.contratos_count }})</nuxt-link>
       </li>
+      <li :class="currentRouteName === `/admin/recargas/${codigo}/asignaciones` ?  'is-active'  : '' ">
+        <nuxt-link :to="`/admin/recargas/${codigo}/asignaciones`"><span class="icon is-small"><i class="el-icon-s-operation"></i></span>Asignaciones ({{ recarga.asignaciones_count }})</nuxt-link>
+      </li>
       <li :class="currentRouteName === `/admin/recargas/${codigo}/asistencia` ?  'is-active'  : '' ">
         <nuxt-link :to="`/admin/recargas/${codigo}/asistencia`"><span class="icon is-small"><i class="el-icon-s-claim"></i></span>Asistencia</nuxt-link>
       </li>
       <li :class="currentRouteName === `/admin/recargas/${codigo}/ausentismos` ?  'is-active'  : '' ">
-        <nuxt-link :to="`/admin/recargas/${codigo}/ausentismos`"><span class="icon is-small"><i class="el-icon-close"></i></span>Ausentismos</nuxt-link>
+        <nuxt-link :to="`/admin/recargas/${codigo}/ausentismos?grupo=${1}`"><span class="icon is-small"><i class="el-icon-close"></i></span>Ausentismos ({{ recarga.ausentismos_count }})</nuxt-link>
       </li>
       <li :class="currentRouteName === `/admin/recargas/${codigo}/viaticos` ?  'is-active'  : '' ">
         <nuxt-link :to="`/admin/recargas/${codigo}/viaticos`"><span class="icon is-small"><i class="el-icon-shopping-cart-full"></i></span>Viáticos ({{ recarga.viaticos_count }})</nuxt-link>
