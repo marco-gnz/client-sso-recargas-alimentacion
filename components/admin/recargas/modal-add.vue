@@ -1,9 +1,9 @@
 <template>
   <div>
-      <div class="modal-background"></div>
+      <div class="modal-background" @click.prevent="hideProductModal"></div>
         <div class="modal-card">
           <header class="modal-card-head">
-            <p class="modal-card-title">Ingresar nueva recarga masiva</p>
+            <p class="modal-card-title">Ingresar nueva recarga</p>
             <button v-if="currentRouteName != '/admin/recargas/ingresar'" class="delete" aria-label="close" @click.prevent="hideProductModal"></button>
           </header>
           <section class="modal-card-body">

@@ -13,20 +13,22 @@
       <Feriados v-if="openModalFeriados" />
       <turnos :codigo="$route.params.id" />
       <div class="card p-2 m-2">
-        <MenuRecarga :codigo="$route.params.id" />
-        <div class="columns">
-          <div class="column" v-for="(opcion, index) in opciones" :key="index">
-            <div class="tile is-parent">
-              <article class="tile is-child box">
-                <p class="title is-6">{{opcion.title}}</p>
-                <p class="subtitle"><button :disabled="opcion.disabled" @click.prevent="opcion.click" class="button is-primary is-inverted"><span>Cargar <i class="el-icon-upload2"></i></span></button></p>
-                <div class="content">
-                  <p class="is-size-7">Última <i>{{DateTime.now().toFormat('ff')}}</i></p>
-                </div>
-              </article>
+         <MenuRecarga :codigo="$route.params.id" :recarga="recarga" />
+        <template v-if="opciones">
+          <div class="columns">
+            <div class="column" v-for="(opcion, index) in opciones" :key="index">
+              <div class="tile is-parent">
+                <article class="tile is-child box">
+                  <p class="title is-6">{{opcion.title}}</p>
+                  <p class="subtitle" v-if="opcion.is_permission"><button :disabled="opcion.disabled" @click.prevent="opcion.click" class="button is-primary is-inverted"><span>Cargar <i class="el-icon-upload2"></i></span></button></p>
+                  <div class="content">
+                    <p class="is-size-7"><i>Reciente: {{opcion.last_item ? opcion.last_item  : '--'}}</i></p>
+                  </div>
+                </article>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
       </div>
     </div>
   </div>
@@ -51,23 +53,9 @@ export default {
             title: `Carga de datos #${this.$route.params.id}`
         };
     },
-    data(){
-      return{
-        opciones:[
-          {title:'Feriados', button:'Definir feriados', click:this.clickOpenModalFeriados},
-          {title:'Reglas y grupos', button:'Definir reglas', click:this.clickOpenModalGrupos, disabled: this.disabledReglas},
-          {title:'Funcionarios/Contratos', button:'Definir funcionarios', click:this.clickOpenModalFuncionarios},
-          {title:'Asignaciones 3° y 4°', button:'Definir turnos', click:this.clickOpenModalTurnos},
-          {title:'Asistencias (Días libres)', button:'Definir asistencia', click:this.clickOpenModalAsistencia},
-          {title:'Ausentismos', button:'Definir ausentismos', click:this.clickOpenModalAusentismos},
-          {title:'Viáticos', button:'Definir viaticos', click:this.clickOpenModalViaticos},
-          {title:'Capacitaciones', button:'Definir capacitaciones', click:this.clickOpenModalAusentismos}
-        ]
-      };
-    },
     created() {
+        this.getRolesPermissions();
         this.getRecarga(this.$route.params.id);
-        this.getGruposAusentismos();
     },
     computed:{
       ...mapGetters({
@@ -93,12 +81,28 @@ export default {
             disabled = true;
           }
           return disabled;
+        },
+        permissions() {
+          return this.$store.state.usuarios.administradores.main.permissions;
+        },
+        opciones(){
+          let opciones = [
+            {title:'Feriados', button:'Definir feriados', click:this.clickOpenModalFeriados, is_permission: this.hasPermission('regla.update'), last_item:this.recarga.last_feriado },
+            {title:'Reglas y grupos', button:'Definir reglas', click:this.clickOpenModalGrupos, disabled: false, is_permission:this.hasPermission('regla.create'), last_item:this.recarga.last_regla },
+            {title:'Funcionarios/Contratos', button:'Definir funcionarios', click:this.clickOpenModalFuncionarios, is_permission:this.hasPermission('contrato.create'), last_item:this.recarga.last_contrato},
+            {title:'Asignaciones 3° y 4°', button:'Definir turnos', click:this.clickOpenModalTurnos, is_permission:this.hasPermission('asignacion.create'), last_item:this.recarga.last_asignacion },
+            {title:'Asistencias (Días libres)', button:'Definir asistencia', click:this.clickOpenModalAsistencia, is_permission:this.hasPermission('turno.create'), last_item:this.recarga.last_asistencia },
+            {title:'Ausentismos', button:'Definir ausentismos', click:this.clickOpenModalAusentismos, is_permission:this.hasPermission('ausentismo.create'), last_item:this.recarga.last_ausentismo },
+            {title:'Viáticos', button:'Definir viaticos', click:this.clickOpenModalViaticos, is_permission:this.hasPermission('viatico.create'), last_item:this.recarga.last_viatico },
+            {title:'Capacitaciones', button:'Definir capacitaciones', click:this.clickOpenModalAusentismos, is_permission:this.hasPermission('capacitacion.create'), last_item:null }
+          ]
+          return opciones;
         }
     },
     methods:{
       ...mapActions({
-            getRecarga: "recargas/recargas/returnRecarga",
-            getGruposAusentismos: 'modulos/modulos/getGruposAusentismos',
+            getRecarga: "recargas/recargas/returnRecargaCargaDatos",
+            getRolesPermissions:'usuarios/administradores/main/getRolesPermissions',
         }),
         clickOpenModalFuncionarios:function(){
           this.$store.commit('recargas/datos/SET_MODAL_FUNCIONARIOS', true);
@@ -120,6 +124,9 @@ export default {
         },
         clickOpenModalViaticos:function(){
           this.$store.commit('recargas/viaticosResumen/SET_MODAL', true);
+        },
+        hasPermission:function(permission){
+          return this.permissions.includes(permission);
         }
     }
 }

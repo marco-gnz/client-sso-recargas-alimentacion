@@ -4,7 +4,11 @@ export const state = () => ({
   tipos_incrementos :[],
   grupos_ausentismos:[],
   meridianos:[],
-  tipos_asistencia_turnos:[]
+  tipos_asistencia_turnos:[],
+  leyes:[],
+  unidades:[],
+  roles:[],
+  horas:[]
 });
 
 export const mutations = {
@@ -29,6 +33,18 @@ export const mutations = {
   SET_TIPOS_ASISTENCIA_TURNOS(state, value){
     state.tipos_asistencia_turnos = value;
   },
+  SET_LEYES(state, value){
+    state.leyes = value;
+  },
+  SET_UNIDADES(state, value){
+    state.unidades = value;
+  },
+  SET_ROLES(state, value){
+    state.roles = value;
+  },
+  SET_HORAS(state, value){
+    state.horas = value;
+  }
 };
 
 export const getters = {
@@ -49,6 +65,18 @@ export const getters = {
   },
   tiposAsistenciaTurnos(state){
     return state.tipos_asistencia_turnos;
+  },
+  leyes(state){
+    return state.leyes;
+  },
+  unidades(state){
+    return state.unidades;
+  },
+  roles(state){
+    return state.roles;
+  },
+  horas(state){
+    return state.horas;
   }
 };
 
@@ -69,6 +97,10 @@ export const actions = {
     const response = await this.$axios.$get('/api/admin/modulos/grupos-ausentismos/response');
     commit('SET_GRUPOS_AUSENTISMOS', response);
   },
+  async getGruposAusentismosRecarga({ commit }, data){
+    const response = await this.$axios.$get(`/api/admin/modulos/grupos-ausentismos/response/recarga/${data}`);
+    commit('SET_GRUPOS_AUSENTISMOS', response);
+  },
   async getMeridianos({ commit }){
     const response = await this.$axios.$get('/api/admin/modulos/meridianos/response');
     commit('SET_MERIDIANOS', response);
@@ -76,7 +108,23 @@ export const actions = {
   async getTiposAsistenciaTurnos({ commit }){
     const response = await this.$axios.$get('/api/admin/modulos/tipos-asistencia-turnos/response');
     commit('SET_TIPOS_ASISTENCIA_TURNOS', response);
-  }
+  },
+  async getLeyes({ commit }){
+    const response = await this.$axios.$get('/api/admin/modulos/leyes/response');
+    commit('SET_LEYES', response);
+  },
+  async getUnidades({ commit }){
+    const response = await this.$axios.$get('/api/admin/modulos/unidades/response');
+    commit('SET_UNIDADES', response);
+  },
+  async getRoles({ commit }){
+    const response = await this.$axios.$get('/api/admin/modulos/roles/response');
+    commit('SET_ROLES', response);
+  },
+  async getHoras({ commit }){
+    const response = await this.$axios.$get('/api/admin/modulos/horas/response');
+    commit('SET_HORAS', response);
+  },
 };
 
 

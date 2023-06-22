@@ -39,16 +39,16 @@ export default {
   props:['uuid'],
   computed:{
     ...mapGetters({
-      modalRechazarReajuste: "recargas/reajustes/modalRechazarReajuste",
-      errors:'recargas/reajustes/errors',
-      loadingRechazarReajuste:'recargas/reajustes/loadingRechazarReajuste',
+      modalRechazarReajuste: "esquemas/esquemaFuncionario/modalRechazarReajuste",
+      errors:'esquemas/esquemaFuncionario/errorsRechazo',
+      loadingRechazarReajuste:'esquemas/esquemaFuncionario/loadingRechazarReajuste',
     }),
     observacion:{
       get() {
-        return this.$store.state.recargas.reajustes.observacion_rechazo;
+        return this.$store.state.esquemas.esquemaFuncionario.observacion_rechazo;
       },
       set(newValue) {
-        this.$store.commit('recargas/reajustes/SET_OBSERVACION_RECHAZAR', newValue);
+        this.$store.commit('esquemas/esquemaFuncionario/SET_OBSERVACION_RECHAZAR', newValue);
       }
     },
     currentRouteName() {
@@ -57,8 +57,7 @@ export default {
   },
   methods:{
     ...mapActions({
-      validateReajuste:'recargas/reajustes/validateReajuste',
-      validateReajusteResumen:'recargas/reajustesResumen/validateReajuste'
+      validateReajuste:'esquemas/esquemaFuncionario/validateReajuste'
     }),
     rechazarReajuste:function(){
       const data = {
@@ -66,14 +65,10 @@ export default {
         aprobar:false,
         observacion:this.observacion
       };
-      if(this.currentRouteName != `/admin/recargas/${this.$route.params.id}/resumen/${this.$route.params.funcionario}/reajustes`){
-        this.validateReajusteResumen(data);
-      }else{
-        this.validateReajuste(data);
-      }
+      this.validateReajuste(data);
     },
     hideRechazarReajusteModal:function(){
-      this.$store.commit('recargas/reajustes/SET_MODAL_RECHAZAR', false);
+      this.$store.commit('esquemas/esquemaFuncionario/SET_MODAL_RECHAZAR', false);
     }
   }
 }

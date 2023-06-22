@@ -10,6 +10,7 @@ export const state = () => ({
   errors_file:null,
   reglas:[],
   ausentismos:[],
+  ausentismos_sobrante:[],
   filas:[],
   success_import:false,
   message_success:'',
@@ -50,6 +51,9 @@ export const mutations = {
   },
   SET_AUSENTISMOS(state, value){
     state.ausentismos = value;
+  },
+  SET_AUSENTISMOS_SOBRANTE(state, value){
+    state.ausentismos_sobrante = value;
   },
   SET_FILAS(state, value){
     state.filas = value;
@@ -95,6 +99,9 @@ export const getters = {
   },
   errorsColumn(state){
     return state.errors_column;
+  },
+  ausentismosSobrante(state){
+    return state.ausentismos_sobrante;
   }
 };
 
@@ -104,6 +111,7 @@ export const actions = {
     commit('SET_ERRORS_FILE', null);
     commit('SET_ERROR_COLUMN', '');
     commit('SET_SUCCESS_IMPORT', true);
+    commit('SET_AUSENTISMOS_SOBRANTE', []);
   },
   errorsLoadFile({ commit }){
     commit('SET_FILE', '');
@@ -117,6 +125,7 @@ export const actions = {
     commit('SET_REGLAS', []);
     commit('SET_GRUPO', '');
     commit('SET_AUSENTISMOS', []);
+    commit('SET_AUSENTISMOS_SOBRANTE', []);
   },
   closeModal({ commit }){
     commit('SET_MODAL', false);
@@ -126,6 +135,7 @@ export const actions = {
     commit('SET_REGLAS', []);
     commit('SET_ERRORS_FILE', null);
     commit('SET_ERROR_COLUMN', '');
+    commit('SET_AUSENTISMOS_SOBRANTE', []);
   },
   async getReglas({ commit }, data){
     commit('SET_LOADING_REGLAS', true);
@@ -133,8 +143,9 @@ export const actions = {
 
     await this.$axios.$get(url, {params:data}).then(response => {
       commit('SET_LOADING_REGLAS', false);
+      console.log(response.reglas);
       if(response.status === 'Success'){
-        commit('SET_REGLAS', response.data)
+        commit('SET_REGLAS', response.reglas)
       }
     }).catch(error => {
       commit('SET_LOADING_REGLAS', false);
@@ -145,33 +156,39 @@ export const actions = {
     console.log(data);
     commit('SET_LOADING', true);
     let formData = new FormData();
-    formData.append('codigo', data.recarga_codigo);
+    formData.append('codigo_recarga', data.recarga_codigo);
     formData.append('grupo_id', data.grupo_id);
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
 
     let grupo_selected = null;
+    let id_carga       = null;
     if(data.grupo_id === 1){
       grupo_selected = 'uno';
+      id_carga       = 'ausentismos_grupo_uno';
     }else if(data.grupo_id === 2){
       grupo_selected = 'dos';
+      id_carga       = 'ausentismos_grupo_dos';
     }else if(data.grupo_id === 3){
       grupo_selected = 'tres';
+      id_carga       = 'ausentismos_grupo_tres';
     }
+    formData.append('id_carga', id_carga);
 
     const url = `/api/admin/recargas/recarga/masivo/grupo/${grupo_selected}`;
-
     await this.$axios.$post(url, formData, {
       headers:{
         'Content-Type': 'multipart/form-data'
       }
     }).then(response => {
       commit('SET_LOADING', false);
+      console.log(response);
       if(response.status === 'Success'){
         dispatch('successLoadFile');
-        commit('SET_FILAS', response.data[0]);
-        commit('SET_AUSENTISMOS', response.data);
+        commit('SET_FILAS', response.ausentismos[0]);
+        commit('SET_AUSENTISMOS', response.ausentismos);
+        commit('SET_AUSENTISMOS_SOBRANTE', response.ausentismos_sobrante);
       }else{
         dispatch('errorsLoadFile');
         commit('SET_ERRORS_FILE', response[1]);
@@ -186,22 +203,28 @@ export const actions = {
   },
   async storeFileGrupoUno({ commit, dispatch }, data){
     let grupo_selected = null;
+    let id_carga       = null;
     if(data.grupo_id === 1){
       grupo_selected = 'uno';
+      id_carga       = 'ausentismos_grupo_uno';
     }else if(data.grupo_id === 2){
       grupo_selected = 'dos';
+      id_carga       = 'ausentismos_grupo_dos';
     }else if(data.grupo_id === 3){
       grupo_selected = 'tres';
+      id_carga       = 'ausentismos_grupo_tres';
     }
+
     commit('SET_LOADING', true);
     const url = `/api/admin/recargas/recarga/masivo/grupo/${grupo_selected}/import`;
 
     let formData = new FormData();
-    formData.append('codigo', data.recarga_codigo);
+    formData.append('codigo_recarga', data.recarga_codigo);
     formData.append('grupo_id', data.grupo_id);
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
+    formData.append('id_carga', id_carga);
     await this.$axios.$post(url, formData, {
       headers:{
         'Content-Type': 'multipart/form-data'

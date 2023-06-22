@@ -10,7 +10,7 @@
         <section class="modal-card-body">
           <div class="columns">
             <div class="column">
-              <p class="subtitle">{{ `${funcionario != null ? `${funcionario.nombre_completo}` : ``}` }}</p>
+              <p class="subtitle">{{ `${esquema != null ? `${esquema.nombre_completo}` : ``}` }}</p>
               <div class="field">
                 <div class="columns">
                   <div class="column">
@@ -52,10 +52,11 @@
                   <div class="column">
                     <div class="field">
                       <label class="label required">Tipo de reajuste</label>
-                      <el-radio-group v-model="rebaja_dias" @change="changeOperator">
+                      <el-radio-group v-model="rebaja_dias" @change="getDaysInDateAction">
                         <el-radio :label="0">Rebaja de días</el-radio>
                         <el-radio :label="1">Incremento de días</el-radio>
                       </el-radio-group>
+                      <p v-if="errors && errors.tipo_reajuste" class="help is-danger">{{errors.tipo_reajuste[0]}}</p>
                     </div>
                   </div>
                   <div class="column">
@@ -91,41 +92,72 @@
                 </div>
               </div>
               <div class="field">
-                <template v-if="(tipo_reajuste === 1)">
                   <div class="columns">
                     <div class="column">
                       <div class="field">
-                        <label class="label required">Valor día ($)</label>
-                        <el-input-number v-model="valor_dia" size="small" class="element-style" :min="0"></el-input-number>
-                        <p v-if="errors && errors.valor_dia" class="help is-danger">{{errors.valor_dia[0]}}</p>
+                        <label class="label required">Cálculo de días</label>
+                        <el-radio-group v-model="calculo_dias" @change="getDaysInDateAction">
+                          <el-radio :label="true">Días de corrido</el-radio>
+                          <el-radio :label="false">Días hábiles</el-radio>
+                        </el-radio-group>
+                        <p v-if="errors && errors.calculo_dias" class="help is-danger">{{errors.calculo_dias[0]}}</p>
                       </div>
                     </div>
+                    <template v-if="(tipo_reajuste === 1)">
+                      <div class="column">
+                        <div class="field">
+                          <label class="label required">Valor día ($)</label>
+                          <el-input-number v-model="valor_dia" size="small" class="element-style" :min="0" @change="getDaysInDateAction"></el-input-number>
+                          <p v-if="errors && errors.valor_dia" class="help is-danger">{{errors.valor_dia[0]}}</p>
+                        </div>
+                      </div>
+                    </template>
                     <div class="column">
                       <div class="field">
-                        <label class="label required">Días</label>
-                        <el-input-number :disabled="((loadingDaysInDate) || (!fecha_inicio || !fecha_termino) || (tipo_reajuste === 1 && !valor_dia))" onKeyDown="return false" v-model="dias" size="small" class="element-style" :precision="1" :step="0.5"></el-input-number>
-                        <p v-if="errors && errors.dias" class="help is-danger">{{errors.dias[0]}}</p>
+                        <label class="label">Días</label>
+                        <p>{{ajuste.total_dias}}</p>
                       </div>
                     </div>
-                    <div class="column">
-                      <div class="field">
-                        <label class="label">Monto de ajuste ($)</label>
-                        <p>{{ calculateMontoAjuste != null ? `$${Intl.NumberFormat('de-DE').format(Math.round(calculateMontoAjuste))}` : '--'  }}</p>
-                        <p v-if="errors && errors.monto_ajuste" class="help is-danger">{{errors.monto_ajuste[0]}}</p>
+                    <template v-if="(tipo_reajuste === 1)">
+                      <div class="column">
+                        <div class="field">
+                          <label class="label">Monto de ajuste ($)</label>
+                          <p>${{ajuste.monto_ajuste_format}}</p>
+                        </div>
                       </div>
-                    </div>
+                    </template>
                   </div>
-                </template>
-                <template v-else>
-                  <div class="column">
-                    <div class="field">
-                      <label class="label required">Días</label>
-                      <el-input-number :disabled="((loadingDaysInDate) || (!fecha_inicio || !fecha_termino))" onKeyDown="return false" v-model="dias" size="small" class="element-style" :precision="1" :step="0.5"></el-input-number>
-                      <p v-if="errors && errors.dias" class="help is-danger">{{errors.dias[0]}}</p>
-                    </div>
-                  </div>
-                </template>
               </div>
+                <div class="field">
+                  <div class="columns">
+                    <div class="column">
+                      <template v-if="(esquema.advertencias) && (esquema.advertencias.length)">
+                        <label class="label">Asocie advertencias</label>
+                          <el-select v-model="advertencias" multiple collapse-tags size="small" class="element-style" placeholder="Seleccione advertencia">
+                            <el-option
+                              v-for="advertencia in esquema.advertencias"
+                              :key="advertencia.code"
+                              :label="advertencia.message"
+                              :value="advertencia.code">
+                            </el-option>
+                          </el-select>
+                      </template>
+                    </div>
+                    <div class="column">
+                      <template v-if="(esquema.errores) && (esquema.errores.length)">
+                        <label class="label">Asocie errores</label>
+                          <el-select v-model="errores" multiple collapse-tags size="small" class="element-style" placeholder="Seleccione errores">
+                            <el-option
+                              v-for="error in esquema.errores"
+                              :key="error.code"
+                              :label="error.message"
+                              :value="error.code">
+                            </el-option>
+                          </el-select>
+                      </template>
+                    </div>
+                  </div>
+                </div>
               <div class="field">
                 <label class="label required">Observación</label>
                 <textarea v-model="observacion" class="textarea has-fixed-size" placeholder="Ingrese motivo, causa u otra observación..."></textarea>
@@ -153,7 +185,7 @@
 <script>
 import {mapActions, mapGetters} from 'vuex';
 export default {
-  props:['funcionario', 'tipo_reajuste'],
+  props:['esquema', 'tipo_reajuste'],
   data(){
     return{
 
@@ -165,12 +197,13 @@ export default {
   },
   computed:{
     ...mapGetters({
-      openModalReajuste: "recargas/resumen/modalReajuste",
+      openModalReajuste: "recarga/resumen/resumen/modalReajuste",
       tiposDeAusentismo: "modulos/modulos/tiposAusentismos",
       tiposIncrementos: "modulos/modulos/tiposIncrementos",
-      errors:"recargas/resumen/reajusteErrors",
-      loadingReajuste:"recargas/resumen/loadingReajuste",
-      loadingDaysInDate:"recargas/resumen/loadingDaysInDate"
+      errors:"recarga/resumen/resumen/reajusteErrors",
+      loadingReajuste:"recarga/resumen/resumen/loadingReajuste",
+      loadingDaysInDate:"recarga/resumen/resumen/loadingDaysInDate",
+      ajuste:'recarga/resumen/resumen/reajuste',
     }),
     currentRouteName() {
       return this.$nuxt.$route.path;
@@ -184,66 +217,82 @@ export default {
     },
     fecha_inicio:{
       get() {
-        return this.$store.state.recargas.resumen.reajuste.fecha_inicio;
+        return this.$store.state.recarga.resumen.resumen.reajuste.fecha_inicio;
       },
       set(newValue) {
-        this.$store.commit('recargas/resumen/SET_REAJUSTE_FECHA_INICIO', newValue);
+        this.$store.commit('recarga/resumen/resumen/SET_REAJUSTE_FECHA_INICIO', newValue);
       }
     },
     fecha_termino:{
       get() {
-        return this.$store.state.recargas.resumen.reajuste.fecha_termino;
+        return this.$store.state.recarga.resumen.resumen.reajuste.fecha_termino;
       },
       set(newValue) {
-        this.$store.commit('recargas/resumen/SET_REAJUSTE_FECHA_TERMINO', newValue);
+        this.$store.commit('recarga/resumen/resumen/SET_REAJUSTE_FECHA_TERMINO', newValue);
+      }
+    },
+    calculo_dias:{
+      get() {
+        return this.$store.state.recarga.resumen.resumen.reajuste.calculo_dias;
+      },
+      set(newValue) {
+        this.$store.commit('recarga/resumen/resumen/SET_REAJUSTE_CALCULO_DIAS', newValue);
       }
     },
     rebaja_dias:{
       get() {
-        return this.$store.state.recargas.resumen.reajuste.rebaja_dias;
+        return this.$store.state.recarga.resumen.resumen.reajuste.rebaja_dias;
       },
       set(newValue) {
-        this.$store.commit('recargas/resumen/SET_REAJUSTE_REBAJA_DIAS', newValue);
+        this.$store.commit('recarga/resumen/resumen/SET_REAJUSTE_REBAJA_DIAS', newValue);
       }
     },
     tipo_ausentismo:{
       get() {
-        return this.$store.state.recargas.resumen.reajuste.tipo_ausentismo_id;
+        return this.$store.state.recarga.resumen.resumen.reajuste.tipo_ausentismo_id;
       },
       set(newValue) {
-        this.$store.commit('recargas/resumen/SET_REAJUSTE_TIPO_AUSENTISMO', newValue);
+        this.$store.commit('recarga/resumen/resumen/SET_REAJUSTE_TIPO_AUSENTISMO', newValue);
       }
     },
     tipo_incremento:{
       get() {
-        return this.$store.state.recargas.resumen.reajuste.tipo_incremento_id;
+        return this.$store.state.recarga.resumen.resumen.reajuste.tipo_incremento_id;
       },
       set(newValue) {
-        this.$store.commit('recargas/resumen/SET_REAJUSTE_TIPO_INCREMENTO', newValue);
+        this.$store.commit('recarga/resumen/resumen/SET_REAJUSTE_TIPO_INCREMENTO', newValue);
       }
     },
-    dias:{
+    advertencias:{
       get() {
-        return this.$store.state.recargas.resumen.reajuste.dias;
+        return this.$store.state.recarga.resumen.resumen.reajuste.advertencias;
       },
       set(newValue) {
-        this.$store.commit('recargas/resumen/SET_REAJUSTE_DIAS', newValue);
+        this.$store.commit('recarga/resumen/resumen/SET_ADVERTENCIAS', newValue);
+      }
+    },
+    errores:{
+      get() {
+        return this.$store.state.recarga.resumen.resumen.reajuste.errores;
+      },
+      set(newValue) {
+        this.$store.commit('recarga/resumen/resumen/SET_ERRORES', newValue);
       }
     },
     valor_dia:{
       get() {
-        return this.$store.state.recargas.resumen.reajuste.valor_dia;
+        return this.$store.state.recarga.resumen.resumen.reajuste.valor_dia;
       },
       set(newValue) {
-        this.$store.commit('recargas/resumen/SET_REAJUSTE_VALOR_DIA', newValue);
+        this.$store.commit('recarga/resumen/resumen/SET_REAJUSTE_VALOR_DIA', newValue);
       }
     },
     observacion:{
       get() {
-        return this.$store.state.recargas.resumen.reajuste.observacion;
+        return this.$store.state.recarga.resumen.resumen.reajuste.observacion;
       },
       set(newValue) {
-        this.$store.commit('recargas/resumen/SET_REAJUSTE_OBSERVACION', newValue);
+        this.$store.commit('recarga/resumen/resumen/SET_REAJUSTE_OBSERVACION', newValue);
       }
     },
   },
@@ -252,62 +301,43 @@ export default {
       closeModal:'recargas/reajustesResumen/closeModal',
       getTiposAusentismos:'modulos/modulos/getTiposAusentismos',
       getTiposIncrementos:'modulos/modulos/getTiposIncrementos',
-      storeReajusteFuncionario:'recargas/resumen/storeReajusteFuncionario',
+      storeReajusteResumen:'recarga/resumen/resumen/storeReajusteResumen',
       storeReajusteNotResumen:'recargas/reajustes/storeReajuste',
-      getDaysInDate:'recargas/resumen/getDaysInDate',
+      getDaysInDate:'recarga/resumen/resumen/getDaysInDate',
     }),
-    changeOperator:function(){
-      if(!this.rebaja_dias){
-        this.dias = -Math.abs(this.dias);
-      }else{
-        this.dias = Math.abs(this.dias);
-      }
-    },
     getDaysInDateAction:function(){
       const data = {
-        incremento:this.rebaja_dias,
+        rebaja_dias:this.rebaja_dias,
+        calculo_dias:this.calculo_dias,
         fecha_inicio:this.fecha_inicio,
-        fecha_termino:this.fecha_termino
+        fecha_termino:this.fecha_termino,
+        valor_dia:this.valor_dia
       };
       if((this.fecha_inicio && this.fecha_termino) && (this.fecha_inicio <= this.fecha_termino)){
         this.getDaysInDate(data);
       }
     },
     hideModalReajuste:function(){
-      this.$store.commit('recargas/resumen/SET_MODAL_REAJUSTE', false);
+      this.$store.commit('recarga/resumen/resumen/SET_MODAL_REAJUSTE', false);
     },
     storeReajuste:function(){
       const data = {
-        recarga_codigo: this.$route.params.id,
-        user_id:this.funcionario.id,
-        fecha_inicio:this.fecha_inicio,
-        fecha_termino:this.fecha_termino,
-        incremento:this.rebaja_dias,
-        tipo_ausentismo_id:this.tipo_ausentismo,
-        tipo_incremento_id:this.tipo_incremento,
-        dias:this.dias,
-        observacion:this.observacion,
-        tipo_reajuste:this.tipo_reajuste,
-      };
-
-      if(this.tipo_reajuste === 1){
-        /* valor_dia:this.valor_dia,
-        monto_ajuste:this.calculateMontoAjuste */
-        data['valor_dia'] = this.valor_dia;
-        data['monto_ajuste'] = this.calculateMontoAjuste;
-      }
-      if(this.currentRouteName != `/admin/recargas/${this.$route.params.id}/resumen`){
-        this.storeReajusteNotResumen(data);
-      }else{
-        this.storeReajusteFuncionario(data);
-      }
+          esquema_id: this.esquema.id,
+          fecha_inicio:this.fecha_inicio,
+          fecha_termino:this.fecha_termino,
+          calculo_dias:this.calculo_dias,
+          incremento:this.rebaja_dias,
+          tipo_ausentismo_id:this.tipo_ausentismo,
+          tipo_incremento_id:this.tipo_incremento,
+          valor_dia:this.valor_dia,
+          monto_ajuste:this.ajuste.monto_ajuste,
+          observacion:this.observacion,
+          tipo_reajuste:this.tipo_reajuste,
+          advertencias:this.advertencias,
+          errores:this.errores
+        };
+        this.storeReajusteResumen(data);
     },
-    /* calculateMontoAjuste:function(){
-      if((this.tipo_reajuste === 1) && (this.valor_dia || this.dias)){
-        let value = this.valor_dia * this.dias;
-        this.monto_ajuste = value;
-      }
-    } */
   }
 }
 </script>

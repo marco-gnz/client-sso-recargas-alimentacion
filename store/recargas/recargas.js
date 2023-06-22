@@ -15,7 +15,14 @@ export const state = () => ({
     fecha_calculo:'',
     monto_dia:''
   },
-  recarga:{}
+  recarga:{},
+  modal_edit_regla:false,
+  loading_regla:false,
+  loading_edit_regla:false,
+  regla:null,
+  errors_regla:{},
+  loading_edit_datos_principales:false,
+  loading_delete_regla:false
 });
 
 export const mutations = {
@@ -75,6 +82,59 @@ export const mutations = {
   DELETE_REGLA_IN_RECARGA(state, value){
     state.reglas = state.reglas.filter(r => r.id !== value);
   },
+
+  SET_MODAL_EDIT_REGLA(state, value){
+    state.modal_edit_regla = value;
+  },
+  SET_LOADING_REGLA(state, value){
+    state.loading_regla = value;
+  },
+  SET_REGLA_ERRORS(state, value){
+    state.errors_regla = value;
+  },
+  SET_REGLA(state, value){
+    state.regla = value;
+  },
+  SET_REGLA_GRUPO(state, value){
+    state.regla.grupo_id = value;
+  },
+  SET_REGLA_ACTIVE_TIPO_DIAS(state, value){
+    state.regla.active_tipo_dias = value;
+  },
+  SET_REGLA_TIPO_DIAS(state, value){
+    state.regla.tipo_dias = value;
+  },
+  SET_REGLA_TURNO(state, value){
+    state.regla.turno_funcionario = value;
+  },
+  SET_REGLA_MERIDIANOS(state, value){
+    state.regla.meridianos = value;
+  },
+  SET_REGLA_HORA_INICIO(state, value){
+    state.regla.hora_inicio = value;
+  },
+  SET_REGLA_HORA_TERMINO(state, value){
+    state.regla.hora_termino = value;
+  },
+  SET_LOADING_EDIT_REGLA(state, value){
+    state.loading_edit_regla = value;
+  },
+  SET_UPDATE_REGLA(state, value){
+    const indice = state.reglas.findIndex(r => r.id === value.id);
+    state.reglas.splice(indice, 1, value);
+  },
+  SET_HORA_REGLA(state, value){
+    let index                             = value.index;
+    let atributo                          = value.atributo;
+    let new_value                         = value.valor;
+    state.regla.horarios[index][atributo] = new_value;
+  },
+  SET_LOADING_UPDATE_DATOS_PRINCIPALES(state, value){
+    state.loading_edit_datos_principales = value;
+  },
+  SET_LOADING_DELETE_REGLA(state, value){
+    state.loading_delete_regla = value;
+  }
 };
 
 export const getters = {
@@ -101,6 +161,24 @@ export const getters = {
   },
   reglas(state){
     return state.reglas;
+  },
+  loadingRegla(state){
+    return state.loading_regla;
+  },
+  errorsRegla(state){
+    return state.errors_regla;
+  },
+  regla(state){
+    return state.regla;
+  },
+  loadingEditRegla(state){
+    return state.loading_edit_regla;
+  },
+  loadingEditDatosPersonales(state){
+    return state.loading_edit_datos_principales;
+  },
+  loadingDeleteRegla(state){
+    return state.loading_delete_regla;
   }
 };
 
@@ -180,6 +258,26 @@ export const actions = {
       console.log(error);
     }
   },
+  async returnRecargaCargaDatos({commit}, codigo){
+    try {
+      commit('SET_LOADING', true);
+      const url = `/api/admin/recargas/recarga/${codigo}/carga-datos`;
+
+      await this.$axios.$get(url).then(response => {
+        commit('SET_LOADING', false);
+        if(response.status === 'Success'){
+          commit('SET_RECARGA', response.data);
+        }else{
+          this.$router.push({name: 404});
+        }
+      }).catch(error => {
+        commit('SET_LOADING', false);
+        this.$router.push({name: 404});
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
   async deleteFeriadoInRecarga({commit}, data){
     commit('SET_LOADING', true);
     const url = `/api/admin/recargas/feriados/eliminar/${data.id_recarga}/${data.codigo_recarga}`;
@@ -200,11 +298,11 @@ export const actions = {
   },
 
   async deleteReglaInRecarga({commit}, data){
-    commit('SET_LOADING', true);
+    commit('SET_LOADING_DELETE_REGLA', true);
     const url = `/api/admin/recargas/regla/eliminar/${data}`;
 
     await this.$axios.delete(url).then(response => {
-      commit('SET_LOADING', false);
+      commit('SET_LOADING_DELETE_REGLA', false);
       console.log(response.data);
       if(response.data.status === 'Success'){
         commit('DELETE_REGLA_IN_RECARGA', data);
@@ -213,21 +311,21 @@ export const actions = {
         );
       }
     }).catch(error => {
-      commit('SET_LOADING', false);
+      commit('SET_LOADING_DELETE_REGLA', false);
       console.log(error);
     });
   },
 
   async updateDatosPrincipales({commit, state}, id){
     try {
-      commit('SET_LOADING', true);
+      commit('SET_LOADING_UPDATE_DATOS_PRINCIPALES', true);
       const url = `/api/admin/recargas/recarga/datos-principales/${id}`;
       const newValues = {
         monto_dia:state.form.monto_dia != '' ? state.form.monto_dia : state.recarga.monto_dia
       };
 
       await this.$axios.$put(url, newValues).then(response => {
-        commit('SET_LOADING', false);
+        commit('SET_LOADING_UPDATE_DATOS_PRINCIPALES', false);
         if(response.status === 'Success'){
           commit('SET_RECARGA', response.data);
           Notification.success(
@@ -239,13 +337,46 @@ export const actions = {
         }
       }).catch(error => {
         commit('REFRESH_CAMPOS');
-        commit('SET_LOADING', false);
+        commit('SET_LOADING_UPDATE_DATOS_PRINCIPALES', false);
         commit('SET_ERRORS', error.response.data.errors);
         console.log(error);
       });
     } catch (error) {
       console.log(error);
     }
+  },
+  async getRegla({ commit, state }, id){
+    commit('SET_LOADING_REGLA', true);
+    const url = `/api/admin/recargas/regla/${id}`;
+    await this.$axios.get(url).then(response => {
+      commit('SET_LOADING_REGLA', false);
+      console.log(response.data);
+      if(response.data.status === 'Success'){
+        commit('SET_REGLA', response.data.regla);
+      }
+    }).catch(error => {
+      commit('SET_LOADING_REGLA', false);
+      console.log(error);
+    });
+  },
+  async updateRegla({ commit, state }, data){
+    commit('SET_LOADING_EDIT_REGLA', true);
+    const url = `/api/admin/recargas/regla/${data.id_regla}`;
+    await this.$axios.$put(url, data).then(response => {
+      commit('SET_LOADING_EDIT_REGLA', false);
+      console.log(response);
+      if(response.status === 'Success'){
+        commit('SET_UPDATE_REGLA', response.regla);
+        commit('SET_MODAL_EDIT_REGLA', false);
+        this.$router.back();
+        Notification.success(
+          {type: "success", title: response.title}
+        );
+      }
+    }).catch(error => {
+      commit('SET_LOADING_EDIT_REGLA', false);
+      console.log(error);
+    });
   }
 };
 

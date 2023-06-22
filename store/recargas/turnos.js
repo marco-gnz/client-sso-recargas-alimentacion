@@ -106,10 +106,11 @@ export const actions = {
   async uploadFileTurnos({ commit, dispatch }, data){
     commit('SET_LOADING', true);
     let formData = new FormData();
-    formData.append('codigo', data.recarga_codigo);
+    formData.append('codigo_recarga', data.recarga_codigo);
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
+    formData.append('id_carga', 'asignaciones');
 
     const url = '/api/admin/recargas/recarga/masivo/turnos';
 
@@ -137,10 +138,11 @@ export const actions = {
   async storeFileTurnos({ commit, dispatch }, data){
     commit('SET_LOADING', true);
     let formData = new FormData();
-    formData.append('codigo', data.recarga_codigo);
+    formData.append('codigo_recarga', data.recarga_codigo);
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
+    formData.append('id_carga', 'asignaciones');
 
     const url = '/api/admin/recargas/recarga/masivo/turnos/import';
 

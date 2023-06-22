@@ -1,7 +1,7 @@
 <template>
   <div v-loading.fullscreen.lock="loadingSpinner" element-loading-text="Cargando datos..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
     <template v-if="(funcionario)">
-      <HeroUser namepage="Contratos vigentes" :funcionario="funcionario" :recarga="recarga" />
+      <HeroUser namepage="Viáticos" :funcionario="funcionario" :recarga="recarga" />
     </template>
     <div class="container.is-fullhd">
       <MenuTotalesFuncionario :funcionario="funcionario" />

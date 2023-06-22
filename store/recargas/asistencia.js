@@ -112,20 +112,23 @@ export const actions = {
         commit('SET_ERROR_COLUMN', '');
     },
     async uploadFileAsistencia({commit, dispatch}, data){
+        commit('SET_LOADING', true);
         const url = '/api/admin/recargas/recarga/masivo/asistencia';
 
         let formData = new FormData();
-        formData.append('codigo', data.recarga_codigo);
+        formData.append('codigo_recarga', data.recarga_codigo);
         formData.append('grupo_id', data.grupo_id);
         formData.append('file', data.file);
         formData.append('columnas', JSON.stringify(data.columnas));
         formData.append('row_columnas', data.row_columnas);
+        formData.append('id_carga', 'asistencias');
 
         await this.$axios.$post(url, formData, {
             headers:{
                 'Content-Type': 'multipart/form-data'
             }
         }).then(response => {
+          commit('SET_LOADING', false);
             if(response.status === 'Success'){
                 dispatch('successLoadFile');
                 commit('SET_FILAS', response.data[0]);
@@ -143,19 +146,22 @@ export const actions = {
         });
     },
     async storeFileAsistencia({commit, dispatch}, data){
+      commit('SET_LOADING', true);
         const url = '/api/admin/recargas/recarga/masivo/asistencia/import';
 
         let formData = new FormData();
-        formData.append('codigo', data.recarga_codigo);
+        formData.append('codigo_recarga', data.recarga_codigo);
         formData.append('file', data.file);
         formData.append('columnas', JSON.stringify(data.columnas));
         formData.append('row_columnas', data.row_columnas);
+        formData.append('id_carga', 'asistencias');
 
         await this.$axios.$post(url, formData, {
             headers:{
                 'Content-Type': 'multipart/form-data'
             }
         }).then(response => {
+          commit('SET_LOADING', false);
             if(response.status === 'Success'){
                 dispatch('successStoreFile');
                 commit('SET_POSITION_PASO_MODAL', 3);

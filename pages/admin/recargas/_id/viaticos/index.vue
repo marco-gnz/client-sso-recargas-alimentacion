@@ -7,7 +7,7 @@
       <div class="container.is-fullhd">
         <MenuTotales  :recarga="recarga" />
         <div class="card p-2 m-2">
-          <MenuRecarga :codigo="$route.params.id" />
+          <MenuRecarga :codigo="$route.params.id" :recarga="recarga" />
           <div class="columns">
             <div class="column">
               <div class="field">
@@ -27,7 +27,8 @@
                   <thead>
                     <tr>
                       <th>Nombres</th>
-                      <th>Existe contrato</th>
+                      <th>Turno</th>
+                      <th>Vigente</th>
                       <th>Fechas</th>
                       <th>Fechas periodo</th>
                       <th>Días habiles</th>
@@ -42,6 +43,7 @@
                       <tbody>
                         <tr v-for="(viatico, index) in viaticos" :key="index">
                           <td>{{ viatico.funcionario_nombres ? viatico.funcionario_nombres : '--'}}</td>
+                          <el-tag effect="dark" size="mini" :type="viatico.es_turnante != null ? (viatico.es_turnante ? 'warning' : 'primary') : 'danger' " disable-transitions>{{`${viatico.es_turnante != null ? `${viatico.es_turnante ? 'Si' : 'No'}` : `Error`}`}}</el-tag>
                           <td><span class="tag" :class="(viatico.existe_funcionario ? 'is-success' : 'is-danger')">{{ viatico.existe_funcionario ? 'Si' : 'No' }}</span></td>
                           <td>{{ viatico.fecha_inicio ? viatico.fecha_inicio : '--'}} / {{ viatico.fecha_termino ? viatico.fecha_termino : '--'}} (<strong>{{ viatico.total_dias }}</strong>d)</td>
                           <td>{{ viatico.fecha_inicio_periodo ? viatico.fecha_inicio_periodo : '--'}} / {{ viatico.fecha_termino_periodo ? viatico.fecha_termino_periodo : '--'}}</td>
@@ -51,7 +53,7 @@
                           <td>{{ viatico.motivo_viatico ? viatico.motivo_viatico : '--'}}</td>
                           <td :class="(viatico.valor_viatico <= 0 ? 'has-text-danger-dark' : 'has-text-success-dark')">{{ viatico.valor_viatico ? viatico.valor_viatico : '--'}}</td>
                           <td>
-                            <nuxt-link  :to="`/admin/recargas/${$route.params.id}/resumen/${viatico.funcionario_uuid}/viaticos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
+                              <nuxt-link v-if="viatico.existe_funcionario" :to="`/admin/esquemas/${viatico.esquema_uuid}/viaticos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
                           </td>
                         </tr>
                       </tbody>
@@ -102,32 +104,31 @@ export default {
     };
   },
   created() {
-      this.getRecarga(this.$route.params.id);
       this.getViaticos(this.$route.params.id);
   },
   computed: {
     ...mapGetters({
-        loadingSpinner: "recargas/recargas/fullScreenLoading",
-        recarga: "recargas/recargas/recarga",
-        viaticos:'recargas/viaticos/viaticos',
-        loadingTable:'recargas/viaticos/loadingTable',
-        pagination:'recargas/viaticos/pagination',
-        offset:'recargas/viaticos/offset'
+        loadingSpinner: "recarga/viaticos/main/fullScreenLoading",
+        recarga: "recarga/viaticos/main/recarga",
+        viaticos:'recarga/viaticos/main/viaticos',
+        loadingTable:'recarga/viaticos/main/loadingTable',
+        pagination:'recarga/viaticos/main/pagination',
+        offset:'recarga/viaticos/main/offset'
     }),
     input_query:{
       get() {
-        return this.$store.state.recargas.viaticos.filtro.input;
+        return this.$store.state.recarga.viaticos.main.filtro.input;
       },
       set(newValue) {
-        this.$store.commit('recargas/viaticos/SET_FILTRO_INPUT', newValue);
+        this.$store.commit('recarga/viaticos/main/SET_FILTRO_INPUT', newValue);
       }
     },
     current_page:{
       get() {
-        return this.$store.state.recargas.viaticos.pagination.current_page;
+        return this.$store.state.recarga.viaticos.main.pagination.current_page;
       },
       set(newValue) {
-        this.$store.commit('recargas/viaticos/SET_CURRENT_PAGE', newValue);
+        this.$store.commit('recarga/viaticos/main/SET_CURRENT_PAGE', newValue);
       }
     },
     isActived: function () {
@@ -155,8 +156,7 @@ export default {
   },
   methods: {
     ...mapActions({
-        getRecarga: "recargas/recargas/returnRecarga",
-        getViaticos:'recargas/viaticos/getViaticos'
+        getViaticos:'recarga/viaticos/main/getViaticos'
     }),
     keySearchInput:function(){
       if(this.input_query.length > 1){

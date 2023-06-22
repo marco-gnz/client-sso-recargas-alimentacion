@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Hero />
+    <!-- <Hero /> -->
     <div class="container.is-fullhd">
       <!-- <Content /> -->
     </div>

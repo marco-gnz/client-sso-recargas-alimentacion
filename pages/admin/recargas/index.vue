@@ -1,8 +1,7 @@
 <template>
   <div>
-    <!-- <Hero title="Listado de recargas" subtitle="Listado de todas las recargas registradas en sistema" /> -->
     <div class="container.is-fullhd">
-      <div class="card p-6 m-6">
+      <!-- <div class="card p-6 m-6">
         <div class="columns">
           <div class="column">
             <label class="label">Seleccione año de carga</label>
@@ -27,10 +26,10 @@
             </el-select>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="card p-6 m-6">
         <div class="columns">
-          <nuxt-link class="button modal-button is-link is-inverted is-pulled-right" :to="{name:'admin-recargas-ingresar'}">Ingresar nueva recarga</nuxt-link>
+          <nuxt-link v-if="hasPermission('recarga.create')" class="button modal-button is-link is-inverted is-pulled-right" :to="{name:'admin-recargas-ingresar'}">Ingresar nueva recarga</nuxt-link>
         </div>
         <template v-if="recargas.length">
           <table class="table is-striped is-narrow is-hoverable is-fullwidth">
@@ -40,28 +39,31 @@
                 <th>Establecimiento</th>
                 <th>Beneficio</th>
                 <th>N° de funcionarios</th>
-                <th>Total monto</th>
-                <th>Habilitado</th>
+                <th>Valor día</th>
+                <th>Total pagar</th>
+                <th>Total sobrante</th>
                 <th>Estado actual</th>
+                <th>Habilitado</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-
-              <tr v-for="(recarga, index) in recargas" :key="index"  @click.prevent="redirectToRecarga(recarga)" class="click">
+              <tr v-for="(recarga, index) in recargas" :key="index" @click.prevent="redirectToRecarga(recarga)" class="click">
                 <td>#{{recarga.codigo}}</td>
                 <td>{{recarga.establecimiento != null ? recarga.establecimiento.sigla : '--'}}</td>
-                <td>{{recarga.mes_beneficio}}/{{recarga.anio_beneficio}}</td>
+                <td>{{recarga.mes_beneficio}} {{recarga.anio_beneficio}}</td>
                 <td>{{recarga.users_count}}</td>
-                <td>${{recarga.total_pagado}}</td>
+                <td>{{recarga.monto_dia}}</td>
+                <td>{{recarga.total_pagado}}</td>
+                <td>{{recarga.total_pagado_not}}</td>
+                <td>{{recarga.last_status}}</td>
                 <td @click.prevent.stop="">
-                  <template>
+                  <template v-if="hasPermission('recarga.status')">
                     <el-tooltip :content="`Habilitado: ${!recarga.active ? `No` : `Si`}`" placement="top">
                         <el-switch :active-value="!recarga.active" :inactive-value="recarga.active" @change="editStatus(recarga.id)" active-color="#13ce66" v-loading.fullscreen.lock="loadingSpinner"></el-switch>
                     </el-tooltip>
                   </template>
                 </td>
-                <td><el-tag size="mini" type="success">{{recarga.last_estado.estado.nombre}}</el-tag></td>
                 <td @click.prevent.stop="">
                   <el-dropdown>
                       <span class="el-dropdown-link">Acción<i class="el-icon-arrow-down el-icon--right"></i></span>
@@ -142,6 +144,9 @@ export default {
       this.getEstablecimientos();
       this.getRecargas();
     },
+    created(){
+      this.getRolesPermissions();
+    },
     computed:{
       ...mapGetters({
         modalOpen:'recargas/recargas/openModal',
@@ -149,6 +154,9 @@ export default {
         establecimientos:'modulos/modulos/establecimientos',
         loadingSpinner:'recargas/recargas/fullScreenLoading',
       }),
+      permissions() {
+        return this.$store.state.usuarios.administradores.main.permissions;
+      },
       showModal() {
         return this.$route.matched.length;
       }
@@ -161,6 +169,7 @@ export default {
             getRecargas: 'recargas/recargas/getRecargas',
             getEstablecimientos: 'modulos/modulos/getEstablecimientos',
             changeStatusRecarga: 'recargas/recargas/changeStatusRecarga',
+            getRolesPermissions:'usuarios/administradores/main/getRolesPermissions',
         }),
         redirectToRecarga:function(recarga){
           this.$router.push({
@@ -179,6 +188,9 @@ export default {
         hideProductModal:function() {
             this.activeModal = null;
             window.history.pushState({}, null, this.$route.path);
+        },
+        hasPermission:function(permission){
+          return this.permissions.includes(permission);
         }
     },
     components: { ModalAdd }

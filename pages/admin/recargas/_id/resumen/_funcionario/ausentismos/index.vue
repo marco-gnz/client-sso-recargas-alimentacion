@@ -44,12 +44,12 @@
                           <th>Días habiles</th>
                         <th>Grupo ausentismo</th>
                         <th>Tipo de ausentismo</th>
-                        <template v-if="(grupo_selected === 3)">
-                          <th>Descuento</th>
-                        </template>
                         <template v-if="(grupo_selected === 2)">
                           <th>Meridiano</th>
                         </template>
+                        <template v-if="(grupo_selected != 1)">
+                            <th>Descuento</th>
+                          </template>
                       </tr>
                     </thead>
                     <tbody>
@@ -65,15 +65,13 @@
                         <td>{{ausentismo.total_dias_habiles_periodo}}</td>
                         <td>{{ausentismo.nombre_grupo_ausentismo}}</td>
                         <td class="click">
-                          <el-tooltip class="item" effect="dark" :content="`${ausentismo.hora_inicio_regla != null ? `No corresponde beneficio entre ${ausentismo.hora_inicio_regla} y ${ausentismo.hora_termino_regla} hrs.` : ``}`" placement="top-start">
-                            <span>{{ausentismo.nombre_tipo_ausentismo}}</span>
-                          </el-tooltip>
+                          <span>{{ausentismo.nombre_tipo_ausentismo}}</span>
                         </td>
-                        <template v-if="(grupo_selected === 3)">
-                          <td><el-tag effect="dark" size="mini" :type="(ausentismo.tiene_descuento ? 'danger' : 'success')">{{ ausentismo.tiene_descuento ? 'Si' : 'No' }}</el-tag></td>
-                        </template>
                         <template v-if="(grupo_selected === 2)">
                           <td>{{ ausentismo.nombre_meridiano != null ? ausentismo.nombre_meridiano : '--' }}</td>
+                        </template>
+                        <template v-if="(grupo_selected != 1)">
+                            <td><span class="tag" :class="(ausentismo.is_ausentismo ? 'is-warning' : 'is-success')">{{ ausentismo.is_ausentismo ? 'Descuento' : 'Sin descuento' }}</span></td>
                         </template>
                       </tr>
                     </tbody>

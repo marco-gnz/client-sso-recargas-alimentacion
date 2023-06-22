@@ -1,7 +1,7 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'NOM SISTEMA',
+    title: 'SBA',
     htmlAttrs: {
       lang: 'es'
     },
@@ -50,7 +50,7 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        url: process.env.BASE_URL,
+        url: process.env.NUXT_ENV_BASE_URL,
         endpoints: {
           login: { url: '/api/login', method: 'post'},
           logout: { url: '/api/logout', method: 'post' },
@@ -69,7 +69,7 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     credentials: true,
-    baseURL: process.env.BASE_URL
+    baseURL: process.env.NUXT_ENV_BASE_URL
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

@@ -25,7 +25,7 @@
                   <tbody>
                     <template v-if="feriados.length">
                       <tr v-for="(feriado, index) in feriados" :key="index" class="is-clickable">
-                        <td><input type="checkbox" v-model="feriados_selected" :value="{fecha:feriado.fecha_not_format, nombre:feriado.nombre, irrenunciable:feriado.irrenunciable_value, tipo:feriado.tipo, observacion:feriado.observacion}"></td>
+                        <td><input type="checkbox" :disabled="feriado.disabled" v-model="feriados_selected" :value="{fecha:feriado.fecha_not_format, nombre:feriado.nombre, irrenunciable:feriado.irrenunciable_value, tipo:feriado.tipo, observacion:feriado.observacion}"></td>
                         <td>{{ feriado.fecha_corta ? feriado.fecha_corta : '--' }}</td>
                         <td>{{ feriado.fecha_larga ? feriado.fecha_larga : '--' }}</td>
                         <td>{{ feriado.nombre ? feriado.nombre : '--' }}</td>

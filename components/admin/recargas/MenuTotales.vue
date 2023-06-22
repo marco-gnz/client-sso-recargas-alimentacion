@@ -28,11 +28,18 @@
       <div class="level-item has-text-centered">
         <div>
           <p class="heading">Monto total</p>
-          <p class="title">$0</p>
+          <p class="title">{{recarga.total_pagado}}</p>
+        </div>
+      </div>
+      <div class="level-item has-text-centered">
+        <div>
+          <p class="heading">Estado</p>
+          <p class="title">{{recarga.last_status}}</p>
         </div>
       </div>
     </nav>
   </div>
+
 </template>
 
 <script>

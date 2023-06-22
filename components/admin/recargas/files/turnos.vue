@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="modal is-large" :class="openModalTurnos ? 'is-active' : '' ">
-      <div class="modal-background"></div>
+      <div class="modal-background" @click.prevent="hideTurnosModal"></div>
       <div class="modal-card" style="width: 80%;">
         <header class="modal-card-head">
           <p class="modal-card-title">Carga masiva de asignaciones de 3° y 4° turno.</p>

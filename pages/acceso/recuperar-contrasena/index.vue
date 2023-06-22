@@ -2,14 +2,13 @@
   <div>
     <div class="container.is-fullhd">
       <div class="card p-6 m-6">
+        <Titulo />
         <div class="columns">
           <div class="column pt-6 is-centered">
             <Menu />
             <div class="field">
-              <p class="control has-icons-left has-icons-right">
                 <label class="label">Ingrese correo electrónico</label>
                 <input class="input is-rounded" type="email" placeholder="Ingrese correo electrónico">
-              </p>
             </div>
             <div class="field">
               <div class="buttons is-right">
@@ -18,9 +17,11 @@
             </div>
           </div>
           <div class="column">
-            <figure class="image is-16by9">
-              <img class="is-rounded" src="https://img.freepik.com/vector-gratis/hacker-rompiendo-bloqueo-acceder-informacion-personal-computadora-isometrica_1284-63723.jpg?w=826&t=st=1664894625~exp=1664895225~hmac=f594959aeeab8272b4de7d8f4cf6da74b147cea04019a108253fb83ff30ccfe2">
-            </figure>
+            <div class="is-flex is-align-items-center is-justify-content-center pt-6">
+              <figure class="image is-512x512">
+                <img class="is-rounded" src="~/assets/img/contrasena.webp" style="max-height: 500px; max-width: 500px;">
+              </figure>
+            </div>
           </div>
         </div>
       </div>
@@ -30,6 +31,7 @@
 
 <script>
 import Menu from '../../../components/autenticacion/Menu.vue';
+import Titulo from '../../../components/autenticacion/Titulo.vue';
 export default {
     name: "IndexPage",
     middleware: 'guest',
@@ -38,6 +40,6 @@ export default {
             title: "Recuperar contraseña"
         };
     },
-    components: {Menu }
+    components: {Menu, Titulo }
 }
 </script>

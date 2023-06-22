@@ -111,6 +111,7 @@ export const actions = {
     formData.append('codigo_recarga', data.codigo_recarga);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
+    formData.append('id_carga', 'funcionarios');
     const url = `/api/admin/recargas/recarga/masivo/funcionarios`;
 
     this.$axios.$post(url, formData, {
@@ -144,6 +145,7 @@ export const actions = {
     formData.append('codigo_recarga', data.codigo_recarga);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
+    formData.append('id_carga', 'funcionarios');
     const url = `/api/admin/recargas/recarga/masivo/funcionarios/import`;
 
     await this.$axios.$post(url, formData, {

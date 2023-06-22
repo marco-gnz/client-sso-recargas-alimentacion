@@ -14,7 +14,7 @@
               <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/contratos`"><span class="icon is-small"><i class="el-icon-s-order"></i></span>Contratos ({{ funcionario.contratos_count }})</nuxt-link>
             </li>
             <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/asistencia` ?  'is-active'  : '' ">
-              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/asistencia`"><span class="icon is-small"><i class="el-icon-s-claim"></i></span>Asistencia ({{funcionario.dias_libres}})</nuxt-link>
+              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/asistencia`"><span class="icon is-small"><i class="el-icon-s-claim"></i></span>Turnos ({{funcionario.dias_libres > 0 ? 'Si' : 'No'}})</nuxt-link>
             </li>
             <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/ausentismos` ?  'is-active'  : '' ">
               <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/ausentismos?grupo=${1}` "><span class="icon is-small"><i class="el-icon-close"></i></span>Ausentismos ({{funcionario.ausentismos_count}})</nuxt-link>
@@ -25,8 +25,8 @@
             <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/reajustes` ?  'is-active'  : '' ">
               <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/reajustes`"><span class="icon is-small"><i class="el-icon-setting"></i></span>Ajustes ({{ funcionario.reajustes_count }})</nuxt-link>
             </li>
-            <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/cartola` ?  'is-active'  : '' ">
-              <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen/${$route.params.funcionario}/cartola`"><span class="icon is-small"><i class="el-icon-s-check has-background-white has-text-danger"></i></span>Cartola</nuxt-link>
+            <li>
+              <el-button icon="el-icon-s-check has-background-white has-text-danger" @click.prevent="openCartola"><span>Cartola</span></el-button>
             </li>
           </ul>
         </div>
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex';
+import {mapGetters, mapActions} from 'vuex';
 export default {
   computed: {
     ...mapGetters({
@@ -44,8 +44,24 @@ export default {
     }),
     currentRouteName() {
       return this.$nuxt.$route.path;
-    }
+    },
   },
+  methods:{
+    ...mapActions({
+      openCartolaAction:'funcionario/pdf/openCartola'
+    }),
+    openCartola:function(){
+      const data = {
+        codigo_recarga:this.$route.params.id,
+        uuid_funcionario:this.$route.params.funcionario
+      };
+      this.openCartolaAction(data);
+      /* const url = `${this.url}/api/funcionario/cartola/${this.$route.params.id}/${this.$route.params.funcionario}`; */
+      /* const url = `${this.url}`;
+      console.log(process.env.BASE_URL); */
+      /* window.open(url, '_blank'); */
+    }
+  }
 }
 </script>
 

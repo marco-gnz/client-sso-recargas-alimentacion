@@ -45,19 +45,38 @@
                     </thead>
                     <tbody>
                       <tr v-for="(regla, index) in reglas" :key="index">
-                        <td>{{regla.tipo_ausentismo.nombre}}</td>
+                        <td>{{`${regla.nombre_tipo_ausentismo != null ? regla.nombre_tipo_ausentismo : '--'}`}}</td>
                         <td>
-                          <span class="tag" :class="(regla.turno_funcionario != null ? `${regla.turno_funcionario ? 'is-warning' : 'is-info'}` : 'is-light')">{{ regla.turno_funcionario != null ? `${regla.turno_funcionario ? 'SI' : 'NO'}` : `N/A`}}</span>
+                          <span class="tag" :class="(regla.value_turno_funcionario != null ? `${regla.value_turno_funcionario ? 'is-warning' : 'is-info'}` : 'is-light')">{{ (regla.value_turno_funcionario != null ? `${regla.value_turno_funcionario ? 'Si' : 'No'}` : 'N/A') }}</span>
                         </td>
                         <td>
-                          <template v-if="grupo_value === 1">
-                            DC
+                          <template v-if="regla.numero_grupo === 1">
+                            <template v-if="regla.active_tipo_dias">
+                              <p>{{regla.tipo_dias}}</p>
+                            </template>
+                            <template v-else>
+                              <p>FuncionarioTurno</p>
+                            </template>
                           </template>
-                          <template v-if="grupo_value === 2">
-                            {{`${regla.meridianos.length ? regla.meridianos.map(m => m.nombre).join(' - ') : '--'}`}}
+                          <template v-if="regla.numero_grupo === 2">
+                            <template v-if="(regla.meridianos) && (regla.meridianos.length)">
+                              <div class="columns">
+                                <div class="column" v-for="(meridiano, index) in regla.meridianos" :key="index">
+                                  <p :class="(meridiano.pivot.active ? 'has-text-success-dark' : 'has-text-danger-dark')">{{ meridiano.nombre }}</p>
+                                </div>
+                              </div>
+                            </template>
+                            <template v-else>
+                              <span>Sin resultados</span>
+                            </template>
                           </template>
-                          <template v-if="grupo_value === 3">
-                            {{`${regla.hora_inicio != null && regla.hora_termino != null ? `${DateTime.fromISO(regla.hora_inicio).toFormat('T')} / ${DateTime.fromISO(regla.hora_termino).toFormat('T')}` : '--'}`}}
+                          <template v-if="regla.numero_grupo === 3">
+                            <template v-if="regla.horarios">
+                              <p v-for="(horario, index) in regla.horarios" :key="index">{{ horario.hora_inicio }} a {{ horario.hora_termino }} hrs.</p>
+                            </template>
+                            <template v-else>
+                              --
+                            </template>
                           </template>
                         </td>
                       </tr>
@@ -138,7 +157,7 @@
                               <th>N° de fila</th>
                               <th>Atributo</th>
                               <th>Error</th>
-                              <th>Valores</th>
+                              <th>Datos</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -146,7 +165,7 @@
                               <th>{{e.row}}</th>
                               <th>{{e.attribute}}</th>
                               <th>{{e.errors.map(m => m).join(', ')}}</th>
-                              <th>{{e.values}}</th>
+                              <th>{{formatValues(e.values)}}</th>
                             </tr>
                           </tbody>
                         </table>
@@ -170,7 +189,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(ausentismo, index) in ausentismos" :key="index">
+                    <tr v-for="(ausentismo, index) in ausentismos" :key="index" :class="(ausentismo.descuento === 'Si' ? 'validate' : '')">
                       <td v-for="(a, index) in ausentismo" :key="index">{{a}}</td>
                     </tr>
                   </tbody>
@@ -195,6 +214,9 @@
           </div>
         </section>
         <footer class="modal-card-foot buttons is-right">
+          <template v-if="ausentismosSobrante.length">
+            <button v-if="paso === 3" @click.prevent="copyAusentismosSobrante" class="button is-info is-rounded">Copiar datos sobrantes  <i class="el-icon-document-copy"></i></button>
+          </template>
           <button v-if="paso === 4 && successImport" @click.prevent="hideAusentismosModal" class="button is-rounded">Cerrar</button>
           <button :disabled="paso === 0" v-if="paso != 4" @click.prevent="volver" class="button is-rounded">Volver</button>
           <button v-if="paso < 3" :disabled="disabledButton" @click.prevent="siguiente" v-loading.fullscreen.lock="loadingSpinner" class="button is-info is-rounded">Siguiente</button>
@@ -216,6 +238,9 @@ export default {
       columnas_grupo:[]
     };
   },
+  created() {
+      this.getGruposAusentismos(this.$route.params.id);
+  },
   computed:{
     ...mapGetters({
       openModalAusentismos: "recargas/ausentismos/modal",
@@ -225,6 +250,7 @@ export default {
       reglas:'recargas/ausentismos/reglas',
       loadingReglas:'recargas/ausentismos/loadingReglas',
       ausentismos:'recargas/ausentismos/ausentismos',
+      ausentismosSobrante:'recargas/ausentismos/ausentismosSobrante',
       filas: "recargas/ausentismos/filas",
       successImport: "recargas/ausentismos/successImport",
       successMessagge: "recargas/ausentismos/successMessagge",
@@ -282,6 +308,7 @@ export default {
       getReglasGrupoAction:'recargas/ausentismos/getReglas',
       loadFileAction:'recargas/ausentismos/uploadFileAusentismo',
       storeFileGrupoUnoAction:'recargas/ausentismos/storeFileGrupoUno',
+      getGruposAusentismos: 'modulos/modulos/getGruposAusentismosRecarga',
     }),
     async getColumnsGrupoUno(){
       const url             = '/api/admin/modulos/columnas/grupo-uno';
@@ -304,13 +331,10 @@ export default {
         recarga_codigo:this.codigo
       };
       if(this.grupo_value === 1){
-        /* this.grupo_select = this.columnas_grupo_uno; */
         this.getColumnsGrupoUno();
       }else if (this.grupo_value === 2){
-        /* this.grupo_select = this.columnas_grupo_dos; */
         this.getColumnsGrupoDos();
       }else if (this.grupo_value === 3){
-        /* this.grupo_select = this.columnas_grupo_tres; */
         this.getColumnsGrupoTres();
       }
       this.getReglasGrupoAction(data);
@@ -343,6 +367,45 @@ export default {
       }
       return isXLSX;
     },
+    copyAusentismosSobrante: function(event) {
+      let tableHTML = '<table>';
+      tableHTML += '<thead>';
+      tableHTML += '<tr>';
+      tableHTML += '<th>Nombres</th>';
+      tableHTML += '<th>Tipo Ausentismo</th>';
+      tableHTML += '<th>Grupo</th>';
+      tableHTML += '<th>Fecha de Inicio</th>';
+      tableHTML += '<th>Fecha de Termino</th>';
+      tableHTML += '</tr>';
+      tableHTML += '</thead>';
+      this.ausentismosSobrante.forEach((item) => {
+        tableHTML += '<tr>';
+        tableHTML += `<td>${item.nombres}</td>`;
+        tableHTML += `<td>${item.nombre_tipo_ausentismo}</td>`;
+        tableHTML += `<td>${item.grupo}</td>`;
+        tableHTML += `<td>${item.fecha_inicio}</td>`;
+        tableHTML += `<td>${item.fecha_termino}</td>`;
+        tableHTML += '</tr>';
+      });
+      tableHTML += '</table>';
+
+      const textArea = document.createElement('textarea');
+      textArea.value = tableHTML;
+
+      document.body.appendChild(textArea);
+      textArea.select();
+      const copySuccessful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+
+      if (copySuccessful) {
+        this.$message({
+          message: `${this.ausentismosSobrante.length} datos copiados.`,
+          type: 'success'
+        });
+      } else {
+        this.$message.error('Error al copiar el texto');
+      }
+    },
     storeGrupoUno:function(){
       const data = {
           recarga_codigo:this.codigo,
@@ -361,11 +424,20 @@ export default {
     },
     siguiente:function(){
       this.$store.commit('recargas/ausentismos/SET_POSITIVE_PASO_MODAL');
+    },
+    formatValues(values) {
+      if (typeof values === 'string') {
+        return values.replace(/[{}]/g, '');
+      }
+      return values;
     }
   }
 }
 </script>
 
 <style>
-
+  .validate{
+    outline: 1px rgba(221, 110, 110, 0.342) solid !important;
+    background-color: rgba(221, 110, 110, 0.342) !important;
+  }
 </style>

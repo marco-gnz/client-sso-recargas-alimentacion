@@ -9,7 +9,7 @@
       <section class="modal-card-body">
         <div class="columns">
           <div class="column">
-            <template v-if="modalShowReajuste">
+            <template v-if="fullScreenLoading">
               <el-skeleton style="width: 100%" animated>
                 <template slot="template">
                   <div style="padding: 14px;">
@@ -62,68 +62,94 @@
                 <tbody>
                   <tr>
                     <th>Tipo de ajuste:</th>
-                    <td>{{ reajuste.tipo_reajuste_nombre }}</td>
+                    <td>{{ ajuste.tipo_reajuste_nombre }}</td>
                   </tr>
                   <tr>
                     <th>Funcionario:</th>
-                    <td>{{ reajuste.nombres_funcionario != null ? reajuste.nombres_funcionario : '--' }}</td>
+                    <td>{{ ajuste.nombres_funcionario != null ? ajuste.nombres_funcionario : '--' }}</td>
                   </tr>
                   <tr>
                     <th>Fecha:</th>
-                    <td>{{ reajuste.fecha_inicio}} / {{ reajuste.fecha_termino}}</td>
+                    <td>{{ ajuste.fecha_inicio}} / {{ ajuste.fecha_termino}}</td>
                   </tr>
                   <tr>
                     <th>Días periodo:</th>
-                    <td>{{ reajuste.dias_periodo}}</td>
+                    <td>{{ ajuste.dias_periodo}}</td>
+                  </tr>
+                  <tr>
+                    <th>Días hábiles:</th>
+                    <td>{{ ajuste.dias_periodo_habiles}}</td>
+                  </tr>
+                  <tr>
+                    <th>Total días:</th>
+                    <td><span class="tag is-success is-light"><strong>{{ ajuste.total_dias}}</strong></span></td>
                   </tr>
                   <tr>
                     <th>Tipo:</th>
-                    <td>{{ reajuste.incremento_nombre}}</td>
+                    <td>{{ ajuste.incremento_nombre}}</td>
                   </tr>
-                  <tr>
-                    <th>Días:</th>
-                    <td>{{ reajuste.dias}}</td>
-                  </tr>
-                  <template v-if="reajuste.tipo_reajuste === 1">
+                  <template v-if="ajuste.tipo_reajuste === 1">
                     <tr>
                       <th>Valor de día:</th>
-                      <td>{{ reajuste.valor_dia}}</td>
+                      <td>{{ ajuste.valor_dia}}</td>
                     </tr>
                     <tr>
                       <th>Monto de ajuste:</th>
-                      <td>{{ reajuste.monto_ajuste}}</td>
+                      <td>{{ ajuste.monto_ajuste}}</td>
                     </tr>
                   </template>
                   <tr>
                     <th>Causal:</th>
                     <td>
-                      <template v-if="reajuste.incremento">
-                        {{ reajuste.tipo_incremento != null ? reajuste.tipo_incremento : '-' }}
+                      <template v-if="ajuste.incremento">
+                        {{ ajuste.tipo_incremento != null ? ajuste.tipo_incremento : '-' }}
                       </template>
                       <template v-else>
-                        {{ reajuste.tipo_ausentismo != null ? reajuste.tipo_ausentismo : '' }}
+                        {{ ajuste.tipo_ausentismo != null ? ajuste.tipo_ausentismo : '' }}
                       </template>
                     </td>
                   </tr>
                   <tr>
                     <th>Ingresado por:</th>
-                    <td>{{ reajuste.user_created_by}}</td>
+                    <td>{{ ajuste.user_created_by}}</td>
                   </tr>
                   <tr>
                     <th>Fecha de ingreso:</th>
-                    <td>{{ reajuste.date_created_user}}</td>
+                    <td>{{ ajuste.date_created_user}}</td>
                   </tr>
                 </tbody>
               </table>
               <div class="field">
                 <label class="label">Observación de reajuste</label>
-                <p class="has-text-justified">{{ reajuste.observacion }}</p>
+                <p class="has-text-justified">{{ ajuste.observacion }}</p>
+              </div>
+              <div class="field">
+                <label class="label">Advertencias/Errores asociados</label>
+                <template v-if="(ajuste.alertas) && (ajuste.alertas.length)">
+                  <div class="table">
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(alerta, index) in ajuste.alertas" :key="index">
+                        <td>{{alerta.tipo}}</td>
+                        <td>{{alerta.observacion}}</td>
+                      </tr>
+                    </tbody>
+                  </div>
+                </template>
+                <template v-else>
+                  <p>Sin Advertencias/Errores asociados...</p>
+                </template>
               </div>
               <div class="field pt-2">
                 <h5 class="subtitle is-5 has-text-centered">Historial de estados</h5>
                 <div class="block">
                   <el-timeline>
-                    <el-timeline-item :size="(index ? 'normal' : 'large')" :icon="(index ? '' : 'el-icon-more')" :color="estado.color" v-for="(estado, index) in reajuste.estados" :key="index" :timestamp="`${estado.created_at}`" placement="top">
+                    <el-timeline-item :size="(index ? 'normal' : 'large')" :icon="(index ? '' : 'el-icon-more')" :color="estado.color" v-for="(estado, index) in ajuste.estados" :key="index" :timestamp="`${estado.created_at}`" placement="top">
                       <el-card :shadow="(index ? 'never' : 'always')">
                         <div class="content">
                           <p class="has-text-justified">{{ estado.observacion }}</p>
@@ -156,32 +182,33 @@ export default {
   created(){
     if(this.$route.query.id){
       this.showModal = true;
-      this.getReajuste(this.$route.query.id);
+      this.getAjuste(this.$route.query.id);
     }
   },
   computed:{
     ...mapGetters({
-      reajuste: "recargas/reajustes/reajuste",
-      modalShowReajuste:'recargas/reajustes/modalShowReajuste'
+      ajuste: "recarga/ajusteShow/ajuste",
+      fullScreenLoading:'recarga/ajusteShow/fullScreenLoading'
     }),
     showModal:{
-      get() {
-        return this.$store.state.recargas.reajustes.modal_show;
+        get() {
+          return this.$store.state.recargas.reajustes.modal_show;
+        },
+        set(newValue) {
+          this.$store.commit('recargas/reajustes/SET_MODAL_SHOW', newValue);
+        }
       },
-      set(newValue) {
-        this.$store.commit('recargas/reajustes/SET_MODAL_SHOW', newValue);
-      }
-    },
     currentRouteName() {
       return this.$nuxt.$route.path;
     },
   },
   methods:{
     ...mapActions({
-        getReajuste: 'recargas/reajustes/getReajuste',
+        getAjuste: 'recarga/ajusteShow/getAjuste',
       }),
     hideModalShow:function() {
-      this.$store.commit('recargas/reajustes/SET_MODAL_SHOW', false);
+      this.showModal = false;
+      this.$store.commit('recarga/ajustes/SET_MODAL_SHOW', false);
       this.$router.back();
     },
   }

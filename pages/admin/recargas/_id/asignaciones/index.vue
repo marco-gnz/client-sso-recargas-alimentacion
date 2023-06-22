@@ -7,7 +7,7 @@
       <div class="container.is-fullhd">
         <MenuTotales  :recarga="recarga" />
         <div class="card p-2 m-2">
-          <MenuRecarga :codigo="$route.params.id" />
+          <MenuRecarga :codigo="$route.params.id" :recarga="recarga" />
           <div class="columns">
             <div class="column">
               <div class="field">
@@ -40,26 +40,32 @@
                     <thead>
                       <tr>
                         <th>Nombres</th>
+                        <th>Turno</th>
+                        <th>Vigente</th>
                         <th>Proceso</th>
                         <th>Año/Mes</th>
                         <th>A. 3° turno</th>
                         <th>B. asignación turno</th>
                         <th>A. 4° turno</th>
-                        <th>Turno</th>
+                        <th>A. Turno</th>
                         <th></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(turno, index) in asignaciones" :key="index">
                         <td>{{turno.nombres}}</td>
+                        <td>
+                          <el-tag effect="dark" size="mini" :type="(turno.existe_funcionario ? turno.es_turnante_type : 'info')" disable-transitions>{{turno.existe_funcionario ? turno.es_turnante : '--'}}</el-tag>
+                        </td>
+                        <td><span class="tag" :class="(turno.existe_funcionario ? 'is-success' : 'is-danger')">{{ turno.existe_funcionario ? 'Si' : 'No' }}</span></td>
                         <td>{{turno.nombre_proceso}}</td>
                         <td>{{turno.anio}}/{{turno.mes}}</td>
                         <td><span :class="turno.asignacion_tercer_turno > 0 ? 'has-text-danger' : '' ">{{turno.asignacion_tercer_turno}}</span></td>
                         <td><span :class="turno.bonificacion_asignacion_turno > 0 ? 'has-text-danger' : '' ">{{turno.bonificacion_asignacion_turno}}</span></td>
                         <td><span :class="turno.asignacion_cuarto_turno > 0 ? 'has-text-danger' : '' ">{{turno.asignacion_cuarto_turno}}</span></td>
-                        <td><el-tag size="mini" :type="turno.es_turnante ? 'warning' : 'success'" disable-transitions>{{`${turno.es_turnante ? 'Si' : 'No'}`}}</el-tag></td>
+                        <td><el-tag effect="dark" size="mini" :type="turno.asignacion_turno ? 'warning' : 'success'" disable-transitions>{{`${turno.asignacion_turno ? 'Si' : 'No'}`}}</el-tag></td>
                         <td>
-                          <nuxt-link  :to="`/admin/recargas/${$route.params.id}/resumen/${turno.funcionario_uuid}/turnos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
+                          <nuxt-link v-if="turno.existe_funcionario" :to="`/admin/esquemas/${turno.esquema_uuid}/asignaciones`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
                         </td>
                       </tr>
                     </tbody>

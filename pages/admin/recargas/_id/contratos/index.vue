@@ -7,7 +7,7 @@
       <div class="container.is-fullhd">
         <MenuTotales  :recarga="recarga" />
         <div class="card p-2 m-2">
-          <MenuRecarga :codigo="$route.params.id" />
+          <MenuRecarga :codigo="$route.params.id" :recarga="recarga" />
           <div class="columns">
             <div class="column">
               <div class="field">
@@ -27,6 +27,7 @@
                   <thead>
                     <tr>
                       <th>Nombres</th>
+                      <th>Turno</th>
                       <th>Fecha contrato</th>
                       <th>Fecha en periodo</th>
                       <th>Días hábiles</th>
@@ -42,6 +43,9 @@
                     <template v-if="(contratos) && (contratos.length)">
                       <tr v-for="(contrato, index) in contratos" :key="index">
                         <td>{{ contrato.funcionario_nombres}}</td>
+                        <td>
+                          <el-tag effect="dark" size="mini" :type="(contrato.existe_funcionario ? contrato.es_turnante_type : 'info')" disable-transitions>{{contrato.existe_funcionario ? contrato.es_turnante : '--'}}</el-tag>
+                        </td>
                         <td>{{ contrato.fecha_inicio ? contrato.fecha_inicio : '--'}} / {{ contrato.fecha_termino ? contrato.fecha_termino : '--'}}</td>
                         <td class="has-text-weight-semibold">{{ contrato.fecha_inicio_periodo ? contrato.fecha_inicio_periodo : '--'}} / {{ contrato.fecha_termino_periodo ? contrato.fecha_termino_periodo : '--'}} ({{ contrato.total_dias_contrato_periodo }})</td>
                         <td class="has-text-weight-semibold" :class="(contrato.total_dias_habiles_contrato_periodo <= 0 ? 'has-text-danger-dark' : '')">{{ contrato.total_dias_habiles_contrato_periodo }}</td>
@@ -51,7 +55,7 @@
                         <td>{{ contrato.hora_nombre ? contrato.hora_nombre : '--'}}</td>
                         <td><span :class="(contrato.alejamiento ? 'tag is-danger is-light' : '')">{{ contrato.alejamiento ? 'Si' : '--' }} </span></td>
                         <td>
-                          <nuxt-link  :to="`/admin/recargas/${$route.params.id}/resumen/${contrato.funcionario_uuid}/contratos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
+                          <nuxt-link  :to="`/admin/esquemas/${contrato.esquema_uuid}/contratos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
                         </td>
                       </tr>
                     </template>

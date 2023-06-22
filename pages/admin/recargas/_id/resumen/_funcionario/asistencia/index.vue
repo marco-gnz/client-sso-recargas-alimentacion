@@ -2,7 +2,7 @@
   <div>
     <div v-loading.fullscreen.lock="loadingSpinner" element-loading-text="Cargando datos..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
       <template v-if="(funcionario)">
-        <HeroUser namepage="Asistencia (Días libres)" :funcionario="funcionario" :recarga="recarga" />
+        <HeroUser namepage="Planificación de turnos (Días libres)" :funcionario="funcionario" :recarga="recarga" />
       </template>
       <div class="container.is-fullhd">
           <MenuTotalesFuncionario :funcionario="funcionario" />
@@ -12,7 +12,8 @@
                   <div class="columns">
                       <div class="column">
                           <div class="table-container pt-2">
-                              <template v-if="(asistencias) && (asistencias.length && asistencias[0].asistencias_list.length)">
+
+                              <template v-if="(asistencias) && (asistencias.length) && (asistencias[0].asistencias_list) && (asistencias[0].asistencias_list.length)">
                                   <table class="table is-striped is-narrow is-hoverable is-fullwidth" v-loading="loadingTableAsistencia" element-loading-text="Cargando asistencia...">
                                       <thead>
                                           <tr>
@@ -71,9 +72,6 @@
                             <div class="columns">
                               <div class="column">
                                 Días destacados en color <span class="has-text-danger has-text-weight-semibold">rojo</span>, representan contrato(s) en el periodo.
-                              </div>
-                              <div class="column">
-                                Días destacados con insignia <strong class="has-background-warning">amarilla</strong>, representan observaciones(s) de modificación.
                               </div>
                             </div>
                           </div>

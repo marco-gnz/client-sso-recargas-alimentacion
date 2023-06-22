@@ -2,6 +2,7 @@
   <div>
     <div class="container.is-fullhd">
       <div class="card p-6 m-6">
+        <Titulo />
         <div class="columns">
           <div class="column pt-6 is-centered">
             <Menu />
@@ -11,10 +12,8 @@
               <p v-if="errors.email" class="help is-danger">{{errors.email[0]}}</p>
             </div>
             <div class="field">
-              <div class="control has-icons-left has-icons-right">
                 <label class="label">Ingrese contraseña</label>
                 <input v-model="login.password" class="input is-rounded" type="password" placeholder="Ingrese contraseña">
-              </div>
               <p v-if="errors.password" class="help is-danger">{{errors.password[0]}}</p>
             </div>
             <div class="field">
@@ -29,9 +28,11 @@
             </div>
           </div>
           <div class="column">
-            <figure class="image is-16by9">
-              <img class="is-rounded" src="https://img.freepik.com/vector-gratis/gente-negocios-trabajando-buscando-candidatos_1262-19729.jpg?w=2000">
-            </figure>
+            <div class="is-flex is-align-items-center is-justify-content-center pt-6">
+              <figure class="image is-512x512">
+                <img class="is-rounded" src="~/assets/img/login.webp" style="max-height: 500px; max-width: 500px;">
+              </figure>
+            </div>
           </div>
         </div>
       </div>
@@ -40,7 +41,9 @@
 </template>
 
 <script>
+import {mapActions} from 'vuex';
 import Menu from '../../../components/autenticacion/Menu.vue';
+import Titulo from '../../../components/autenticacion/Titulo.vue';
 export default {
     name: "IndexPage",
     middleware: 'guest',
@@ -60,6 +63,9 @@ export default {
       };
     },
     methods:{
+      ...mapActions({
+        getRolesPermissions:'usuarios/administradores/main/getRolesPermissions'
+      }),
       async loginAction(){
         try {
           this.fullscreenLoading = !this.fullscreenLoading;
@@ -73,6 +79,7 @@ export default {
           }!`,
           showClose: true,
         });
+          this.getRolesPermissions();
           this.fullscreenLoading = !this.fullscreenLoading;
         } catch (error) {
           this.fullscreenLoading = !this.fullscreenLoading;
@@ -89,6 +96,6 @@ export default {
         }
       }
     },
-    components: {Menu }
+    components: {Menu, Titulo }
 }
 </script>

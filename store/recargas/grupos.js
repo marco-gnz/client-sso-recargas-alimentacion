@@ -3,6 +3,7 @@ export const state = () => ({
   open_grupos:false,
   errors:{},
   full_screen_loading:false,
+  checked_all:true
 });
 
 export const mutations = {
@@ -15,6 +16,9 @@ export const mutations = {
   SET_LOADING(state, value){
     state.full_screen_loading = value;
   },
+  SET_CHECKED_ALL(state, value){
+    state.checked_all = value;
+  }
 };
 
 export const getters = {
@@ -42,6 +46,10 @@ export const actions = {
           commit('SET_MODAL_GRUPOS', false);
           Notification.success(
             {type: "success", title: response.title}
+          );
+        }else if(response.status = 'error'){
+          Notification.success(
+            {type: "success", title: response.message}
           );
         }
       }).catch(error => {

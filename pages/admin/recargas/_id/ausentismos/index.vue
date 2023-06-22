@@ -7,7 +7,7 @@
       <div class="container.is-fullhd">
         <MenuTotales  :recarga="recarga" />
         <div class="card p-2 m-2">
-          <MenuRecarga :codigo="$route.params.id" />
+          <MenuRecarga :codigo="$route.params.id" :recarga="recarga" />
           <div class="columns">
             <div class="column">
               <div class="field">
@@ -37,6 +37,23 @@
                   </ul>
                 </div>
               </div>
+              <div class="field">
+                <div class="tabs is-toggle is-toggle-rounded is-small is-centered">
+                  <div class="columns">
+                    <div class="column">
+                      <label class="label">Seleccione tipo de ausentismo</label>
+                      <el-select @change="actionGetAusentismos" size="mini" v-model="tipo_ausentismo_selected" filterable multiple collapse-tags clearable placeholder="Seleccione tipo" class="element-select">
+                        <el-option
+                          v-for="tipo in tipoAusentismos"
+                          :key="tipo.id"
+                          :label="tipo.nombre"
+                          :value="tipo.id">
+                        </el-option>
+                      </el-select>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="table-container pt-2" v-loading.fullscreen.lock="loadingTable && !ausentismos.length">
                 <span v-if="(pagination)" class="tag is-info is-light">{{ `${pagination.total} ${pagination.total > 1 ? `resultados` : `resultado`}` }}</span>
                 <template v-if="ausentismos.length">
@@ -44,53 +61,59 @@
                       <thead>
                         <tr>
                           <th>Nombres</th>
-                          <th>Existe contrato</th>
+                          <th>Turno</th>
+                          <th>Vigente</th>
                           <template v-if="(grupo_selected != 3)">
                             <th>Fechas de ausentismo</th>
                           </template>
                           <th>Fechas en periodo</th>
                           <template v-if="(grupo_selected === 3)">
                             <th>Hora ausentismo</th>
-                            <th>Total horas</th>
                           </template>
                             <th>Días habiles</th>
                           <th>Tipo de ausentismo</th>
-                          <template v-if="(grupo_selected === 3)">
-                            <th>Descuento</th>
-                          </template>
                           <template v-if="(grupo_selected === 2)">
                             <th>Meridiano</th>
+                          </template>
+                          <template v-if="(grupo_selected != 1)">
+                            <th>Descuento</th>
+                          </template>
+                          <template v-if="(grupo_selected === 1)">
+                            <th>Tipo días</th>
                           </template>
                         </tr>
                       </thead>
                       <tbody>
-
                           <tr v-for="(ausentismo, index) in ausentismos" :key="index">
                             <td>{{ ausentismo.nombre_funcionario ? ausentismo.nombre_funcionario : '--' }}</td>
+                            <td>
+                              <el-tag effect="dark" size="mini" :type="(ausentismo.existe_funcionario ? ausentismo.es_turnante_type : 'info')" disable-transitions>{{ausentismo.existe_funcionario ? ausentismo.es_turnante : '--'}}</el-tag>
+                            </td>
                             <td><span class="tag" :class="(ausentismo.existe_funcionario ? 'is-success' : 'is-danger')">{{ ausentismo.existe_funcionario ? 'Si' : 'No' }}</span></td>
                             <template v-if="(grupo_selected != 3)">
                               <td>{{ausentismo.fecha_inicio}} / {{ausentismo.fecha_termino}} ({{ausentismo.total_dias_ausentismo}}d)</td>
                             </template>
                             <td><strong>{{ausentismo.fecha_inicio_periodo}}</strong> / <strong>{{ausentismo.fecha_termino_periodo}} ({{ausentismo.total_dias_ausentismo_periodo}}d)</strong></td>
                             <template v-if="(grupo_selected === 3)">
-                              <td>{{ ausentismo.hora_inicio }} / {{ ausentismo.hora_termino }}</td>
-                              <td>{{ ausentismo.total_horas }}</td>
+                              <td>{{ ausentismo.hora_inicio }} / {{ ausentismo.hora_termino }} ({{ ausentismo.total_horas }})</td>
                             </template>
                             <td>{{ausentismo.total_dias_habiles_periodo}}</td>
                             <td class="click">
                               <span>{{ausentismo.nombre_tipo_ausentismo}}</span>
                             </td>
-                            <template v-if="(grupo_selected === 3)">
-                              <td><el-tag effect="dark" size="mini" :type="(ausentismo.tiene_descuento ? 'danger' : 'success')">{{ ausentismo.tiene_descuento ? 'Si' : 'No' }}</el-tag></td>
-                            </template>
                             <template v-if="(grupo_selected === 2)">
                               <td>{{ ausentismo.nombre_meridiano != null ? ausentismo.nombre_meridiano : '--' }}</td>
                             </template>
+                            <template v-if="(grupo_selected != 1)">
+                              <td><span class="tag" :class="(ausentismo.tiene_descuento ? 'is-warning' : 'is-success')">{{ ausentismo.tiene_descuento ? 'Descuento' : 'Sin descuento' }}</span></td>
+                            </template>
+                            <template v-if="(grupo_selected === 1)">
+                              <td>{{ausentismo.regla_tipo_dias ? ausentismo.regla_tipo_dias : '--'}}</td>
+                            </template>
                             <td>
-                              <nuxt-link  :to="`/admin/recargas/${$route.params.id}/resumen/${ausentismo.funcionario_uuid}/ausentismos?grupo=${grupo_selected}`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
+                              <nuxt-link v-if="ausentismo.existe_funcionario" :to="`/admin/esquemas/${ausentismo.esquema_uuid}/ausentismos?grupo=${grupo_selected}`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
                             </td>
                           </tr>
-
                     </tbody>
                   </table>
                 </template>
@@ -133,7 +156,6 @@ export default {
   },
   created() {
       this.grupo_selected = parseInt(this.$route.query.grupo);
-      this.getRecarga(this.$route.params.id);
       this.getAusentismosRecarga(this.$route.params.id);
   },
   data(){
@@ -143,20 +165,21 @@ export default {
   },
   computed:{
     ...mapGetters({
-        loadingSpinner: "recargas/recargas/fullScreenLoading",
-        recarga: "recargas/recargas/recarga",
-        grupos:'recargas/ausentismosResumen/gruposAusentismo',
-        loadingTable: "recargas/ausentismosResumen/loadingTable",
-        pagination:'recargas/ausentismosResumen/pagination',
-        offset:'recargas/ausentismosResumen/offset',
-        ausentismos:'recargas/ausentismosResumen/ausentismos',
+        loadingSpinner: "recarga/ausentismos/main/fullScreenLoading",
+        recarga: "recarga/ausentismos/main/recarga",
+        grupos:'recarga/ausentismos/main/gruposAusentismo',
+        loadingTable: "recarga/ausentismos/main/loadingTable",
+        pagination:'recarga/ausentismos/main/pagination',
+        offset:'recarga/ausentismos/main/offset',
+        ausentismos:'recarga/ausentismos/main/ausentismos',
+        tipoAusentismos:'recarga/ausentismos/main/tipoAusentismos'
     }),
     input_query:{
       get() {
-        return this.$store.state.recargas.ausentismosResumen.filtro.input;
+        return this.$store.state.recarga.ausentismos.main.filtro.input;
       },
       set(newValue) {
-        this.$store.commit('recargas/ausentismosResumen/SET_FILTRO_INPUT', newValue);
+        this.$store.commit('recarga/ausentismos/main/SET_FILTRO_INPUT', newValue);
       }
     },
     grupo_selected:{
@@ -164,15 +187,23 @@ export default {
         return parseInt(this.$route.query.grupo);
       },
       set(newValue) {
-        this.$store.commit('recargas/ausentismosResumen/SET_GRUPO_SELECTED_AUSENTISMO', newValue);
+        this.$store.commit('recarga/ausentismos/main/SET_GRUPO_SELECTED_AUSENTISMO', newValue);
+      }
+    },
+    tipo_ausentismo_selected:{
+      get() {
+        return this.$store.state.recarga.ausentismos.main.filtro.tipo_ausentismo_id;
+      },
+      set(newValue) {
+        this.$store.commit('recarga/ausentismos/main/SET_TIPO_SELECTED_AUSENTISMO', newValue);
       }
     },
     current_page:{
       get() {
-        return this.$store.state.recargas.ausentismosResumen.pagination.current_page;
+        return this.$store.state.recarga.ausentismos.main.pagination.current_page;
       },
       set(newValue) {
-        this.$store.commit('recargas/ausentismosResumen/SET_CURRENT_PAGE', newValue);
+        this.$store.commit('recarga/ausentismos/main/SET_CURRENT_PAGE', newValue);
       }
     },
     isActived: function () {
@@ -200,8 +231,7 @@ export default {
   },
   methods:{
     ...mapActions({
-        getRecarga: "recargas/recargas/returnRecarga",
-        getAusentismosRecarga:'recargas/ausentismosResumen/getAusentismos'
+        getAusentismosRecarga:'recarga/ausentismos/main/getAusentismos'
     }),
     keySearchInput:function(){
       if(this.input_query.length > 1){
@@ -211,6 +241,8 @@ export default {
       }
     },
     changeGrupoAusentismo:function(){
+      this.tipo_ausentismo_selected = [];
+      this.current_page   = 1;
       this.grupo_selected = this.$route.query.grupo;
       this.getAusentismosRecarga(this.$route.params.id);
     },

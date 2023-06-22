@@ -123,10 +123,11 @@ export const actions = {
     commit('SET_LOADING', true);
     console.log(data);
     let formData = new FormData();
-    formData.append('codigo', data.recarga_codigo);
+    formData.append('codigo_recarga', data.recarga_codigo);
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
+    formData.append('id_carga', 'viaticos');
 
     const url = '/api/admin/recargas/recarga/masivo/viaticos';
 
@@ -156,10 +157,11 @@ export const actions = {
     commit('SET_LOADING', true);
     console.log(data);
     let formData = new FormData();
-    formData.append('codigo', data.recarga_codigo);
+    formData.append('codigo_recarga', data.recarga_codigo);
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
+    formData.append('id_carga', 'viaticos');
 
     const url = '/api/admin/recargas/recarga/masivo/viaticos/import';
 

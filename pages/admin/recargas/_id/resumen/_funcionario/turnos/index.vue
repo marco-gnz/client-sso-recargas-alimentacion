@@ -1,10 +1,10 @@
 <template>
   <div v-loading.fullscreen.lock="loadingSpinner" element-loading-text="Cargando datos..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
-    <template v-if="(funcionario)">
-      <HeroUser namepage="Asignaciones" :funcionario="funcionario" :recarga="recarga" />
+    <template v-if="(esquema)">
+      <HeroUser namepage="Asignaciones" :esquema="esquema" :recarga="recarga" />
     </template>
     <div class="container.is-fullhd">
-      <MenuTotalesFuncionario :funcionario="funcionario" />
+      <MenuTotalesFuncionario :esquema="esquema" />
       <div class="card p-6 m-6">
         <MenuFuncionario/>
         <div class="card p-6 m-6">
@@ -31,7 +31,7 @@
                         <td><span :class="turno.asignacion_tercer_turno > 0 ? 'has-text-danger' : '' ">{{turno.asignacion_tercer_turno}}</span></td>
                         <td><span :class="turno.bonificacion_asignacion_turno > 0 ? 'has-text-danger' : '' ">{{turno.bonificacion_asignacion_turno}}</span></td>
                         <td><span :class="turno.asignacion_cuarto_turno > 0 ? 'has-text-danger' : '' ">{{turno.asignacion_cuarto_turno}}</span></td>
-                        <td><el-tag size="mini" :type="turno.es_turnante ? 'warning' : 'success'" disable-transitions>{{`${turno.es_turnante ? 'Si' : 'No'}`}}</el-tag></td>
+                        <td><el-tag effect="dark" size="mini" :type="turno.asignacion_turno ? 'warning' : 'success'" disable-transitions>{{`${turno.asignacion_turno ? 'Si' : 'No'}`}}</el-tag></td>
                       </tr>
                     </tbody>
                   </table>
@@ -61,17 +61,17 @@ export default {
   middleware: "auth",
   head() {
       return {
-          title: `#${this.$route.params.id} - ${this.funcionario.apellidos}`
+          title: `#${this.$route.params.id} - ${this.esquema.funcionario_apellidos}`
       };
   },
   created(){
-    this.getFuncionario(this.$route.params, this.$route.params.funcionario);
+    this.getEsquema(this.$route.params, this.$route.params.funcionario);
     this.getFuncionarioTurnos(this.$route.params, this.$route.params.funcionario);
   },
   computed:{
     ...mapGetters({
       loadingSpinner: "recargas/funcionario/fullScreenLoading",
-      funcionario:'recargas/funcionario/funcionario',
+      esquema:'recargas/esquema/esquema',
       turnos:'recargas/funcionario/turnos',
       loadingTableTurnos:'recargas/funcionario/loadingTableTurnos',
       recarga:'recargas/funcionario/recarga'
@@ -79,6 +79,7 @@ export default {
   },
   methods:{
     ...mapActions({
+      getEsquema:'recargas/esquema/getEsquema',
       getFuncionario:'recargas/funcionario/getFuncionario',
       getFuncionarioTurnos:'recargas/funcionario/getTurnos'
     })

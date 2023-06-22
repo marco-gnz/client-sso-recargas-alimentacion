@@ -1,3 +1,4 @@
+import { Notification } from 'element-ui';
 export const state = () => ({
   open_modal:false,
   loading_table:false,
@@ -70,13 +71,13 @@ export const actions = {
     commit('recargas/reajustes/SET_INDEX_REAJUSTES', data.index_reajuste, {root: true});
     commit('recargas/reajustes/SET_LOADING_RECHAZAR', true, {root: true});
     await this.$axios.$put(url, data).then(response => {
+      console.log(response);
       commit('recargas/reajustes/SET_INDEX_REAJUSTES', undefined, {root: true});
       commit('recargas/reajustes/SET_LOADING_RECHAZAR', false, {root: true});
       if(response.status === 'Success'){
-        commit('SET_UPDATE_REAJUSTE', response.data);
+        commit('SET_UPDATE_REAJUSTE', response.ajuste);
         commit('recargas/reajustes/SET_MODAL_RECHAZAR', false, {root: true});
         commit('recargas/reajustes/SET_OBSERVACION_RECHAZAR', '', {root: true});
-
         commit('recargas/reajustes/SET_ERRORS', '', {root: true});
         Notification.success(
           {type: "success", title: response.title}
