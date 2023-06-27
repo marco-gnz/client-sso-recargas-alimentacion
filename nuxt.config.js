@@ -1,5 +1,8 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
+  server: {
+    port: process.env.NUXT_ENV_PORT // Configura el puerto aquí
+  },
   head: {
     title: 'SBA',
     htmlAttrs: {

@@ -266,7 +266,6 @@
 
 <script>
 import {mapActions, mapGetters} from 'vuex';
-import turnosVue from '../files/turnos.vue';
 export default {
   props:['codigo'],
   data(){
@@ -306,14 +305,14 @@ export default {
   },
   mounted(){
     this.getTiposAusentismos();
-    /* this.getGruposAusentismos(); */
+    this.getGruposAusentismos();
     this.getGrupoAusentismos();
     this.getMeridianos();
   },
   methods:{
     ...mapActions({
       getTiposAusentismos: 'modulos/modulos/getTiposAusentismos',
-      /* getGruposAusentismos: 'modulos/modulos/getGruposAusentismos', */
+      getGruposAusentismos: 'modulos/modulos/getGruposAusentismos',
       getMeridianos: 'modulos/modulos/getMeridianos',
       storeReglasAction: 'recargas/grupos/storeReglas',
     }),

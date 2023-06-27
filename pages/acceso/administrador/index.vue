@@ -62,6 +62,9 @@ export default {
         errors:{}
       };
     },
+    mounted(){
+      this.$axios.$get('/sanctum/csrf-cookie');
+    },
     methods:{
       ...mapActions({
         getRolesPermissions:'usuarios/administradores/main/getRolesPermissions'
