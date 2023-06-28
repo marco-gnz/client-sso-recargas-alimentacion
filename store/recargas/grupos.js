@@ -3,6 +3,7 @@ export const state = () => ({
   open_grupos:false,
   errors:{},
   full_screen_loading:false,
+  loading_store_reglas:false,
   checked_all:true
 });
 
@@ -15,6 +16,9 @@ export const mutations = {
   },
   SET_LOADING(state, value){
     state.full_screen_loading = value;
+  },
+  SET_STORE_REGLAS(state, value){
+    state.loading_store_reglas = value;
   },
   SET_CHECKED_ALL(state, value){
     state.checked_all = value;
@@ -31,16 +35,19 @@ export const getters = {
   fullScreenLoading(state){
     return state.full_screen_loading;
   },
+  loadingStoreReglas(state){
+    return state.loading_store_reglas;
+  }
 };
 
 export const actions = {
   async storeReglas({ commit }, data){
     try {
-      commit('SET_LOADING', true);
+      commit('SET_STORE_REGLAS', true);
       const url = '/api/admin/recargas/recarga/masivo/reglas/store';
 
       this.$axios.$post(url, {reglas:data}).then(response => {
-        commit('SET_LOADING', false);
+        commit('SET_STORE_REGLAS', false);
         if(response.status = 'success'){
           commit('SET_ERRORS', {});
           commit('SET_MODAL_GRUPOS', false);
@@ -53,7 +60,7 @@ export const actions = {
           );
         }
       }).catch(error => {
-        commit('SET_LOADING', false);
+        commit('SET_STORE_REGLAS', false);
         commit('SET_ERRORS', error.response.data.errors);
       });
     } catch (error) {

@@ -257,7 +257,7 @@
           </div>
         </section>
         <footer class="modal-card-foot buttons is-right">
-          <button :disabled="!gruposChecked" class="button is-primary is-rounded" @click.prevent="storeReglas">Ingresar {{gruposChecked > 1 ? 'reglas' : 'regla'}}</button>
+          <button :disabled="!gruposChecked" class="button is-primary is-rounded" :class="(loadingStoreReglas ? 'is-loading' : '')" @click.prevent="storeReglas">Ingresar {{gruposChecked > 1 ? 'reglas' : 'regla'}}</button>
         </footer>
       </div>
     </div>
@@ -289,6 +289,7 @@ export default {
       gruposAusentismos: "modulos/modulos/gruposAusentismos",
       meridianos: "modulos/modulos/meridianos",
       errors: "recargas/grupos/errors",
+      loadingStoreReglas: 'recargas/grupos/loadingStoreReglas',
     }),
     checked_all:{
       get() {
