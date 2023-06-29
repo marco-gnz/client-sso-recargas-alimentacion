@@ -15,7 +15,7 @@
                 <nuxt-link to="/admin/recargas">Recargas</nuxt-link>
             </a>
             <a class="navbar-item">
-              <nuxt-link to="/admin/recargas/enviar" v-if="hasPermission('recarga.send')">Enviar recarga</nuxt-link>
+              <nuxt-link to="/admin/recargas/enviar" v-if="hasPermission('recarga.send')">Enviar cartola</nuxt-link>
             </a>
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link">

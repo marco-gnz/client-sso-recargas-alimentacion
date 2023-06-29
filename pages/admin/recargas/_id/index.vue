@@ -85,8 +85,8 @@
                        <p :class="(regla.count_ausentismos <= 0 ? 'has-text-danger-dark' : 'has-text-weight-semibold')">{{ regla.count_ausentismos }}</p>
                       </td>
                       <td>
-                        <nuxt-link v-if="recarga.last_status_value === 0 && hasPermission('regla.update')" @click.native="editRegla(index)" :to="{path: `/admin/recargas/${$route.params.id}`, query: { id: regla.id }}"><el-button size="mini" type="primary" icon="el-icon-edit" circle></el-button></nuxt-link>
-                        <template v-if="(recarga.last_status_value === 0 && hasPermission('regla.delete'))&&(regla.count_ausentismos <= 0)">
+                        <nuxt-link v-if="(recarga.last_status_value === 0 && hasPermission('regla.update')) && (regla.count_ausentismos <= 0)" @click.native="editRegla(index)" :to="{path: `/admin/recargas/${$route.params.id}`, query: { id: regla.id }}"><el-button size="mini" type="primary" icon="el-icon-edit" circle></el-button></nuxt-link>
+                        <template v-if="(recarga.last_status_value === 0 && hasPermission('regla.delete')) && (regla.count_ausentismos <= 0)">
                           <el-popconfirm
                               @confirm="deleteReglaAction(regla.id)"
                               confirm-button-text='Si, eliminar'
