@@ -166,10 +166,12 @@
                       <th>
                         <div class="columns">
                             <div class="column">
-                              <span class="click" @click.prevent="orderByData(ordenamientos[0])">Beneficio</span>
+                              <span class="click" @click.prevent="orderByData(ordenamientos[0])">Bene</span>
                             </div>
-                            <div class="column">
-                              <el-popover
+                        </div>
+                        <div class="columns">
+                          <div class="column">
+                            <el-popover
                                 placement="top"
                                 width="300"
                                 v-model="visible"
@@ -183,11 +185,11 @@
                                 </div>
                                 <el-checkbox slot="reference" :indeterminate="isIndeterminate" v-model="checked_all" @change="handleCheckAllChange">All</el-checkbox>
                               </el-popover>
-                            </div>
+                          </div>
                         </div>
                       </th>
                       <th>
-                        Reemplazo
+                        Reem
                       </th>
                       <template v-if="!open_grupo">
                         <th>
@@ -206,12 +208,12 @@
                         <th>Apellidos</th>
                       </template>
                       <th>
-                        Turno (A)
+                        Tur (A)
                       </th>
                       <th>
                         <div class="columns">
                             <div class="column">
-                              <span class="click" @click.prevent="orderByData(ordenamientos[2])">Turno</span>
+                              <span class="click" @click.prevent="orderByData(ordenamientos[2])">Tur</span>
                             </div>
                             <div class="column">
                               <i v-if="isParamASC(ordenamientos[2])" class="el-icon-caret-top"></i>
@@ -222,11 +224,18 @@
                       <th>
                         <div class="columns">
                             <div class="column">
-                              <span class="click" @click.prevent="orderByData(ordenamientos[3])">Contrato</span>
+                              <span class="click" @click.prevent="orderByData(ordenamientos[3])">Días</span>
                             </div>
                             <div class="column">
                               <i v-if="isParamASC(ordenamientos[3])" class="el-icon-caret-top"></i>
                               <i v-if="isParamDESC(ordenamientos[3])" class="el-icon-caret-bottom"></i>
+                            </div>
+                        </div>
+                      </th>
+                      <th>
+                        <div class="columns">
+                            <div class="column">
+                              <span class="click" @click.prevent="orderByData(ordenamientos[3])">Uni</span>
                             </div>
                         </div>
                       </th>
@@ -328,7 +337,7 @@
                             </div>
                         </div>
                       </th>
-                      <th>Opciones</th>
+                      <th><i class="el-icon-more-outline"></i></th>
                     </tr>
                   </thead>
                   <tfoot>
@@ -514,6 +523,7 @@
                       <th>--</th>
                       <th>--</th>
                       <th>--</th>
+                      <th>--</th>
                       <th>{{recarga.total_clp}}</th>
                       <th></th>
                     </tr>
@@ -579,6 +589,15 @@
                           </div>
                           <div class="column">
                             <i v-if="funcionario.fecha_alejamiento" class="el-icon-date has-text-danger-dark"></i>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="columns">
+                          <div class="column">
+                            <el-tooltip :content="`${funcionario.unidad_nom ? funcionario.unidad_nom : '--'}`" placement="top-start">
+                                <p>{{funcionario.unidad_abre ? funcionario.unidad_abre : '--'}}</p>
+                            </el-tooltip>
                           </div>
                         </div>
                       </td>
@@ -778,7 +797,7 @@ export default {
     mounted(){
       this.createdValueGrupo();
       this.getLeyes();
-      this.getUnidades();
+      this.getUnidades(this.$route.params.id);
       this.getHoras();
       this.getTiposAusentismos();
     },
@@ -793,7 +812,7 @@ export default {
             offset:'recarga/resumen/resumen/offset',
             loadingTablaResumen:'recarga/resumen/resumen/loadingTablaResumen',
             leyes:'modulos/modulos/leyes',
-            unidades:'modulos/modulos/unidades',
+            unidades:'modulos/modulos/unidadesRecarga',
             horas:'modulos/modulos/horas',
             tipoAusentismos:'modulos/modulos/tiposAusentismos',
             ordenamientos:'recarga/resumen/resumen/ordenamientos',
@@ -1083,7 +1102,7 @@ export default {
             createdValueGrupo:'recargas/cookies/createdValueGrupo',
             getLeyes:'modulos/modulos/getLeyes',
             getHoras:'modulos/modulos/getHoras',
-            getUnidades:'modulos/modulos/getUnidades',
+            getUnidades:'modulos/modulos/getUnidadesRecarga',
             getTiposAusentismos:'modulos/modulos/getTiposAusentismos',
             getRolesPermissions:'usuarios/administradores/main/getRolesPermissions',
             updateStatusMarcadosAction:'recarga/resumen/resumen/updateStatusMarcados',

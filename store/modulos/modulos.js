@@ -7,6 +7,7 @@ export const state = () => ({
   tipos_asistencia_turnos:[],
   leyes:[],
   unidades:[],
+  unidades_recarga:[],
   roles:[],
   horas:[]
 });
@@ -38,6 +39,9 @@ export const mutations = {
   },
   SET_UNIDADES(state, value){
     state.unidades = value;
+  },
+  SET_UNIDADES_RECARGA(state, value){
+    state.unidades_recarga = value;
   },
   SET_ROLES(state, value){
     state.roles = value;
@@ -71,6 +75,9 @@ export const getters = {
   },
   unidades(state){
     return state.unidades;
+  },
+  unidadesRecarga(state){
+    return state.unidades_recarga;
   },
   roles(state){
     return state.roles;
@@ -116,6 +123,15 @@ export const actions = {
   async getUnidades({ commit }){
     const response = await this.$axios.$get('/api/admin/modulos/unidades/response');
     commit('SET_UNIDADES', response);
+  },
+  async getUnidadesRecarga({ commit }, data){
+    try {
+      const response = await this.$axios.$get(`/api/admin/modulos/unidades/response/recarga/${data}`);
+      commit('SET_UNIDADES_RECARGA', response);
+    } catch (error) {
+        console.log(error);
+    }
+
   },
   async getRoles({ commit }){
     const response = await this.$axios.$get('/api/admin/modulos/roles/response');
