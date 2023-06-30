@@ -742,7 +742,7 @@
               </template>
             </div>
             <div class="buttons">
-              <button :disabled="(recarga.last_status_value != 2)" class="button is-info is-outlined" @click.prevent="openModalGenerarPlanilla">
+              <button class="button is-info is-outlined" @click.prevent="openModalGenerarPlanilla">
                 <span>Generar planilla</span>
                 <span class="icon is-small">
                  <i class="el-icon-download"></i>
