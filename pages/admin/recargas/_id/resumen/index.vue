@@ -100,10 +100,21 @@
                   </el-select>
                 </div>
                 <div class="column">
+                  <label class="label">C. costo</label>
+                  <el-select size="mini" v-model="filtro_centro_costo" multiple collapse-tags clearable placeholder="Seleccione centro" class="element-select">
+                    <el-option
+                      v-for="centro in centroCostosRecarga"
+                      :key="centro"
+                      :label="centro"
+                      :value="centro">
+                    </el-option>
+                  </el-select>
+                </div>
+                <div class="column">
                   <div class="field">
                     <div class="columns">
                       <div class="column">
-                        <label class="label">Unidad contrato</label>
+                        <label class="label">Unidad</label>
                         <el-select size="mini" v-model="filtro_unidad" filterable multiple collapse-tags clearable placeholder="Seleccione unidad" class="element-select">
                           <el-option
                             v-for="unidad in unidades"
@@ -798,6 +809,7 @@ export default {
       this.createdValueGrupo();
       this.getLeyes();
       this.getUnidades(this.$route.params.id);
+      this.getCentroCostosRecarga(this.$route.params.id);
       this.getHoras();
       this.getTiposAusentismos();
     },
@@ -814,6 +826,7 @@ export default {
             leyes:'modulos/modulos/leyes',
             unidades:'modulos/modulos/unidadesRecarga',
             horas:'modulos/modulos/horas',
+            centroCostosRecarga:'modulos/modulos/centroCostosRecarga',
             tipoAusentismos:'modulos/modulos/tiposAusentismos',
             ordenamientos:'recarga/resumen/resumen/ordenamientos',
             filtrosOrder:'recarga/resumen/resumen/filtroOrder',
@@ -977,6 +990,14 @@ export default {
             this.$store.commit('recarga/resumen/resumen/SET_FILTRO_TIPO_AUSENTISMO', newValue);
           }
         },
+        filtro_centro_costo:{
+          get() {
+            return this.$store.state.recarga.resumen.resumen.filtro.centro_costo;
+          },
+          set(newValue) {
+            this.$store.commit('recarga/resumen/resumen/SET_FILTRO_CENTRO_COSTO', newValue);
+          }
+        },
         index_click_funcionario:{
           get() {
             return this.$store.state.recarga.resumen.resumen.index_click_funcionario;
@@ -1104,6 +1125,7 @@ export default {
             getHoras:'modulos/modulos/getHoras',
             getUnidades:'modulos/modulos/getUnidadesRecarga',
             getTiposAusentismos:'modulos/modulos/getTiposAusentismos',
+            getCentroCostosRecarga:'modulos/modulos/getCentroCostosRecarga',
             getRolesPermissions:'usuarios/administradores/main/getRolesPermissions',
             updateStatusMarcadosAction:'recarga/resumen/resumen/updateStatusMarcados',
             deleteDataRecarga:'recarga/resumen/resumen/deleteDataRecarga',

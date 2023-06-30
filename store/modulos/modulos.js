@@ -9,7 +9,8 @@ export const state = () => ({
   unidades:[],
   unidades_recarga:[],
   roles:[],
-  horas:[]
+  horas:[],
+  centro_costos_recarga:[]
 });
 
 export const mutations = {
@@ -42,6 +43,9 @@ export const mutations = {
   },
   SET_UNIDADES_RECARGA(state, value){
     state.unidades_recarga = value;
+  },
+  SET_CENTRO_COSTOS_RECARGA(state, value){
+    state.centro_costos_recarga = value;
   },
   SET_ROLES(state, value){
     state.roles = value;
@@ -84,6 +88,9 @@ export const getters = {
   },
   horas(state){
     return state.horas;
+  },
+  centroCostosRecarga(state){
+    return state.centro_costos_recarga;
   }
 };
 
@@ -131,7 +138,15 @@ export const actions = {
     } catch (error) {
         console.log(error);
     }
-
+  },
+  async getCentroCostosRecarga({ commit }, data){
+    try {
+      const response = await this.$axios.$get(`/api/admin/modulos/centro-costos/response/recarga/${data}`);
+      console.log(response);
+      commit('SET_CENTRO_COSTOS_RECARGA', response);
+    } catch (error) {
+        console.log(error);
+    }
   },
   async getRoles({ commit }){
     const response = await this.$axios.$get('/api/admin/modulos/roles/response');

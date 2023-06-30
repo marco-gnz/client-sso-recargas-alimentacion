@@ -57,7 +57,8 @@ export const state = () => ({
     equals_unidad:true,
     ordenamiento:[],
     load_grupo:null,
-    tipo_ausentismo:[]
+    tipo_ausentismo:[],
+    centro_costo:[]
   },
   pagination: {
     total: 0,
@@ -389,6 +390,9 @@ export const mutations = {
   },
   SET_FILTRO_TIPO_AUSENTISMO(state, value){
     state.filtro.tipo_ausentismo = value;
+  },
+  SET_FILTRO_CENTRO_COSTO(state, value){
+    state.filtro.centro_costo = value;
   },
   SET_INDEX_SELECTED_TABLE(state, value){
     state.index_selected_table = value;
