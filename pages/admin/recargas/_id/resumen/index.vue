@@ -412,6 +412,7 @@
                             </div>
                         </div>
                       </th>
+                      <th></th>
                       <th>
                         <div class="columns">
                             <div class="column">
@@ -531,7 +532,6 @@
                             </div>
                         </div>
                       </th>
-                      <th>--</th>
                       <th>--</th>
                       <th>--</th>
                       <th>--</th>
