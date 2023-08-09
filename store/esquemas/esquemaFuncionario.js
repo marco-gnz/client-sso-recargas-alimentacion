@@ -28,7 +28,8 @@ export const state = () => ({
     total_dias:0,
     diff_days:0,
     monto_ajuste:0,
-    monto_ajuste_format:0
+    monto_ajuste_format:0,
+    calculo:''
   },
   reajuste_errors:{},
   modal_reajuste:false,
@@ -39,7 +40,8 @@ export const state = () => ({
   modal_rechazar:false,
   loading_rechazar_reajuste:false,
   observacion_rechazo:'',
-  errors_modal_rechazo:{}
+  errors_modal_rechazo:{},
+  loading_pre_calculo:false
 });
 
 export const mutations = {
@@ -126,8 +128,15 @@ export const mutations = {
     state.reajuste.diff_days            = value.diff_days;
   },
   SET_REAJUSTE_MONTO_TOTAlES(state, value){
+    state.reajuste.total_dias           = value.total_dias;
     state.reajuste.monto_ajuste         = value.monto_ajuste;
     state.reajuste.monto_ajuste_format  = value.monto_ajuste_format;
+    state.reajuste.diff_days            = value.diff_days;
+    state.reajuste.monto_ajuste         = value.monto_ajuste;
+    state.reajuste.monto_ajuste_format  = value.monto_ajuste_format;
+  },
+  SET_REAJUSTE_PRE_CALCULO(state, value){
+    state.reajuste.calculo = value;
   },
   SET_MODAL_REAJUSTE(state, value){
     state.modal_reajuste = value;
@@ -138,6 +147,7 @@ export const mutations = {
       state.reajuste.rebaja_dias = 0;
       state.reajuste.calculo_dias = true;
       state.reajuste.tipo_reajuste = 0;
+      state.reajuste.calculo = '';
       state.reajuste.valor_dia = 0;
       state.reajuste.advertencias = [];
       state.reajuste.errores = [];
@@ -163,6 +173,7 @@ export const mutations = {
     }
     state.reajuste.rebaja_dias = 0;
     state.reajuste.calculo_dias = true;
+    state.reajuste.calculo = '';
     state.reajuste.tipo_reajuste = 0;
     state.reajuste.valor_dia = 0;
     state.reajuste.advertencias = [];
@@ -194,6 +205,9 @@ export const mutations = {
   },
   SET_ERRORS_RECHAZO(state, value){
     state.errors_modal_rechazo = value;
+  },
+  SET_LOADING_PRE_CALCULO(state, value){
+    state.loading_pre_calculo = value;
   }
 };
 
@@ -264,6 +278,9 @@ export const getters = {
   diffDays(state){
     return state.reajuste.diff_days;
   },
+  loadingPreCalculo(state){
+    return state.loading_pre_calculo;
+  }
 };
 
 export const actions = {
@@ -384,6 +401,7 @@ export const actions = {
       commit('SET_LOADING_DAYS_IN_DATE', false);
       if(response.status === 'Success'){
         commit('SET_REAJUSTE_TOTAlES', response.totales);
+        commit('SET_REAJUSTE_PRE_CALCULO', response.totales.new_esquema);
       }
     }).catch(error => {
       commit('SET_LOADING_DAYS_IN_DATE', false);
@@ -400,6 +418,7 @@ export const actions = {
       console.log(response);
       if(response.status === 'Success'){
         commit('SET_REAJUSTE_MONTO_TOTAlES', response.totales);
+        commit('SET_REAJUSTE_PRE_CALCULO', response.totales.new_esquema);
       }
     }).catch(error => {
       commit('SET_LOADING_DAYS_IN_DATE', false);

@@ -35,7 +35,8 @@ export const state = () => ({
     total_dias:0,
     diff_days:0,
     monto_ajuste:0,
-    monto_ajuste_format:0
+    monto_ajuste_format:0,
+    calculo:''
   },
   reajuste_errors:{},
   loading_reajuste:false,
@@ -107,7 +108,8 @@ export const state = () => ({
   funcionario_manual_asignaciones:[],
   funcionario_manual_contratos:[],
   recargas_adicional:[],
-  loading_delete_esquema_manual:false
+  loading_delete_esquema_manual:false,
+  loading_pre_calculo:false
 });
 
 export const mutations = {
@@ -283,8 +285,15 @@ export const mutations = {
     state.reajuste.diff_days            = value.diff_days;
   },
   SET_REAJUSTE_MONTO_TOTAlES(state, value){
+    state.reajuste.total_dias           = value.total_dias;
     state.reajuste.monto_ajuste         = value.monto_ajuste;
     state.reajuste.monto_ajuste_format  = value.monto_ajuste_format;
+    state.reajuste.diff_days            = value.diff_days;
+    state.reajuste.monto_ajuste         = value.monto_ajuste;
+    state.reajuste.monto_ajuste_format  = value.monto_ajuste_format;
+  },
+  SET_REAJUSTE_PRE_CALCULO(state, value){
+    state.reajuste.calculo = value;
   },
   SET_FUNCIONARIO_RECARGAS(state, value){
     state.funcionario_recargas = value;
@@ -307,6 +316,7 @@ export const mutations = {
       }
       state.reajuste.rebaja_dias = 0;
       state.reajuste.calculo_dias = true;
+      state.reajuste.calculo = '';
       state.reajuste.tipo_reajuste = 0;
       state.reajuste.valor_dia = 0;
       state.reajuste.advertencias = [];
@@ -324,6 +334,7 @@ export const mutations = {
     }
     state.reajuste.rebaja_dias = 0;
     state.reajuste.calculo_dias = true;
+    state.reajuste.calculo = '';
     state.reajuste.tipo_reajuste = 0;
     state.reajuste.valor_dia = 0;
     state.reajuste.advertencias = [];
@@ -432,6 +443,9 @@ export const mutations = {
   },
   DELETE_ESQUEMA(state, value){
     state.funcionarios = state.funcionarios.filter(f => f.id !== value);
+  },
+  SET_LOADING_PRE_CALCULO(state, value){
+    state.loading_pre_calculo = value;
   }
 };
 
@@ -549,6 +563,9 @@ export const getters = {
   },
   loadingDeleteEsquemaManual(state){
     return state.loading_delete_esquema_manual;
+  },
+  loadingPreCalculo(state){
+    return state.loading_pre_calculo;
   }
 };
 
@@ -736,6 +753,7 @@ export const actions = {
       console.log(response);
       if(response.status === 'Success'){
         commit('SET_REAJUSTE_TOTAlES', response.totales);
+        commit('SET_REAJUSTE_PRE_CALCULO', response.totales.new_esquema);
       }
     }).catch(error => {
       commit('SET_LOADING_DAYS_IN_DATE', false);
@@ -752,6 +770,7 @@ export const actions = {
       console.log(response);
       if(response.status === 'Success'){
         commit('SET_REAJUSTE_MONTO_TOTAlES', response.totales);
+        commit('SET_REAJUSTE_PRE_CALCULO', response.totales.new_esquema);
       }
     }).catch(error => {
       commit('SET_LOADING_DAYS_IN_DATE', false);

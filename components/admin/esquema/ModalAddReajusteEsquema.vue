@@ -17,7 +17,7 @@
                     <div class="field">
                       <label class="label required">Fecha de inicio</label>
                       <el-date-picker
-                        @change="getDaysInDateAction"
+                        @change="calculoApi(tipo_reajuste === 0 ? 'date' : 'monto', false)"
                         v-model="fecha_inicio"
                         format="dd-MM-yyyy"
                         value-format="yyyy-MM-dd"
@@ -33,7 +33,7 @@
                     <div class="field">
                       <label class="label required">Fecha de término</label>
                       <el-date-picker
-                        @change="getDaysInDateAction"
+                        @change="calculoApi(tipo_reajuste === 0 ? 'date' : 'monto', false)"
                         v-model="fecha_termino"
                         format="dd-MM-yyyy"
                         value-format="yyyy-MM-dd"
@@ -52,7 +52,7 @@
                   <div class="column">
                     <div class="field">
                       <label class="label required">Tipo de reajuste</label>
-                      <el-radio-group v-model="rebaja_dias" @change="getDaysInDateAction">
+                      <el-radio-group v-model="rebaja_dias" @change="calculoApi(tipo_reajuste === 0 ? 'date' : 'monto', true)">
                         <el-radio :label="0">Rebaja de días</el-radio>
                         <el-radio :label="1">Incremento de días</el-radio>
                       </el-radio-group>
@@ -96,7 +96,7 @@
                     <div class="column">
                       <div class="field">
                         <label class="label required">Cálculo de días</label>
-                        <el-radio-group v-model="calculo_dias" @change="getDaysInDateAction">
+                        <el-radio-group v-model="calculo_dias" @change="calculoApi(tipo_reajuste === 0 ? 'date' : 'monto', false)">
                           <el-radio :label="true">Días de corrido</el-radio>
                           <el-radio :label="false">Días hábiles</el-radio>
                         </el-radio-group>
@@ -107,7 +107,7 @@
                       <div class="column">
                         <div class="field">
                           <label class="label required">Valor día ($)</label>
-                          <el-input-number :disabled="((!fecha_inicio || !fecha_termino))"  v-model="valor_dia" size="small" class="element-style" :min="0" @change="getMontoInDaysAction"></el-input-number>
+                          <el-input-number :disabled="((!fecha_inicio || !fecha_termino))"  v-model="valor_dia" size="small" class="element-style" :min="0" @change="calculoApi('monto')"></el-input-number>
                           <p v-if="errors && errors.valor_dia" class="help is-danger">{{errors.valor_dia[0]}}</p>
                         </div>
                       </div>
@@ -115,7 +115,7 @@
                     <div class="column">
                       <div class="field">
                         <label class="label">Días</label>
-                        <el-input-number :disabled="((!fecha_inicio || !fecha_termino) || (tipo_reajuste === 1 && !valor_dia))" onKeyDown="return false" v-model="total_dias" size="small" class="element-style" :min="1" :max="diffDays" @change="getMontoInDaysAction"></el-input-number> <span><i :class="(rebaja_dias ? 'el-icon-circle-plus-outline has-text-success-dark' : 'el-icon-remove-outline has-text-danger-dark')"></i></span>
+                        <el-input-number :disabled="((!fecha_inicio || !fecha_termino) || (tipo_reajuste === 1 && !valor_dia))" onKeyDown="return false" v-model="total_dias" size="small" class="element-style" :min="0" :max="diffDays" @change="calculoApi(tipo_reajuste === 0 ? 'date' : 'monto', true)"></el-input-number> <span><i :class="(rebaja_dias ? 'el-icon-circle-plus-outline has-text-success-dark' : 'el-icon-remove-outline has-text-danger-dark')"></i></span>
                         <p v-if="errors && errors.total_dias" class="help is-danger">{{errors.total_dias[0]}}</p>
                       </div>
                     </div>
@@ -166,12 +166,12 @@
               </div>
               <p v-if="errors && errors.data" class="help is-danger">{{errors.data[0]}}</p>
               <div class="field">
-                <div class="notification is-info is-light">
-                  Recuerde seleccionar la opción "Cálculo de días" dependiendo si el funcionario es turnante o no turnante.
-                </div>
-                <div class="notification is-info is-light">
-                  Una vez ingresado el reajuste, será calculado en el total siempre y cuando este sea <strong>aprobado por un Administrador autorizado</strong>.
-                </div>
+                <h5 class="title is-5">Previsualización</h5>
+                <template v-if="new_esquema_calculo">
+                  <table class="table is-striped is-narrow is-hoverable is-fullwidth" v-loading="loadingDaysInDate">
+                    <calculo :tipo_reajuste="tipo_reajuste" :new_esquema_calculo="new_esquema_calculo" />
+                  </table>
+                </template>
               </div>
               <div class="field">
                   <div class="buttons is-right">
@@ -188,7 +188,9 @@
 
 <script>
 import {mapActions, mapGetters} from 'vuex';
+import calculo from '../../recarga/ajustes/calculo.vue';
 export default {
+  components: { calculo },
   props:['esquema', 'tipo_reajuste'],
   mounted(){
     this.getTiposAusentismos();
@@ -203,7 +205,8 @@ export default {
         loadingDaysInDate:"recargas/resumen/loadingDaysInDate",
         ajuste:'esquemas/esquemaFuncionario/reajuste',
         errors:"esquemas/esquemaFuncionario/reajusteErrors",
-        diffDays:'esquemas/esquemaFuncionario/diffDays'
+        diffDays:'esquemas/esquemaFuncionario/diffDays',
+        loadingPreCalculo:'esquemas/esquemaFuncionario/loadingPreCalculo',
       }),
       currentRouteName() {
         return this.$nuxt.$route.path;
@@ -214,6 +217,9 @@ export default {
           value = this.valor_dia * this.dias;
         }
         return value;
+      },
+      new_esquema_calculo(){
+        return this.$store.state.esquemas.esquemaFuncionario.reajuste.calculo;
       },
       fecha_inicio:{
         get() {
@@ -314,27 +320,41 @@ export default {
         getDaysInDate:'esquemas/esquemaFuncionario/getDaysInDate',
         getMontoInDays:'esquemas/esquemaFuncionario/getMontoInDays'
       }),
-      getDaysInDateAction:function(){
+      calculoApi:function(tipo_descuento, modificar_dias){
+        modificar_dias = modificar_dias ? 1 : 0;
+        if(tipo_descuento === 'date'){
+          this.getDaysInDateAction(modificar_dias);
+        }else{
+          this.getMontoInDaysAction(modificar_dias);
+        }
+      },
+      getDaysInDateAction:function(modificar_dias){
         const data = {
           rebaja_dias:this.rebaja_dias,
           calculo_dias:this.calculo_dias,
           fecha_inicio:this.fecha_inicio,
           fecha_termino:this.fecha_termino,
           total_dias:this.total_dias,
-          valor_dia:this.valor_dia
+          valor_dia:this.valor_dia,
+          esquema_id: this.esquema.id,
+          modificar_dias:modificar_dias
         };
         if((this.fecha_inicio && this.fecha_termino) && (this.fecha_inicio <= this.fecha_termino)){
           this.getDaysInDate(data);
         }
       },
-      getMontoInDaysAction:function(){
-        if(this.valor_dia > 0 && this.total_dias > 0){
+      getMontoInDaysAction:function(modificar_dias){
           const data = {
+            rebaja_dias:this.rebaja_dias,
+            calculo_dias:this.calculo_dias,
+            fecha_inicio:this.fecha_inicio,
+            fecha_termino:this.fecha_termino,
             total_dias:this.total_dias,
-            valor_dia:this.valor_dia
+            valor_dia:this.valor_dia,
+            esquema_id: this.esquema.id,
+            modificar_dias:modificar_dias
           };
           this.getMontoInDays(data);
-        }
       },
       hideModalReajuste:function(){
         this.$store.commit('esquemas/esquemaFuncionario/SET_MODAL_REAJUSTE', false);
