@@ -145,6 +145,42 @@
                   <p>Sin Advertencias/Errores asociados...</p>
                 </template>
               </div>
+              <div class="field">
+                <h5 class="subtitle is-5 has-text-centered">Contratos</h5>
+                <div class="select">
+                  <select v-model="filtroPeriodo" @change="getContratos">
+                    <option selected value="" disabled>-- Seleccione periodo de contrato --</option>
+                    <option v-for="(periodo, index) in periodos" :key="index" :value="periodo.date">{{periodo.month}}-{{periodo.year}}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field box">
+                <template v-if="contratos.length">
+                  <div class="field">
+                    <table class="table  is-narrow is-hoverable is-fullwidth" v-loading="loadingContratos">
+                      <thead>
+                        <tr>
+                          <th>Fecha periodo</th>
+                          <th>Unidad</th>
+                          <th>Cargo</th>
+                          <th>Ley</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(contrato, index) in contratos" :key="index">
+                          <td>{{contrato.fecha_inicio_periodo}} / {{contrato.fecha_termino_periodo}} ({{contrato.total_dias_habiles_contrato_periodo}})</td>
+                          <td>{{contrato.unidad_nombre}}</td>
+                          <td>{{contrato.cargo_nombre}}</td>
+                          <td>{{contrato.ley_nombre}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </template>
+                <template v-else>
+                  <span>Sin contratos...</span>
+                </template>
+              </div>
               <div class="field pt-2">
                 <h5 class="subtitle is-5 has-text-centered">Historial de estados</h5>
                 <div class="block">
@@ -188,7 +224,10 @@ export default {
   computed:{
     ...mapGetters({
       ajuste: "recarga/ajusteShow/ajuste",
-      fullScreenLoading:'recarga/ajusteShow/fullScreenLoading'
+      fullScreenLoading:'recarga/ajusteShow/fullScreenLoading',
+      contratos: "recarga/ajusteShow/contratos",
+      periodos: "recarga/ajusteShow/periodos",
+      loadingContratos: "recarga/ajusteShow/loadingContratos",
     }),
     showModal:{
         get() {
@@ -198,6 +237,14 @@ export default {
           this.$store.commit('recargas/reajustes/SET_MODAL_SHOW', newValue);
         }
       },
+      filtroPeriodo:{
+        get() {
+          return this.$store.state.recarga.ajusteShow.filtro.periodo;
+        },
+        set(newValue) {
+          this.$store.commit('recarga/ajusteShow/SET_FILTRO_PERIODO', newValue);
+        }
+      },
     currentRouteName() {
       return this.$nuxt.$route.path;
     },
@@ -205,10 +252,19 @@ export default {
   methods:{
     ...mapActions({
         getAjuste: 'recarga/ajusteShow/getAjuste',
+        getContratosAction:'recarga/ajusteShow/getContratos'
       }),
+    getContratos:function(){
+      const data = {
+        ajuste_uuid:this.ajuste.uuid,
+        periodo:this.filtroPeriodo
+      };
+      this.getContratosAction(data);
+    },
     hideModalShow:function() {
       this.showModal = false;
       this.$store.commit('recarga/ajustes/SET_MODAL_SHOW', false);
+      this.filtroPeriodo = '';
       this.$router.back();
     },
   }
