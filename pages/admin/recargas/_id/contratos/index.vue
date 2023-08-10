@@ -36,6 +36,7 @@
                       <th>Ley</th>
                       <th>Horas</th>
                       <th>Alejamiento</th>
+                      <th>C. costo</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -54,6 +55,7 @@
                         <td>{{ contrato.ley_nombre ? contrato.ley_nombre : '--'}}</td>
                         <td>{{ contrato.hora_nombre ? contrato.hora_nombre : '--'}}</td>
                         <td><span :class="(contrato.alejamiento ? 'tag is-danger is-light' : '')">{{ contrato.alejamiento ? 'Si' : '--' }} </span></td>
+                        <td>{{contrato.centro_costo ? contrato.centro_costo : '--'}}</td>
                         <td>
                           <nuxt-link  :to="`/admin/esquemas/${contrato.esquema_uuid}/contratos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
                         </td>

@@ -235,7 +235,7 @@
                       <th>
                         <div class="columns">
                             <div class="column">
-                              <span class="click" @click.prevent="orderByData(ordenamientos[3])">Días</span>
+                              <span class="click" @click.prevent="orderByData(ordenamientos[3])">Contrato</span>
                             </div>
                             <div class="column">
                               <i v-if="isParamASC(ordenamientos[3])" class="el-icon-caret-top"></i>

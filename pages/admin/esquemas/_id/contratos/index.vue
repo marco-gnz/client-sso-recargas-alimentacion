@@ -24,6 +24,7 @@
                         <th>Ley</th>
                         <th>Horas</th>
                         <th>Alejamiento</th>
+                        <th>C. costo</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -37,6 +38,7 @@
                           <td>{{ contrato.ley_nombre ? contrato.ley_nombre : '--'}}</td>
                           <td>{{ contrato.hora_nombre ? contrato.hora_nombre : '--'}}</td>
                           <td><span :class="(contrato.alejamiento ? 'tag is-danger is-light' : '')">{{ contrato.alejamiento ? 'Si' : '--' }} </span></td>
+                          <td>{{contrato.centro_costo ? contrato.centro_costo : '--'}}</td>
                         </tr>
                       </template>
                       <template v-else>

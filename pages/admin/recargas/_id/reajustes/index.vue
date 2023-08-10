@@ -26,7 +26,7 @@
                   <div class="column">
                     <div class="pt-2">
                       <label class="label">Filtrar por estado</label>
-                      <el-checkbox-group  v-model="estados_filtro" size="mini" @change="actionGetReajustesRecarga">
+                      <el-checkbox-group  v-model="estados_filtro" size="mini" @change="filterGetReajustes">
                         <el-checkbox-button :disabled="loadingTable" v-for="(estado, index) in estados" :key="index" :label="estado.id">{{estado.nombre}}</el-checkbox-button>
                       </el-checkbox-group>
                     </div>
@@ -34,7 +34,7 @@
                   <div class="column">
                     <div class="pt-2">
                       <label class="label">Rebaja / Incremento</label>
-                      <el-checkbox-group v-model="rebaja_incremento" size="mini" @change="actionGetReajustesRecarga">
+                      <el-checkbox-group v-model="rebaja_incremento" size="mini" @change="filterGetReajustes">
                         <el-checkbox :label="0">Rebaja</el-checkbox>
                         <el-checkbox :label="1">Incremento</el-checkbox>
                       </el-checkbox-group>
@@ -43,7 +43,7 @@
                   <div class="column">
                     <div class="pt-2">
                       <label class="label">Filtrar por tipo</label>
-                      <el-checkbox-group v-model="tipos_filtro" size="mini" @change="actionGetReajustesRecarga">
+                      <el-checkbox-group v-model="tipos_filtro" size="mini" @change="filterGetReajustes">
                         <el-checkbox-button :disabled="loadingTable" v-for="(tipo, index) in tipoAjustes" :key="index" :label="tipo.id">{{tipo.nombre}}</el-checkbox-button>
                       </el-checkbox-group>
                     </div>
@@ -288,6 +288,10 @@ export default {
     showReajuste:function(index){
       this.changeColorSelected(index);
       this.showModal = true;
+    },
+    filterGetReajustes:function(){
+      this.current_page = 1;
+      this.actionGetReajustesRecarga();
     },
     actionGetReajustesRecarga:function(){
       this.getAjustes(this.$route.params.id);

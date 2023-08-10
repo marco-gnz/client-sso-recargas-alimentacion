@@ -44,14 +44,14 @@
                 <th>Total sobrante</th>
                 <th>Estado actual</th>
                 <th>Habilitado</th>
-                <th>Acciones</th>
+                <!-- <th>Acciones</th> -->
               </tr>
             </thead>
             <tbody>
               <tr v-for="(recarga, index) in recargas" :key="index" @click.prevent="redirectToRecarga(recarga)" class="click">
                 <td>#{{recarga.codigo}}</td>
                 <td>{{recarga.establecimiento != null ? recarga.establecimiento.sigla : '--'}}</td>
-                <td>{{recarga.mes_beneficio}} {{recarga.anio_beneficio}}</td>
+                <td>{{recarga.mes_beneficio}} / {{recarga.anio_beneficio}}</td>
                 <td>{{recarga.users_count}}</td>
                 <td>{{recarga.monto_dia}}</td>
                 <td>{{recarga.total_pagado}}</td>
@@ -64,14 +64,14 @@
                     </el-tooltip>
                   </template>
                 </td>
-                <td @click.prevent.stop="">
+                <!-- <td @click.prevent.stop="">
                   <el-dropdown>
                       <span class="el-dropdown-link">Acción<i class="el-icon-arrow-down el-icon--right"></i></span>
                       <el-dropdown-menu slot="dropdown">
                           <el-dropdown-item  icon="el-icon-document-copy">Ver más</el-dropdown-item>
                       </el-dropdown-menu>
                   </el-dropdown>
-                </td>
+                </td> -->
               </tr>
             </tbody>
           </table>
