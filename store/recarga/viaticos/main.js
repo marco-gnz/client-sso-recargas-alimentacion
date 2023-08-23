@@ -4,7 +4,9 @@ export const state = () => ({
   viaticos:[],
   loading_table:false,
   filtro:{
-    input:''
+    input:'',
+    descuento_turno_libre:[],
+    descuento:[]
   },
   pagination: {
     total: 0,
@@ -26,6 +28,12 @@ export const mutations = {
   },
   SET_FILTRO_INPUT(state, value){
     state.filtro.input = value;
+  },
+  SET_FILTRO_DESCUENTO_TURNO_LIBRE(state, value){
+    state.filtro.descuento_turno_libre = value;
+  },
+  SET_FILTRO_DESCUENTO(state, value){
+    state.filtro.descuento = value;
   },
   SET_CURRENT_PAGE(state, value){
     state.pagination.current_page = value;

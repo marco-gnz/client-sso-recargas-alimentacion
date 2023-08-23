@@ -23,6 +23,18 @@
                         </el-input>
                       </div>
                     </div>
+                    <div class="field">
+                      <div class="control">
+                        <el-select v-model="input_recarga" size="small" class="element-style" placeholder="Seleccione periodo de beneficio" @change="getAsistenciaQuery">
+                          <el-option
+                            v-for="recarga in recargas"
+                            :key="recarga.id"
+                            :label="`${recarga.codigo} - ${recarga.mes_beneficio} ${recarga.anio_beneficio} - ${recarga.establecimiento ? recarga.establecimiento.sigla : '--'}`"
+                            :value="recarga.codigo">
+                          </el-option>
+                        </el-select>
+                      </div>
+                    </div>
                     <div class="table-container pt-2" v-loading.fullscreen.lock="loading && !asistencias.length">
                       <span v-if="(pagination)" class="tag is-info is-light">{{ `${pagination.total} ${pagination.total > 1 ? `resultados` : `resultado`}` }}</span>
                         <template v-if="asistencias.length">
@@ -30,7 +42,7 @@
                                 <thead>
                                     <tr>
                                         <th>Nombres</th>
-                                        <td v-for="(columna, index) in columnas_asistencia" :key="index">
+                                        <td v-for="(columna, index) in columnasMes" :key="index">
                                           <el-tooltip :content="columna.descripcion" placement="top">
                                             <i :class="(columna.is_week_day ? 'has-text-danger' : '')">{{columna.nombre_columna}}</i>
                                           </el-tooltip>
@@ -43,7 +55,7 @@
                                 <tbody>
                                     <tr v-for="(asistencia, index) in asistencias" :key="index">
                                         <td><span class="is-size-7">{{asistencia.nombres}}</span></td>
-                                        <nuxt-link  tag="td" v-for="(tipo, index_2) in asistencia.asistencias_list" :key="index_2" :class="(indexClickedUsuario === index && indexClickedAsistencia === index_2 ? 'is-selected' : (tipo.exist_contrato ? 'has-background-danger-light is-clickable' : ''))" :event="(tipo.exist_contrato ? 'click' : '')"  :to="{path: `/admin/esquemas/${tipo.esquema_uuid}/turnos`}">
+                                        <nuxt-link  tag="td" v-for="(tipo, index_2) in asistencia.asistencias_list" :key="index_2" :class="(tipo.exist_contrato && tipo.exist_ausentismo ? 'has-background-danger-light is-clickable' : (tipo.exist_contrato ? 'has-background-primary-light is-clickable' : (tipo.exist_ausentismo ? 'has-background-warning is-clickable' :  '')))" :event="(tipo.exist_contrato ? 'click' : '')"  :to="{path: `/admin/esquemas/${tipo.esquema_uuid}/turnos`}">
                                           <el-badge type="warning" :hidden="tipo.observaciones_count <= 0" :value="tipo.observaciones_count" class="item">
                                             <span :class="(tipo.tipo_asistencia_turno.id === 3 ? 'has-text-danger has-text-weight-bold' : (tipo.tipo_asistencia_turno.id === 1 ? 'has-text-link' : 'has-text-primary') )">
                                               <span :class="(tipo.exist_asistencia && tipo.tipo_asistencia_turno.nombre != 'X'  ? 'tag is-black' : (tipo.exist_asistencia && tipo.tipo_asistencia_turno.nombre === 'X' ? 'tag is-light' : ''))">{{tipo.tipo_asistencia_turno.nombre}}</span>
@@ -97,7 +109,21 @@
                     <div class="notification is-black is-light">
                       <div class="columns">
                         <div class="column">
-                          Días destacados en color <span class="has-text-danger has-text-weight-semibold">rojo</span>, representan contrato(s) en el periodo.
+                          <span class="has-text-primary has-text-weight-semibold">Contrato(s) en el periodo</span>.
+                        </div>
+                         <div class="column">
+                          <span class="has-text-warning has-text-weight-semibold">Ausentismos(s) sin contrato en el periodo</span>.
+                        </div>
+                        <div class="column">
+                          <span class="has-text-danger has-text-weight-semibold">Ausentismos(s) con contrato en el periodo</span>.
+                        </div>
+                      </div>
+                      <div class="columns">
+                        <div class="column">
+                          <div class="notification is-warning is-light">
+                            Ausentismos visualizados pertenecen al mismo año y mes de periodo de turnos filtrado. <br>
+                            <strong>Ausentismos exclusivamente con descuento.</strong>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -125,16 +151,16 @@ export default {
   },
   data(){
     return{
-        columnas_asistencia:[],
         indexClickedUsuario:undefined,
         indexClickedAsistencia:undefined,
-        setTimeoutBuscador:''
+        setTimeoutBuscador:'',
     };
   },
   created() {
+      this.getRecargas();
       this.getRecarga(this.$route.params.id);
-      this.getAsistenciasRecarga(this.$route.params.id);
-      this.getColumnsAsistencia();
+      this.getColumnsAsistenciaAction(this.input_recarga);
+      this.getAsistenciasRecarga(this.input_recarga);
       this.getTiposAsistenciaTurnos();
       if(this.$route.query.id){
         this.modalEdit = true;
@@ -150,7 +176,9 @@ export default {
         asistencias:'recargas/asistenciaResumen/asistencias',
         tiposAsistenciaTurnos:'modulos/modulos/tiposAsistenciaTurnos',
         pagination:'recargas/asistenciaResumen/pagination',
-        offset:'recargas/asistenciaResumen/offset'
+        offset:'recargas/asistenciaResumen/offset',
+        columnasMes:'recargas/asistenciaResumen/columnasMes',
+        recargas:'recargas/recargas/recargas',
       }),
       openAsistenciaSearch:{
         get() {
@@ -214,6 +242,15 @@ export default {
           this.$store.commit('recargas/asistenciaResumen/SET_FILTRO_INPUT', newValue);
         }
       },
+      input_recarga:{
+        get() {
+          let codigo = this.$store.state.recargas.asistenciaResumen.filtro.recarga != '' ? this.$store.state.recargas.asistenciaResumen.filtro.recarga : this.$route.params.id;
+          return codigo;
+        },
+        set(newValue) {
+          this.$store.commit('recargas/asistenciaResumen/SET_FILTRO_RECARGA', newValue);
+        }
+      },
       input_query_search_modal:{
         get() {
           return this.$store.state.recargas.asistenciaSearch.filtro.input;
@@ -222,18 +259,30 @@ export default {
           this.$store.commit('recargas/asistenciaSearch/SET_FILTRO_INPUT', newValue);
         }
       },
+      /* recargas:{
+        get() {
+          return this.$store.state.recargas.asistenciaResumen.recargas;
+        },
+        set(newValue) {
+          this.$store.commit('recargas/asistenciaSearch/SET_FILTRO_INPUT', newValue);
+        }
+      }, */
   },
   methods:{
       ...mapActions({
+          getRecargas: 'recargas/recargas/getRecargas',
           getTiposAsistenciaTurnos:'modulos/modulos/getTiposAsistenciaTurnos',
           getRecarga: "recargas/recargas/returnRecarga",
-          getAsistenciasRecarga:'recargas/asistenciaResumen/getAsistenciasRecarga'
+          getAsistenciasRecarga:'recargas/asistenciaResumen/getAsistenciasRecarga',
+          getColumnsAsistencia:'recargas/asistenciaResumen/getColumnsAsistencia',
       }),
-      async getColumnsAsistencia(){
-        const url       = `/api/admin/modulos/columnas/asistencia/${this.$route.params.id}/resumen`;
-        const response  = await this.$axios.$get(url);
-        this.columnas_asistencia   = response;
-    },
+      getAsistenciaQuery:function(){
+        this.getColumnsAsistencia(this.input_recarga);
+        this.getAsistenciasRecarga(this.input_recarga);
+      },
+      getColumnsAsistenciaAction:function(codigo_recarga){
+        this.getColumnsAsistencia(codigo_recarga);
+      },
     changeColorSelected(index, index_2){
         if(this.indexClickedUsuario === undefined){
             this.indexClickedUsuario = index;
@@ -255,11 +304,11 @@ export default {
       }
     },
     actionGetAsistencia:function(){
-      this.getAsistenciasRecarga(this.$route.params.id);
+      this.getAsistenciasRecarga(this.input_recarga);
     },
     changePage:function(page){
       this.current_page = page;
-      this.actionGetAsistencia();
+      this.getAsistenciaQuery();
     },
     openModalSearchAsistencia:function(index, funcionario){
       this.funcionarioSelected = funcionario;

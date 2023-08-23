@@ -6,7 +6,9 @@ export const state = () => ({
   filtro:{
     input:'',
     grupo_id:'',
-    tipo_ausentismo_id:[]
+    tipo_ausentismo_id:[],
+    descuento_turno_libre:[],
+    descuento:[]
   },
   grupos_ausentismo:[],
   tipo_ausentismos:[],
@@ -42,6 +44,12 @@ export const mutations = {
   },
   SET_TIPO_SELECTED_AUSENTISMO(state, value){
     state.filtro.tipo_ausentismo_id = value;
+  },
+  SET_TIPO_SELECTED_DESCUENTO_TURNO_LIBRE(state, value){
+    state.filtro.descuento_turno_libre = value;
+  },
+  SET_TIPO_SELECTED_DESCUENTO(state, value){
+    state.filtro.descuento= value;
   },
   SET_GRUPOS_AUSENTISMO(state, value){
     state.grupos_ausentismo = value;
@@ -90,7 +98,9 @@ export const actions = {
       grupo:state.filtro.grupo_id,
       page:state.pagination.current_page,
       input:state.filtro.input,
-      tipo_ausentismo_id:state.filtro.tipo_ausentismo_id
+      tipo_ausentismo_id:state.filtro.tipo_ausentismo_id,
+      descuento_turno_libre:state.filtro.descuento_turno_libre,
+      descuento:state.filtro.descuento
     };
     await this.$axios.$get(url, {params:params}).then(response => {
       commit('SET_LOADING_TABLE', false);

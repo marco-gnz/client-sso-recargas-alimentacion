@@ -71,6 +71,13 @@
                   </el-checkbox-group>
                 </div>
                 <div class="column">
+                  <label class="label">Descuento turno L y X</label>
+                  <el-checkbox-group v-model="filtro_descuento_turno" @change="actionGetFuncionariosFiltro">
+                    <el-checkbox :label="1" :disabled="loadingTablaResumen">Si</el-checkbox>
+                    <el-checkbox :label="2" :disabled="loadingTablaResumen">No</el-checkbox>
+                  </el-checkbox-group>
+                </div>
+                <div class="column">
                   <label class="label">Ajustes</label>
                   <el-checkbox-group v-model="filtro_ajustes" @change="actionGetFuncionariosFiltro">
                     <el-checkbox :label="0" :disabled="loadingTablaResumen">Días</el-checkbox>
@@ -932,6 +939,14 @@ export default {
           },
           set(newValue) {
             this.$store.commit('recarga/resumen/resumen/SET_FILTRO_TURNO', newValue);
+          }
+        },
+        filtro_descuento_turno:{
+          get() {
+            return this.$store.state.recarga.resumen.resumen.filtro.descuento_turno_libre;
+          },
+          set(newValue) {
+            this.$store.commit('recarga/resumen/resumen/SET_FILTRO_DESCUENTO_TURNO_LIBRE', newValue);
           }
         },
         filtro_errores:{

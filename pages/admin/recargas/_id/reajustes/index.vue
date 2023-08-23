@@ -11,7 +11,7 @@
         <div class="columns">
           <div class="column">
             <div class="field">
-              <div class="control is-medium is-loading">
+              <div class="control is-medium">
                 <el-input
                     autofocus
                     placeholder="Busque ajustes por rut, nombre o apellidos de funcionario"

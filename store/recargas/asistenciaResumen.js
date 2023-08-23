@@ -14,7 +14,8 @@ export const state = () => ({
     loading_asistencia:false,
     recarga:'',
     filtro:{
-      input:''
+      input:'',
+      recarga:''
     },
     pagination: {
       total: 0,
@@ -25,6 +26,8 @@ export const state = () => ({
       to: 0
     },
     offset: 3,
+    recargas:[],
+    columnas_mes:[]
 });
 
 export const mutations = {
@@ -78,6 +81,15 @@ export const mutations = {
     SET_FILTRO_INPUT(state, value){
       state.filtro.input = value;
     },
+    SET_RECARGAS(state, value){
+      state.recargas = value;
+    },
+    SET_COLUMNAS_MES(state, value){
+      state.columnas_mes = value;
+    },
+    SET_FILTRO_RECARGA(state, value){
+      state.filtro.recarga = value;
+    },
 };
 
 
@@ -114,12 +126,26 @@ export const getters = {
     },
     offset(state){
       return state.offset;
+    },
+    columnasMes(state){
+      return state.columnas_mes;
     }
 };
 
 export const actions = {
     successUpdate({ commit }){
         commit('SET_MODAL_EDIT', false);
+    },
+    async getColumnsAsistencia({ commit}, data){
+      const url = `/api/admin/modulos/columnas/asistencia/${data}/resumen`;
+      await this.$axios.$get(url).then(response => {
+        console.log(response);
+        if(response.status === 'Success'){
+          commit('SET_COLUMNAS_MES', response.columnas);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
     },
     async getAsistenciaFuncionario({ commit}, data){
       commit('SET_LOADING_TABLE', true);

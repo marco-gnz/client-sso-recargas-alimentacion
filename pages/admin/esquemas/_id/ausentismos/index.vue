@@ -42,7 +42,8 @@
                             <th>Hora ausentismo</th>
                             <th>Total horas</th>
                           </template>
-                            <th>Días habiles</th>
+                            <th>Días turnante</th>
+                            <th>Días no turnante</th>
                           <th>Grupo ausentismo</th>
                           <th>Tipo de ausentismo</th>
                           <template v-if="(grupo_selected === 2)">
@@ -54,6 +55,7 @@
                           <template v-if="(grupo_selected === 1)">
                             <th>Tipo días</th>
                           </template>
+                          <th>Descuento turno libre</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -61,12 +63,13 @@
                           <template v-if="(grupo_selected != 3)">
                             <td>{{ausentismo.fecha_inicio}} / {{ausentismo.fecha_termino}} ({{ausentismo.total_dias_ausentismo}}d)</td>
                           </template>
-                          <td><strong>{{ausentismo.fecha_inicio_periodo}}</strong> / <strong>{{ausentismo.fecha_termino_periodo}} ({{ausentismo.total_dias_ausentismo_periodo}}d)</strong></td>
+                          <td><strong>{{ausentismo.fecha_inicio_periodo}}</strong> / <strong>{{ausentismo.fecha_termino_periodo}}</strong></td>
                           <template v-if="(grupo_selected === 3)">
                             <td>{{ ausentismo.hora_inicio }} / {{ ausentismo.hora_termino }}</td>
                             <td>{{ ausentismo.total_horas }}</td>
                           </template>
-                          <td>{{ausentismo.total_dias_habiles_periodo}}</td>
+                          <td>{{ausentismo.total_dias_ausentismo_periodo_turno}} / {{ausentismo.total_dias_habiles_ausentismo_periodo_turno}}</td>
+                          <td>{{ausentismo.total_dias_ausentismo_periodo}} / {{ausentismo.total_dias_habiles_periodo}}</td>
                           <td>{{ausentismo.nombre_grupo_ausentismo}}</td>
                           <td class="click">
                             <span>{{ausentismo.nombre_tipo_ausentismo}}</span>
@@ -80,6 +83,7 @@
                           <template v-if="(grupo_selected === 1)">
                             <td>{{ausentismo.regla_tipo_dias ? ausentismo.regla_tipo_dias : '--'}}</td>
                           </template>
+                          <td>{{ausentismo.descuento_turno_libre ? 'Si' : 'No'}}</td>
                         </tr>
                       </tbody>
                     </table>

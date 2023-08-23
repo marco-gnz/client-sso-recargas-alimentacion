@@ -59,7 +59,8 @@ export const state = () => ({
     ordenamiento:[],
     load_grupo:null,
     tipo_ausentismo:[],
-    centro_costo:[]
+    centro_costo:[],
+    descuento_turno_libre:[]
   },
   pagination: {
     total: 0,
@@ -404,6 +405,9 @@ export const mutations = {
   },
   SET_FILTRO_CENTRO_COSTO(state, value){
     state.filtro.centro_costo = value;
+  },
+  SET_FILTRO_DESCUENTO_TURNO_LIBRE(state, value){
+    state.filtro.descuento_turno_libre = value;
   },
   SET_INDEX_SELECTED_TABLE(state, value){
     state.index_selected_table = value;

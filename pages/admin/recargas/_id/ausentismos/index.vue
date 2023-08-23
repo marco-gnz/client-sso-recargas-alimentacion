@@ -51,6 +51,20 @@
                         </el-option>
                       </el-select>
                     </div>
+                    <div class="column">
+                      <label class="label">Descuento turno libre</label>
+                      <el-checkbox-group v-model="descuento_turno_libre_selected" @change="actionGetAusentismos">
+                        <el-checkbox :label="1">Si</el-checkbox>
+                        <el-checkbox :label="0">No</el-checkbox>
+                      </el-checkbox-group>
+                    </div>
+                    <div class="column">
+                      <label class="label">Descuento</label>
+                      <el-checkbox-group v-model="descuento" @change="actionGetAusentismos">
+                        <el-checkbox :label="1">Si</el-checkbox>
+                        <el-checkbox :label="0">No</el-checkbox>
+                      </el-checkbox-group>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -70,7 +84,8 @@
                           <template v-if="(grupo_selected === 3)">
                             <th>Hora ausentismo</th>
                           </template>
-                            <th>Días habiles</th>
+                            <th>Días turnante</th>
+                            <th>Días no turnante</th>
                           <th>Tipo de ausentismo</th>
                           <template v-if="(grupo_selected === 2)">
                             <th>Meridiano</th>
@@ -81,6 +96,7 @@
                           <template v-if="(grupo_selected === 1)">
                             <th>Tipo días</th>
                           </template>
+                          <th>Descuento turno libre</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -93,11 +109,12 @@
                             <template v-if="(grupo_selected != 3)">
                               <td>{{ausentismo.fecha_inicio}} / {{ausentismo.fecha_termino}} ({{ausentismo.total_dias_ausentismo}}d)</td>
                             </template>
-                            <td><strong>{{ausentismo.fecha_inicio_periodo}}</strong> / <strong>{{ausentismo.fecha_termino_periodo}} ({{ausentismo.total_dias_ausentismo_periodo}}d)</strong></td>
+                            <td><strong>{{ausentismo.fecha_inicio_periodo}}</strong> / <strong>{{ausentismo.fecha_termino_periodo}} </strong></td>
                             <template v-if="(grupo_selected === 3)">
                               <td>{{ ausentismo.hora_inicio }} / {{ ausentismo.hora_termino }} ({{ ausentismo.total_horas }})</td>
                             </template>
-                            <td>{{ausentismo.total_dias_habiles_periodo}}</td>
+                            <td>{{ausentismo.total_dias_ausentismo_periodo_turno}} / {{ausentismo.total_dias_habiles_ausentismo_periodo_turno}}</td>
+                            <td>{{ausentismo.total_dias_ausentismo_periodo}} / {{ausentismo.total_dias_habiles_periodo}}</td>
                             <td class="click">
                               <span>{{ausentismo.nombre_tipo_ausentismo}}</span>
                             </td>
@@ -110,6 +127,7 @@
                             <template v-if="(grupo_selected === 1)">
                               <td>{{ausentismo.regla_tipo_dias ? ausentismo.regla_tipo_dias : '--'}}</td>
                             </template>
+                            <td>{{ausentismo.descuento_turno_libre ? 'Si' : 'No'}}</td>
                             <td>
                               <nuxt-link v-if="ausentismo.existe_funcionario" :to="`/admin/esquemas/${ausentismo.esquema_uuid}/ausentismos?grupo=${grupo_selected}`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
                             </td>
@@ -196,6 +214,22 @@ export default {
       },
       set(newValue) {
         this.$store.commit('recarga/ausentismos/main/SET_TIPO_SELECTED_AUSENTISMO', newValue);
+      }
+    },
+    descuento:{
+      get() {
+        return this.$store.state.recarga.ausentismos.main.filtro.descuento;
+      },
+      set(newValue) {
+        this.$store.commit('recarga/ausentismos/main/SET_TIPO_SELECTED_DESCUENTO', newValue);
+      }
+    },
+    descuento_turno_libre_selected:{
+      get() {
+        return this.$store.state.recarga.ausentismos.main.filtro.descuento_turno_libre;
+      },
+      set(newValue) {
+        this.$store.commit('recarga/ausentismos/main/SET_TIPO_SELECTED_DESCUENTO_TURNO_LIBRE', newValue);
       }
     },
     current_page:{
