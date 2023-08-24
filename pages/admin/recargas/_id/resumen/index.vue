@@ -71,7 +71,7 @@
                   </el-checkbox-group>
                 </div>
                 <div class="column">
-                  <label class="label">Descuento turno L y X</label>
+                  <label class="label">Descuento turno L y N</label>
                   <el-checkbox-group v-model="filtro_descuento_turno" @change="actionGetFuncionariosFiltro">
                     <el-checkbox :label="1" :disabled="loadingTablaResumen">Si</el-checkbox>
                     <el-checkbox :label="2" :disabled="loadingTablaResumen">No</el-checkbox>

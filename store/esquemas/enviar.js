@@ -85,6 +85,7 @@ export const actions = {
       commit('SET_LOADING_SEARCH_ESQUEMAS', false);
       if(response.status === 'Success'){
         commit('SET_ESQUEMAS', response.esquemas);
+        commit('SET_FORM_EMAIL', response.email);
       }
     }).catch(error => {
       commit('SET_LOADING_SEARCH_ESQUEMAS', false);
