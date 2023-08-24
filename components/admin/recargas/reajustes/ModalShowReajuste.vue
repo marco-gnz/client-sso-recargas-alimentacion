@@ -160,10 +160,12 @@
                     <table class="table  is-narrow is-hoverable is-fullwidth" v-loading="loadingContratos">
                       <thead>
                         <tr>
-                          <th>Fecha periodo</th>
+                          <th>Fecha</th>
                           <th>Unidad</th>
                           <th>Cargo</th>
                           <th>Ley</th>
+                          <th>Hora</th>
+                          <th>C.Costo</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -172,6 +174,8 @@
                           <td>{{contrato.unidad_nombre}}</td>
                           <td>{{contrato.cargo_nombre}}</td>
                           <td>{{contrato.ley_nombre}}</td>
+                          <td>{{contrato.hora_nombre}}</td>
+                          <td>{{contrato.centro_costo ? contrato.centro_costo : '--'}}</td>
                         </tr>
                       </tbody>
                     </table>
