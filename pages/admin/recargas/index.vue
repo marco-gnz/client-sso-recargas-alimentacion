@@ -37,6 +37,7 @@
               <tr>
                 <th>Código</th>
                 <th>Establecimiento</th>
+                <th>Descuento</th>
                 <th>Beneficio</th>
                 <th>N° de funcionarios</th>
                 <th>Valor día</th>
@@ -51,6 +52,7 @@
               <tr v-for="(recarga, index) in recargas" :key="index" @click.prevent="redirectToRecarga(recarga)" class="click">
                 <td>#{{recarga.codigo}}</td>
                 <td>{{recarga.establecimiento != null ? recarga.establecimiento.sigla : '--'}}</td>
+                <td>{{recarga.mes_calculo}} / {{recarga.anio_calculo}}</td>
                 <td>{{recarga.mes_beneficio}} / {{recarga.anio_beneficio}}</td>
                 <td>{{recarga.users_count}}</td>
                 <td>{{recarga.monto_dia}}</td>

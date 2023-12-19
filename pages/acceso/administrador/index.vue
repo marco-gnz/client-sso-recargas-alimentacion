@@ -92,6 +92,9 @@ export default {
           } else if (error.response.status === 401) {
             this.errors = { email: [] };
             this.errors.email[0] = "El correo o la contraseña es incorrecto";
+          }else if (error.response.status === 403) {
+            this.errors = { email: [] };
+            this.errors.email[0] = "No tienes un perfil habilitado para acceder.";
           } else if (error.response.status === 503) {
             this.errors = { email: [] };
             this.errors.email[0] = "Usuario no autorizado para el acceso";
