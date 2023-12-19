@@ -30,9 +30,51 @@
                 </a>
               </div>
             </div>
-            <a class="navbar-item" v-if="hasPermission('tarjeta.read')">
+            <div class="navbar-item has-dropdown is-hoverable" v-if="hasPermission('mantenedor.read')">
+              <a class="navbar-link">
+                Mantenedores
+              </a>
+              <div class="navbar-dropdown">
+                <div class="nested dropdown">
+                  <a class="navbar-item">
+                    <span class="icon-text">
+                      <span>Datos contractuales</span>
+                      <span class="icon">
+                        <i class="el-icon-arrow-right"></i>
+                      </span>
+                    </span>
+                  </a>
+                  <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                    <div class="dropdown-content">
+                      <nuxt-link :class="(currentRouteFullName === `${currentRouteName}?tipo=${url.query}` ? 'is-active' : '')" class="dropdown-item" v-for="(url, index) in urls" :key="index" @click.native="actionGetDatosContractuales(url.query)" :to="{path:'/admin/mantenedores/contractuales', query:{tipo:url.query}}">{{url.name}}</nuxt-link>
+                    </div>
+                  </div>
+                </div>
+                <!-- <div class="nested dropdown">
+                  <a class="navbar-item">
+                    <span class="icon-text">
+                      <span>Variaciones</span>
+                      <span class="icon">
+                        <i class="el-icon-arrow-right"></i>
+                      </span>
+                    </span>
+                  </a>
+                  <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                    <div class="dropdown-content">
+                      <a href="/" class="dropdown-item">
+                        Tipos de ausentismos
+                      </a>
+                      <a class="dropdown-item">
+                        Tipos de incremento
+                      </a>
+                    </div>
+                  </div>
+                </div> -->
+              </div>
+            </div>
+            <!-- <a class="navbar-item" v-if="hasPermission('tarjeta.read')">
                 <nuxt-link to="#">Tarjetas</nuxt-link>
-            </a>
+            </a> -->
           </div>
         </no-ssr>
         <client-only>
@@ -70,13 +112,31 @@ export default {
     this.getRolesPermissions();
   },
   computed: {
+    ...mapGetters({
+      urls:'mantenedores/main/urls'
+    }),
+    filtroInput:{
+      get() {
+        return this.$store.state.mantenedores.main.filtro.input;
+      },
+      set(newValue) {
+        this.$store.commit('mantenedores/main/SET_FILTRO_INPUT', newValue);
+      }
+    },
+    currentRouteFullName(){
+      return this.$nuxt.$route.fullPath;
+    },
+    currentRouteName(){
+      return this.$nuxt.$route.path;
+    },
     permissions() {
       return this.$store.state.usuarios.administradores.main.permissions;
     },
   },
   methods:{
     ...mapActions({
-      getRolesPermissions:'usuarios/administradores/main/getRolesPermissions'
+      getRolesPermissions:'usuarios/administradores/main/getRolesPermissions',
+      getDatosContractuales:'mantenedores/main/getDatosContractuales'
     }),
     async logout(){
       this.fullscreenLoading = !this.fullscreenLoading;
@@ -86,11 +146,31 @@ export default {
     },
     hasPermission:function(permission){
       return this.permissions.includes(permission);
+    },
+    actionGetDatosContractuales:function(tipo){
+      this.filtroInput = '';
+      const data = {
+        tipo:tipo
+      };
+      this.getDatosContractuales(data);
     }
   }
 }
 </script>
 
 <style>
+.nested.dropdown:hover > .dropdown-menu {
+  display: block;
+}
+.nested.dropdown .dropdown-menu {
+  top: -12px;
+  margin-left: 100%;
+}
 
+.nested.dropdown .dropdown-trigger button {
+  padding: 0px 0px;
+  border: 0px;
+  font-size: 14px;
+  font-weight: 400;
+}
 </style>
