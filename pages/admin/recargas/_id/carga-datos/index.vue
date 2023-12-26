@@ -20,7 +20,7 @@
               <div class="tile is-parent">
                 <article class="tile is-child box">
                   <p class="title is-6">{{opcion.title}}</p>
-                  <p class="subtitle" v-if="opcion.is_permission"><button :disabled="opcion.disabled" @click.prevent="opcion.click" class="button is-primary is-inverted"><span>Cargar <i class="el-icon-upload2"></i></span></button></p>
+                  <p class="subtitle" v-if="opcion.is_permission"><button :disabled="opcion.disabled || recarga.last_status_value !== 0" @click.prevent="opcion.click" class="button is-primary is-inverted"><span>Cargar <i class="el-icon-upload2"></i></span></button></p>
                   <div class="content">
                     <p class="is-size-7"><i>Reciente: {{opcion.last_item ? opcion.last_item  : '--'}}</i></p>
                   </div>
