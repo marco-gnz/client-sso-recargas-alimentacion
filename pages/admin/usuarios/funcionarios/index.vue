@@ -34,6 +34,7 @@
                       <th>Nombre</th>
                       <th>Email</th>
                       <th>Último contrato</th>
+                      <th>Establecimiento</th>
                       <th>Último pago</th>
                       <th>Monto último pago</th>
                       <th></th>
@@ -46,6 +47,7 @@
                         <td>{{funcionario.apellidos}} {{funcionario.nombres}}</td>
                         <td>{{funcionario.email ? funcionario.email : '--'}}</td>
                         <td>{{funcionario.contrato ? `${funcionario.contrato.fecha_inicio} / ${funcionario.contrato.fecha_termino}` : '--'}}</td>
+                        <td>{{funcionario.esquema ? funcionario.esquema.establecimiento : '--'}}</td>
                         <td>{{funcionario.esquema ? `${funcionario.esquema.mes_beneficio} / ${funcionario.esquema.anio_beneficio}` : '--'}}</td>
                         <td>{{funcionario.esquema ? funcionario.esquema.monto_total_cancelar_format : '--'}}</td>
                         <td>

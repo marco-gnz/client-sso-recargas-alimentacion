@@ -55,7 +55,9 @@
                       </td>
                       <td>
                         <nuxt-link v-if="hasPermission('user.update')" @click.native="editUsuario(index)" :to="{path: `/admin/usuarios/administradores`, query: { id: usuario.uuid }}"><el-button size="mini" type="primary" icon="el-icon-edit" circle></el-button></nuxt-link>
-                        <el-button v-if="hasPermission('user.update')" v-loading.lock="loadingStatus && index_click_usuario === index" :disabled="loadingStatus" size="mini" icon="el-icon-refresh" type="danger" circle @click.native="refreshPassword(index, usuario.uuid)"></el-button>
+                        <el-tooltip class="item" effect="dark" content="Restablecer contraseña" placement="left-start">
+                          <el-button v-if="hasPermission('user.update')" v-loading.lock="loadingStatus && index_click_usuario === index" :disabled="loadingStatus" size="mini" icon="el-icon-refresh" type="danger" circle @click.native="refreshPassword(index, usuario.uuid)"></el-button>
+                        </el-tooltip>
                       </td>
                     </tr>
                   </template>

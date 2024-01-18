@@ -2,6 +2,7 @@ import { Notification } from 'element-ui';
 export const state = () => ({
   roles: [],
   permissions:[],
+  permissions_aditional:[],
   full_screen_loading:false,
   usuarios:[],
   filtro:{
@@ -133,6 +134,9 @@ export const mutations = {
   SET_USUARIO_ROLES(state, value){
     state.usuario.roles_id = value;
   },
+  SET_USUARIO_PERMISOS(state, value){
+    state.usuario.permisos_id = value;
+  },
   SET_USUARIO_ESTABLECIMIENTOS(state, value){
     state.usuario.establecimientos_id = value;
   },
@@ -198,6 +202,9 @@ export const mutations = {
   },
   SET_CHANGE_PASSWORD_ERRORS(state, value){
     state.errors_password = value;
+  },
+  SET_PERMISSIONS_ADITIONAL(state, value){
+    state.permissions_aditional = value;
   }
 };
 
@@ -255,6 +262,9 @@ export const getters = {
   },
   errorsPassword(state){
     return state.errors_password;
+  },
+  permissionsAditiontal(state){
+    return state.permissions_aditional;
   }
 };
 
@@ -357,6 +367,7 @@ export const actions = {
       apellidos:state.usuario.apellidos,
       email:state.usuario.email,
       roles_id:state.usuario.roles_id,
+      permisos_id:state.usuario.permisos_id,
       establecimientos_id:state.usuario.establecimientos_id
     };
     await this.$axios.$put(url, data_get).then(response => {
@@ -438,4 +449,18 @@ export const actions = {
       console.log(error);
     });
   },
+  async getPermissionsAditional({ commit, state}, data){
+    const url = `/api/admin/usuarios/administradores/permissions/${data}`;
+    const data_get = {
+      roles_id:state.usuario?.roles_id
+    };
+    await this.$axios.$get(url, {params:data_get}).then(response => {
+      console.log(response);
+      if(response.status === 'Success'){
+        commit('SET_PERMISSIONS_ADITIONAL', response.permissions_aditional);
+      }
+    }).catch(error => {
+      console.log(error);
+    });
+  }
 };

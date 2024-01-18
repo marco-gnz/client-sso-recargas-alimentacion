@@ -124,7 +124,7 @@
                       <div class="field">
                         <label class="label required">Seleccione perfiles</label>
                         <div class="control">
-                          <el-select v-model="roles" multiple collapse-tags clearable placeholder="Seleccione rol" class="element-select">
+                          <el-select v-model="roles" multiple collapse-tags clearable placeholder="Seleccione perfiles" class="element-select" @change="getPermissions">
                             <el-option
                               v-for="rol in rolesList"
                               :key="rol.id"
@@ -133,6 +133,23 @@
                             </el-option>
                           </el-select>
                           <p v-if="errors && errors.roles_id" class="help is-danger">{{errors.roles_id != null ? errors.roles_id[0] : ''}}</p>
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label class="label">Seleccione permisos adicionales a los perfiles seleccionados (opcional)</label>
+                        <div class="control">
+                          <div class="columns">
+                            <div class="column">
+                              <template v-if="permissionsAditional.length && roles.length">
+                                <el-checkbox-group v-model="permisos" size="mini">
+                                  <el-checkbox class="element-style-checkbox-group" v-for="(permiso, index) in permissionsAditional" :key="index" :label="permiso.id" border>{{permiso.name}}</el-checkbox>
+                              </el-checkbox-group>
+                              </template>
+                              <template v-else>
+                                <el-empty class="is-centered" description="Sin permisos para asociar" :image-size="50"></el-empty>
+                              </template>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -194,12 +211,12 @@ export default {
       setTimeoutBuscador:''
     };
   },
-   created(){
+   async created(){
     this.getRoles();
     this.getEstablecimientos();
     if(this.$route.query.id){
       this.show_modal_editar = true;
-      this.getUsuario(this.$route.query.id);
+      await this.getUsuario(this.$route.query.id);
     }
   },
   computed:{
@@ -210,6 +227,7 @@ export default {
       establecimientosList:'modulos/modulos/establecimientos',
       loadingVerifyUsuario:'usuarios/administradores/main/loadingVerifyUsuario',
       isAdmin:'usuarios/administradores/main/isAdmin',
+      permissionsAditional:'usuarios/administradores/main/permissionsAditiontal'
     }),
     show_modal_editar:{
       get() {
@@ -261,10 +279,18 @@ export default {
     },
     roles:{
       get() {
-        return this.$store.state.usuarios.administradores.main.usuario.roles_id;
+        return this.$store.state.usuarios.administradores.main.usuario?.roles_id;
       },
       set(newValue) {
         this.$store.commit('usuarios/administradores/main/SET_USUARIO_ROLES', newValue);
+      }
+    },
+    permisos:{
+      get() {
+        return this.$store.state.usuarios.administradores.main.usuario?.permisos_id;
+      },
+      set(newValue) {
+        this.$store.commit('usuarios/administradores/main/SET_USUARIO_PERMISOS', newValue);
       }
     },
     establecimientos:{
@@ -282,7 +308,7 @@ export default {
       set(newValue) {
         this.$store.commit('usuarios/administradores/main/SET_PASO', newValue);
       }
-    },
+    }
   },
   methods:{
     ...mapActions({
@@ -290,7 +316,8 @@ export default {
       getRoles:'modulos/modulos/getRoles',
       getEstablecimientos:'modulos/modulos/getEstablecimientos',
       verifyUsuarioAction:'usuarios/administradores/main/verifyUsuario',
-      editUsuarioAction:'usuarios/administradores/main/editUsuario'
+      editUsuarioAction:'usuarios/administradores/main/editUsuario',
+      getPermissionsAditionalAction:'usuarios/administradores/main/getPermissionsAditional'
     }),
     verifyUsuarioIn:function(){
       if(this.rut && this.dv){
@@ -308,9 +335,16 @@ export default {
     },
     siguientePaso:function(){
       this.paso++;
+      if(this.paso === 1){
+        this.getPermissions();
+      }
     },
     editUsuario:function(){
       this.editUsuarioAction(this.$route.query.id);
+    },
+    getPermissions:function(){
+      this.getPermissionsAditionalAction(this.$route.query.id);
+      this.permisos = [];
     }
   }
 }
