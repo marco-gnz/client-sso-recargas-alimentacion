@@ -344,7 +344,6 @@ export default {
     },
     getPermissions:function(){
       this.getPermissionsAditionalAction(this.$route.query.id);
-      this.permisos = [];
     }
   }
 }
