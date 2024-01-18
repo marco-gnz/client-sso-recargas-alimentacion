@@ -12,6 +12,11 @@
   margin: auto;
 }
 
+.element-style-checkbox-group{
+  width: 50% !important;
+  margin: auto !important;
+}
+
 .table td.is-selected, .table th.is-selected {
   background-color: rgb(209, 136, 0, 0.5) !important;
   color: #fff;

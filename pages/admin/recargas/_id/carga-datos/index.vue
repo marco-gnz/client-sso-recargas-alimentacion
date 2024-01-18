@@ -11,13 +11,14 @@
       <Asistencia />
       <Viaticos v-if="openModalViaticos" :codigo="$route.params.id" />
       <Feriados v-if="openModalFeriados" />
+      <Ajustes v-if="openModalCarga" :codigo="$route.params.id" />
       <turnos :codigo="$route.params.id" />
       <div class="card p-2 m-2">
          <MenuRecarga :codigo="$route.params.id" :recarga="recarga" />
         <template v-if="opciones">
           <div class="columns">
             <div class="column" v-for="(opcion, index) in opciones" :key="index">
-              <div class="tile is-parent">
+              <div class="title is-parent">
                 <article class="tile is-child box">
                   <p class="title is-6">{{opcion.title}}</p>
                   <p class="subtitle" v-if="opcion.is_permission"><button :disabled="opcion.disabled || recarga.last_status_value !== 0" @click.prevent="opcion.click" class="button is-primary is-inverted"><span>Cargar <i class="el-icon-upload2"></i></span></button></p>
@@ -45,9 +46,10 @@ import Turnos from '../../../../../components/admin/recargas/files/turnos.vue';
 import Asistencia from '../../../../../components/admin/recargas/files/asistencia.vue';
 import Feriados from '../../../../../components/admin/recargas/files/feriados.vue';
 import Viaticos from '../../../../../components/admin/recargas/files/viaticos.vue';
+import Ajustes from '../../../../../components/admin/recargas/files/ajustes.vue';
 export default {
     middleware: 'auth',
-    components: { MenuRecarga, MenuTotales, Funcionarios, Validaciones, Ausentismos, Turnos, Asistencia, Feriados, Viaticos },
+    components: { MenuRecarga, MenuTotales, Funcionarios, Validaciones, Ausentismos, Turnos, Asistencia, Feriados, Viaticos, Ajustes },
     head() {
         return {
             title: `Carga de datos #${this.$route.params.id}`
@@ -65,7 +67,8 @@ export default {
           openModalGrupos: "recargas/grupos/modalGrupos",
           openModalAusentismos: "recargas/ausentismos/modal",
           openModalFeriados:'recargas/feriados/modal',
-          openModalViaticos:'recargas/viaticosResumen/openModalViaticos'
+          openModalViaticos:'recargas/viaticosResumen/openModalViaticos',
+          openModalCarga:'recargas/reajustes/carga'
         }),
         file_funcionarios:{
           get() {
@@ -89,12 +92,12 @@ export default {
           let opciones = [
             {title:'Feriados', button:'Definir feriados', click:this.clickOpenModalFeriados, is_permission: this.hasPermission('regla.update'), last_item:this.recarga.last_feriado },
             {title:'Reglas y grupos', button:'Definir reglas', click:this.clickOpenModalGrupos, disabled: false, is_permission:this.hasPermission('regla.create'), last_item:this.recarga.last_regla },
-            {title:'Funcionarios/Contratos', button:'Definir funcionarios', click:this.clickOpenModalFuncionarios, is_permission:this.hasPermission('contrato.create'), last_item:this.recarga.last_contrato},
+            {title:'Funcionarios / Contratos', button:'Definir funcionarios', click:this.clickOpenModalFuncionarios, is_permission:this.hasPermission('contrato.create'), last_item:this.recarga.last_contrato},
             {title:'Asignaciones 3° y 4°', button:'Definir turnos', click:this.clickOpenModalTurnos, is_permission:this.hasPermission('asignacion.create'), last_item:this.recarga.last_asignacion },
-            {title:'Asistencias (Días libres)', button:'Definir asistencia', click:this.clickOpenModalAsistencia, is_permission:this.hasPermission('turno.create'), last_item:this.recarga.last_asistencia },
+            {title:'Asistencias (Turnos libres)', button:'Definir asistencia', click:this.clickOpenModalAsistencia, is_permission:this.hasPermission('turno.create'), last_item:this.recarga.last_asistencia },
             {title:'Ausentismos', button:'Definir ausentismos', click:this.clickOpenModalAusentismos, is_permission:this.hasPermission('ausentismo.create'), last_item:this.recarga.last_ausentismo },
             {title:'Viáticos', button:'Definir viaticos', click:this.clickOpenModalViaticos, is_permission:this.hasPermission('viatico.create'), last_item:this.recarga.last_viatico },
-            {title:'Capacitaciones', button:'Definir capacitaciones', click:this.clickOpenModalAusentismos, is_permission:this.hasPermission('capacitacion.create'), last_item:null }
+            {title:'Ajustes', button:'Definir ajustes', click:this.clickOpenModalAjuste, is_permission:this.hasPermission('ajuste.create.masivo'), last_item:this.recarga.last_ajuste }
           ]
           return opciones;
         }
@@ -124,6 +127,9 @@ export default {
         },
         clickOpenModalViaticos:function(){
           this.$store.commit('recargas/viaticosResumen/SET_MODAL', true);
+        },
+        clickOpenModalAjuste:function(){
+          this.$store.commit('recargas/reajustes/SET_MODAL_CARGA', true);
         },
         hasPermission:function(permission){
           return this.permissions.includes(permission);

@@ -22,10 +22,38 @@
               </div>
             </div>
             <div class="table-container pt-2">
-              <div class="columns has-text-centered">
+                <div class="columns has-text-centered">
                   <div class="column">
                     <div class="pt-2">
-                      <label class="label">Filtrar por estado</label>
+                      <label class="label">Causal incremento</label>
+                      <el-select @change="filterGetReajustes" size="mini" v-model="causal_incremento" filterable multiple collapse-tags clearable placeholder="Seleccione causal" class="element-select">
+                        <el-option
+                          v-for="tipo in tiposIncrementos"
+                          :key="tipo.id"
+                          :label="tipo.nombre"
+                          :value="tipo.id">
+                        </el-option>
+                      </el-select>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="pt-2">
+                      <label class="label">Causal rebaja</label>
+                      <el-select @change="filterGetReajustes" size="mini" v-model="causal_rebaja" filterable multiple collapse-tags clearable placeholder="Seleccione causal" class="element-select">
+                        <el-option
+                          v-for="tipo in tiposDeAusentismo"
+                          :key="tipo.id"
+                          :label="tipo.nombre"
+                          :value="tipo.id">
+                        </el-option>
+                      </el-select>
+                    </div>
+                  </div>
+                </div>
+                <div class="columns has-text-centered">
+                  <div class="column">
+                    <div class="pt-2">
+                      <label class="label">Estado</label>
                       <el-checkbox-group  v-model="estados_filtro" size="mini" @change="filterGetReajustes">
                         <el-checkbox-button :disabled="loadingTable" v-for="(estado, index) in estados" :key="index" :label="estado.id">{{estado.nombre}}</el-checkbox-button>
                       </el-checkbox-group>
@@ -42,9 +70,18 @@
                   </div>
                   <div class="column">
                     <div class="pt-2">
-                      <label class="label">Filtrar por tipo</label>
+                      <label class="label">Tipo ajuste</label>
                       <el-checkbox-group v-model="tipos_filtro" size="mini" @change="filterGetReajustes">
                         <el-checkbox-button :disabled="loadingTable" v-for="(tipo, index) in tipoAjustes" :key="index" :label="tipo.id">{{tipo.nombre}}</el-checkbox-button>
+                      </el-checkbox-group>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="pt-2">
+                      <label class="label">Tipo de carga</label>
+                      <el-checkbox-group v-model="tipo_carga" size="mini" @change="filterGetReajustes">
+                        <el-checkbox :label="0">Manual</el-checkbox>
+                        <el-checkbox :label="1">Masivo</el-checkbox>
                       </el-checkbox-group>
                     </div>
                   </div>
@@ -177,6 +214,8 @@ export default {
   created() {
       this.getAjustes(this.$route.params.id);
       this.getRolesPermissions();
+      this.getTiposAusentismos();
+      this.getTiposIncrementos();
   },
   computed:{
     ...mapGetters({
@@ -188,7 +227,9 @@ export default {
         estados:'recarga/ajustes/estados',
         tipoAjustes:'recarga/ajustes/tipoAjustes',
         pagination:'recarga/ajustes/pagination',
-        offset:'recarga/ajustes/offset'
+        offset:'recarga/ajustes/offset',
+        tiposDeAusentismo: "modulos/modulos/tiposAusentismos",
+        tiposIncrementos: "modulos/modulos/tiposIncrementos",
       }),
       permissions() {
         return this.$store.state.usuarios.administradores.main.permissions;
@@ -231,6 +272,30 @@ export default {
         },
         set(newValue) {
           this.$store.commit('recarga/ajustes/SET_FILTRO_REBAJA_INCREMENTO', newValue);
+        }
+      },
+      tipo_carga:{
+        get() {
+          return this.$store.state.recarga.ajustes.filtro.tipo_carga;
+        },
+        set(newValue) {
+          this.$store.commit('recarga/ajustes/SET_FILTRO_TIPO_CARGA', newValue);
+        }
+      },
+      causal_incremento:{
+        get() {
+          return this.$store.state.recarga.ajustes.filtro.causal_incremento;
+        },
+        set(newValue) {
+          this.$store.commit('recarga/ajustes/SET_FILTRO_CAUSAL_INCREMENTO', newValue);
+        }
+      },
+      causal_rebaja:{
+        get() {
+          return this.$store.state.recarga.ajustes.filtro.causal_rebaja;
+        },
+        set(newValue) {
+          this.$store.commit('recarga/ajustes/SET_FILTRO_CAUSAL_REBAJA', newValue);
         }
       },
       showModalRechazar:{
@@ -277,6 +342,8 @@ export default {
         getAjustes: 'recarga/ajustes/getAjustes',
         validateReajuste:'recarga/ajustes/validateAjuste',
         getRolesPermissions:'usuarios/administradores/main/getRolesPermissions',
+        getTiposAusentismos:'modulos/modulos/getTiposAusentismos',
+        getTiposIncrementos:'modulos/modulos/getTiposIncrementos',
     }),
     keySearchInput:function(){
       if(this.input_query.length > 1){

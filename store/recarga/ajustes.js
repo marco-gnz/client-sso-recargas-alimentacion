@@ -9,7 +9,10 @@ export const state = () => ({
     input:'',
     rebaja_incremento:[],
     estados:[],
-    tipos:[]
+    tipos:[],
+    tipo_carga:[],
+    causal_incremento:[],
+    causal_rebaja:[]
   },
   modal_show:false,
   modal_rechazar:false,
@@ -68,6 +71,15 @@ export const mutations = {
   },
   SET_FILTRO_REBAJA_INCREMENTO(state, value){
     state.filtro.rebaja_incremento = value;
+  },
+  SET_FILTRO_TIPO_CARGA(state, value){
+    state.filtro.tipo_carga = value;
+  },
+  SET_FILTRO_CAUSAL_INCREMENTO(state, value){
+    state.filtro.causal_incremento = value;
+  },
+  SET_FILTRO_CAUSAL_REBAJA(state, value){
+    state.filtro.causal_rebaja = value;
   },
   SET_ESTADOS(state, value){
     state.estados = value;
@@ -139,6 +151,9 @@ export const actions = {
       estados:state.filtro.estados,
       tipos:state.filtro.tipos,
       rebaja_incremento:state.filtro.rebaja_incremento,
+      tipo_carga:state.filtro.tipo_carga,
+      causal_rebaja:state.filtro.causal_rebaja,
+      causal_incremento:state.filtro.causal_incremento,
       page:state.pagination.current_page
     };
 

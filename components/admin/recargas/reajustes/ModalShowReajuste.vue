@@ -61,12 +61,16 @@
               <table class="table is-striped is-narrow is-hoverable is-fullwidth">
                 <tbody>
                   <tr>
-                    <th>Tipo de ajuste:</th>
-                    <td>{{ ajuste.tipo_reajuste_nombre }}</td>
+                    <th>Rut funcionario:</th>
+                    <td>{{ ajuste.rut_funcionario != null ? ajuste.rut_funcionario : '--' }}</td>
                   </tr>
                   <tr>
-                    <th>Funcionario:</th>
+                    <th>Nombres funcionario:</th>
                     <td>{{ ajuste.nombres_funcionario != null ? ajuste.nombres_funcionario : '--' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Tipo de ajuste:</th>
+                    <td>{{ ajuste.tipo_reajuste_nombre }}</td>
                   </tr>
                   <tr>
                     <th>Fecha:</th>
@@ -110,6 +114,18 @@
                     </td>
                   </tr>
                   <tr>
+                    <th>DC cartola actual:</th>
+                    <td>{{ajuste.esquema_dc}}</td>
+                  </tr>
+                  <tr>
+                    <th>MC cartola actual:</th>
+                    <td>{{ajuste.esquema_mc}}</td>
+                  </tr>
+                  <tr>
+                    <th>Tipo de ingreso:</th>
+                    <td>{{ajuste.tipo_carga}}</td>
+                  </tr>
+                  <tr>
                     <th>Ingresado por:</th>
                     <td>{{ ajuste.user_created_by}}</td>
                   </tr>
@@ -124,7 +140,7 @@
                 <p class="has-text-justified">{{ ajuste.observacion }}</p>
               </div>
               <div class="field">
-                <label class="label">Advertencias/Errores asociados</label>
+                <label class="label">Advertencias / Errores asociados</label>
                 <template v-if="(ajuste.alertas) && (ajuste.alertas.length)">
                   <div class="table">
                     <thead>
@@ -142,7 +158,7 @@
                   </div>
                 </template>
                 <template v-else>
-                  <p>Sin Advertencias/Errores asociados...</p>
+                  <p>--</p>
                 </template>
               </div>
               <div class="field">
