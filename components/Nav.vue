@@ -50,7 +50,7 @@
                     </div>
                   </div>
                 </div>
-                <!-- <div class="nested dropdown">
+                <div class="nested dropdown">
                   <a class="navbar-item">
                     <span class="icon-text">
                       <span>Variaciones</span>
@@ -61,15 +61,10 @@
                   </a>
                   <div class="dropdown-menu" id="dropdown-menu" role="menu">
                     <div class="dropdown-content">
-                      <a href="/" class="dropdown-item">
-                        Tipos de ausentismos
-                      </a>
-                      <a class="dropdown-item">
-                        Tipos de incremento
-                      </a>
+                      <nuxt-link :class="(currentRouteFullName === `${currentRouteName}?tipo=${url.query}` ? 'is-active' : '')" class="dropdown-item" v-for="(url, index) in urlsVariaciones" :key="index" @click.native="actionGetVariaciones(url.query)" :to="{path:'/admin/mantenedores/variaciones', query:{tipo:url.query}}">{{url.name}}</nuxt-link>
                     </div>
                   </div>
-                </div> -->
+                </div>
               </div>
             </div>
             <!-- <a class="navbar-item" v-if="hasPermission('tarjeta.read')">
@@ -113,7 +108,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      urls:'mantenedores/main/urls'
+      urls:'mantenedores/main/urls',
+      urlsVariaciones:'mantenedores/main/urlsVariaciones'
     }),
     filtroInput:{
       get() {
@@ -136,7 +132,8 @@ export default {
   methods:{
     ...mapActions({
       getRolesPermissions:'usuarios/administradores/main/getRolesPermissions',
-      getDatosContractuales:'mantenedores/main/getDatosContractuales'
+      getDatosContractuales:'mantenedores/main/getDatosContractuales',
+      getVariaciones:'mantenedores/main/getVariaciones'
     }),
     async logout(){
       this.fullscreenLoading = !this.fullscreenLoading;
@@ -153,6 +150,13 @@ export default {
         tipo:tipo
       };
       this.getDatosContractuales(data);
+    },
+    actionGetVariaciones:function(tipo){
+      this.filtroInput = '';
+      const data = {
+        tipo:tipo
+      };
+      this.getVariaciones(data);
     }
   }
 }

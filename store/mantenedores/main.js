@@ -5,6 +5,10 @@ export const state = () => ({
     {query:'unidad', name:'Unidades', icon:'el-icon-s-operation'},
     {query:'asignacion', name:'Proceso de asignación', icon:'el-icon-s-operation'}
   ],
+  urls_variaciones:[
+    {query:'ausentismo', name:'Tipo de ausentismos', icon:'el-icon-s-operation'},
+    {query:'incremento', name:'Tipo de incrementos', icon:'el-icon-s-operation'},
+  ],
   cargos:[],
   unidades:[],
   procesos:[],
@@ -32,6 +36,11 @@ export const state = () => ({
   contractual:{
     cod_sirh:'',
     name:''
+  },
+  variacion:{
+    cod_sirh:'',
+    name:'',
+    sigla:''
   },
   errors:{}
 });
@@ -74,6 +83,20 @@ export const mutations = {
   SET_CONTRACTUAL_NAME(state, value){
     state.contractual.name = value;
   },
+
+  SET_VARIACION(state, value){
+    state.variacion = value;
+  },
+  SET_VARIACION_COD_SIRH(state, value){
+    state.variacion.cod_sirh = value;
+  },
+  SET_VARIACION_NAME(state, value){
+    state.variacion.name = value;
+  },
+  SET_VARIACION_SIGLA(state, value){
+    state.variacion.sigla = value;
+  },
+
   SET_ERRORS(state, value){
     state.errors = value;
   },
@@ -83,6 +106,11 @@ export const mutations = {
   SET_REFRESH(state){
     state.contractual.cod_sirh = '';
     state.contractual.name = '';
+
+    state.variacion.cod_sirh = '';
+    state.variacion.name = '';
+    state.variacion.sigla = '';
+
     state.errors = {};
   },
   SET_UPDATE_DATA(state, value){
@@ -94,6 +122,9 @@ export const mutations = {
 export const getters = {
   urls(state){
     return state.urls;
+  },
+  urlsVariaciones(state){
+    return state.urls_variaciones;
   },
   data(state){
     return state.data;
@@ -232,5 +263,115 @@ export const actions = {
       commit('SET_ERRORS', error.response.data.errors);
       console.log(error);
     });
-  }
+  },
+  async getVariacion({commit, state}, data){
+    commit('SET_LOADING_DATA_SHOW', true);
+    const url = `/api/admin/mantenedores/variacion`;
+    const params = {
+      tipo: data.tipo,
+      id:data.id
+    };
+
+    await this.$axios.$get(url, {
+      params:params
+    }).then(response => {
+      commit('SET_LOADING_DATA_SHOW', false);
+      console.log(response);
+      if(response.status === 'Success'){
+        commit('SET_VARIACION', response.data);
+      }
+    }).catch(error => {
+      commit('SET_LOADING_DATA_SHOW', false);
+      console.log(error);
+    });
+  },
+  async getVariaciones({commit, state}, data){
+    commit('SET_LOADING_DATA', true);
+    const url = `/api/admin/mantenedores/variaciones`;
+    const params = {
+      tipo: data.tipo,
+      page:state.pagination.current_page,
+      input:state.filtro.input
+    };
+
+    await this.$axios.$get(url, {
+      params:params
+    }).then(response => {
+      commit('SET_LOADING_DATA', false);
+      console.log(response);
+      if(response.status === 'Success'){
+        commit('SET_DATA', response.data);
+        commit('SET_PAGINATION', response.pagination);
+      }
+    }).catch(error => {
+      commit('SET_LOADING_DATA', false);
+      console.log(error);
+    });
+  },
+  async storeVariacion({commit, state}, data){
+    commit('SET_LOADING_ACTION', true);
+    const url = `/api/admin/mantenedores/variaciones/${data}`;
+
+    const values = {
+      tipo:data,
+      codigo_sirh:state.variacion.cod_sirh,
+      nombre:state.variacion.name,
+      sigla:state.variacion.sigla
+    };
+
+    await this.$axios.$post(url, values).then(response => {
+      commit('SET_LOADING_ACTION', false);
+      console.log(response);
+      if(response.status === 'Success'){
+        commit('SET_NEW_CONTRACTUAL', response.data);
+        commit('SET_REFRESH');
+        commit('SET_MODAL_ADD', false);
+        Notification.success(
+          {type: "success", title: response.title}
+        );
+      }else{
+        Notification.error(
+          {type: "error", message: 'Error de servidor.'}
+        );
+      }
+    }).catch(error => {
+      commit('SET_LOADING_ACTION', false);
+      commit('SET_ERRORS', error.response.data.errors);
+      console.log(error);
+    });
+  },
+  async updateVariacion({commit, state}, data){
+    commit('SET_LOADING_ACTION', true);
+    const url = `/api/admin/mantenedores/variaciones/${data.id}/${data.tipo}`;
+
+    const values = {
+      id:data.id,
+      tipo:data.tipo,
+      codigo_sirh:state.variacion.cod_sirh,
+      nombre:state.variacion.name,
+      sigla:state.variacion.sigla
+    };
+
+    await this.$axios.$put(url, values).then(response => {
+      console.log(response);
+      commit('SET_LOADING_ACTION', false);
+      if(response.status === 'Success'){
+        commit('SET_UPDATE_DATA', response.data);
+        commit('SET_REFRESH');
+        commit('SET_MODAL_EDIT', false);
+        Notification.success(
+          {type: "success", title: response.title}
+        );
+      }else{
+        Notification.error(
+          {type: "error", message: 'Error de servidor.'}
+        );
+      }
+      this.$router.back();
+    }).catch(error => {
+      commit('SET_LOADING_ACTION', false);
+      commit('SET_ERRORS', error.response.data.errors);
+      console.log(error);
+    });
+  },
 };
