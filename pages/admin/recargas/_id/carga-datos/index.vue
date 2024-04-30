@@ -94,7 +94,7 @@ export default {
             {title:'Reglas y grupos', button:'Definir reglas', click:this.clickOpenModalGrupos, disabled: false, is_permission:this.hasPermission('regla.create'), last_item:this.recarga.last_regla },
             {title:'Funcionarios / Contratos', button:'Definir funcionarios', click:this.clickOpenModalFuncionarios, is_permission:this.hasPermission('contrato.create'), last_item:this.recarga.last_contrato},
             {title:'Asignaciones 3° y 4°', button:'Definir turnos', click:this.clickOpenModalTurnos, is_permission:this.hasPermission('asignacion.create'), last_item:this.recarga.last_asignacion },
-            {title:'Asistencias (Turnos libres)', button:'Definir asistencia', click:this.clickOpenModalAsistencia, is_permission:this.hasPermission('turno.create'), last_item:this.recarga.last_asistencia },
+            {title:'Carga de turnos (L, N o X)', button:'Definir asistencia', click:this.clickOpenModalAsistencia, is_permission:this.hasPermission('turno.create'), last_item:this.recarga.last_asistencia },
             {title:'Ausentismos', button:'Definir ausentismos', click:this.clickOpenModalAusentismos, is_permission:this.hasPermission('ausentismo.create'), last_item:this.recarga.last_ausentismo },
             {title:'Viáticos', button:'Definir viaticos', click:this.clickOpenModalViaticos, is_permission:this.hasPermission('viatico.create'), last_item:this.recarga.last_viatico },
             {title:'Ajustes', button:'Definir ajustes', click:this.clickOpenModalAjuste, is_permission:this.hasPermission('ajuste.create.masivo'), last_item:this.recarga.last_ajuste }
