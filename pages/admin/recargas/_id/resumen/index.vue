@@ -157,7 +157,7 @@
               <div class="columns">
                 <div class="column">
                   <button @click.prevent="openModalAddEsquema" class="button is-primary is-light"><i
-                      class="el-icon-plus"></i></button>
+                      class="el-icon-plus"></i> Ingresar esquema</button>
                 </div>
               </div>
             </div>
@@ -240,7 +240,7 @@
                       <th>
                         <div class="columns">
                           <div class="column">
-                            <span class="click" @click.prevent="orderByData(ordenamientos[5])">Unidad</span>
+                            <span>Unidad</span>
                           </div>
                           <div class="column">
                             <i v-if="isParamASC(ordenamientos[5])" class="el-icon-caret-top"></i>
@@ -251,7 +251,7 @@
                       <th>
                         <div class="columns">
                           <div class="column">
-                            <span class="click" @click.prevent="orderByData(ordenamientos[6])">C. Costo</span>
+                            <span>C. Costo</span>
                           </div>
                           <div class="column">
                             <i v-if="isParamASC(ordenamientos[6])" class="el-icon-caret-top"></i>
