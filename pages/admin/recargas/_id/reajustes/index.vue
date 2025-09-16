@@ -1,10 +1,11 @@
 <template>
-  <div v-loading.fullscreen.lock="fullScreenLoading" element-loading-text="Cargando datos..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
+  <div v-loading.fullscreen.lock="fullScreenLoading" element-loading-text="Cargando datos..."
+    element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
     <template v-if="recarga">
       <Hero namepage="Ajuste de días y montos" :recarga="recarga" />
     </template>
     <div class="container.is-fullhd">
-      <MenuTotales  :recarga="recarga" />
+      <MenuTotales :recarga="recarga" />
       <div class="card p-2 m-2">
         <MenuRecarga :codigo="$route.params.id" :recarga="recarga" />
         <ModalRechazar :uuid="uuid" />
@@ -12,169 +13,186 @@
           <div class="column">
             <div class="field">
               <div class="control is-medium">
-                <el-input
-                    autofocus
-                    placeholder="Busque ajustes por rut, nombre o apellidos de funcionario"
-                    v-model="input_query"
-                    @keyup.native="keySearchInput"
-                    clearable>
+                <el-input autofocus placeholder="Busque ajustes por rut, nombre o apellidos de funcionario"
+                  v-model="input_query" @keyup.native="keySearchInput" clearable>
                 </el-input>
               </div>
             </div>
             <div class="table-container pt-2">
-                <div class="columns has-text-centered">
-                  <div class="column">
-                    <div class="pt-2">
-                      <label class="label">Causal incremento</label>
-                      <el-select @change="filterGetReajustes" size="mini" v-model="causal_incremento" filterable multiple collapse-tags clearable placeholder="Seleccione causal" class="element-select">
-                        <el-option
-                          v-for="tipo in tiposIncrementos"
-                          :key="tipo.id"
-                          :label="tipo.nombre"
-                          :value="tipo.id">
-                        </el-option>
-                      </el-select>
-                    </div>
-                  </div>
-                  <div class="column">
-                    <div class="pt-2">
-                      <label class="label">Causal rebaja</label>
-                      <el-select @change="filterGetReajustes" size="mini" v-model="causal_rebaja" filterable multiple collapse-tags clearable placeholder="Seleccione causal" class="element-select">
-                        <el-option
-                          v-for="tipo in tiposDeAusentismo"
-                          :key="tipo.id"
-                          :label="tipo.nombre"
-                          :value="tipo.id">
-                        </el-option>
-                      </el-select>
-                    </div>
+              <div class="columns has-text-centered">
+                <div class="column">
+                  <div class="pt-2">
+                    <label class="label">Causal incremento</label>
+                    <el-select @change="filterGetReajustes" size="mini" v-model="causal_incremento" filterable multiple
+                      collapse-tags clearable placeholder="Seleccione causal" class="element-select">
+                      <el-option v-for="tipo in tiposIncrementos" :key="tipo.id" :label="tipo.nombre" :value="tipo.id">
+                      </el-option>
+                    </el-select>
                   </div>
                 </div>
-                <div class="columns has-text-centered">
-                  <div class="column">
-                    <div class="pt-2">
-                      <label class="label">Estado</label>
-                      <el-checkbox-group  v-model="estados_filtro" size="mini" @change="filterGetReajustes">
-                        <el-checkbox-button :disabled="loadingTable" v-for="(estado, index) in estados" :key="index" :label="estado.id">{{estado.nombre}}</el-checkbox-button>
-                      </el-checkbox-group>
-                    </div>
-                  </div>
-                  <div class="column">
-                    <div class="pt-2">
-                      <label class="label">Rebaja / Incremento</label>
-                      <el-checkbox-group v-model="rebaja_incremento" size="mini" @change="filterGetReajustes">
-                        <el-checkbox :label="0">Rebaja</el-checkbox>
-                        <el-checkbox :label="1">Incremento</el-checkbox>
-                      </el-checkbox-group>
-                    </div>
-                  </div>
-                  <div class="column">
-                    <div class="pt-2">
-                      <label class="label">Tipo ajuste</label>
-                      <el-checkbox-group v-model="tipos_filtro" size="mini" @change="filterGetReajustes">
-                        <el-checkbox-button :disabled="loadingTable" v-for="(tipo, index) in tipoAjustes" :key="index" :label="tipo.id">{{tipo.nombre}}</el-checkbox-button>
-                      </el-checkbox-group>
-                    </div>
-                  </div>
-                  <div class="column">
-                    <div class="pt-2">
-                      <label class="label">Tipo de carga</label>
-                      <el-checkbox-group v-model="tipo_carga" size="mini" @change="filterGetReajustes">
-                        <el-checkbox :label="0">Manual</el-checkbox>
-                        <el-checkbox :label="1">Masivo</el-checkbox>
-                      </el-checkbox-group>
-                    </div>
+                <div class="column">
+                  <div class="pt-2">
+                    <label class="label">Causal rebaja</label>
+                    <el-select @change="filterGetReajustes" size="mini" v-model="causal_rebaja" filterable multiple
+                      collapse-tags clearable placeholder="Seleccione causal" class="element-select">
+                      <el-option v-for="tipo in tiposDeAusentismo" :key="tipo.id" :label="tipo.nombre" :value="tipo.id">
+                      </el-option>
+                    </el-select>
                   </div>
                 </div>
-                <span v-if="(pagination)" class="tag is-info is-light">{{ `${pagination.total} ${pagination.total > 1 ? `resultados` : `resultado`}` }}</span>
-                <table class="table  is-narrow is-hoverable is-fullwidth" v-loading="loadingTable" >
-                  <thead>
-                    <tr>
-                      <th>Nombres</th>
-                      <th>Turno</th>
-                      <th>Fecha</th>
-                      <th>Rebaja/Incremento</th>
-                      <th>Causal</th>
-                      <th>Días</th>
-                      <th>Tipo ajuste</th>
-                      <th>Monto ajuste</th>
-                      <th>Estado</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <template v-if="(ajustes) && (ajustes.length)">
-                      <nuxt-link @click.native="showReajuste(index)" v-for="(reajuste, index) in ajustes" :key="index" :class="(index_color === index ? 'row-selected' : '')" class="click" tag="tr" :to="{path: `/admin/recargas/${$route.params.id}/reajustes`, query: { id: reajuste.uuid }}">
-                        <td>{{ reajuste.nombres_funcionario != null ? reajuste.nombres_funcionario : '--' }}</td>
-                        <td><el-tag effect="dark" size="mini" :type="reajuste.es_turnante != null ? (reajuste.es_turnante ? 'warning' : 'primary') : 'danger' " disable-transitions>{{`${reajuste.es_turnante != null ? `${reajuste.es_turnante ? 'Si' : 'No'}` : `Error`}`}}</el-tag></td>
-                        <td>{{ reajuste.fecha_inicio }} / {{ reajuste.fecha_termino }} ({{reajuste.dias_periodo}})</td>
-                        <td>
-                          <el-tooltip class="item" effect="dark" :content="reajuste.incremento_nombre" placement="top-start">
-                            <i class="has-text-weight-semibold" :class="(reajuste.incremento ? 'el-icon-plus has-text-link-dark' : 'el-icon-minus has-text-danger-dark')"></i>
-                          </el-tooltip>
-                        </td>
-                        <td>
-                          <template v-if="reajuste.incremento">
-                            {{ reajuste.tipo_incremento != null ? reajuste.tipo_incremento : '-' }}
+              </div>
+              <div class="columns has-text-centered">
+                <div class="column">
+                  <div class="pt-2">
+                    <label class="label">Estado</label>
+                    <el-checkbox-group v-model="estados_filtro" size="mini" @change="filterGetReajustes">
+                      <el-checkbox-button :disabled="loadingTable" v-for="(estado, index) in estados" :key="index"
+                        :label="estado.id">{{estado.nombre}}</el-checkbox-button>
+                    </el-checkbox-group>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="pt-2">
+                    <label class="label">Rebaja / Incremento</label>
+                    <el-checkbox-group v-model="rebaja_incremento" size="mini" @change="filterGetReajustes">
+                      <el-checkbox :label="0">Rebaja</el-checkbox>
+                      <el-checkbox :label="1">Incremento</el-checkbox>
+                    </el-checkbox-group>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="pt-2">
+                    <label class="label">Tipo ajuste</label>
+                    <el-checkbox-group v-model="tipos_filtro" size="mini" @change="filterGetReajustes">
+                      <el-checkbox-button :disabled="loadingTable" v-for="(tipo, index) in tipoAjustes" :key="index"
+                        :label="tipo.id">{{tipo.nombre}}</el-checkbox-button>
+                    </el-checkbox-group>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="pt-2">
+                    <label class="label">Tipo de carga</label>
+                    <el-checkbox-group v-model="tipo_carga" size="mini" @change="filterGetReajustes">
+                      <el-checkbox :label="0">Manual</el-checkbox>
+                      <el-checkbox :label="1">Masivo</el-checkbox>
+                    </el-checkbox-group>
+                  </div>
+                </div>
+              </div>
+              <div class="columns has-text-right">
+                <div class="column">
+                  <div class="pt-2">
+                    <button class="button is-success is-rounded" :class="(loadingDownloadAjustes ? 'is-loading' : '')" @click.prevent="downloadAjustesBtn">Descargar</button>
+                  </div>
+                </div>
+              </div>
+              <span v-if="(pagination)" class="tag is-info is-light">{{ `${pagination.total} ${pagination.total > 1 ?
+                `resultados` : `resultado`}` }}</span>
+              <table class="table  is-narrow is-hoverable is-fullwidth" v-loading="loadingTable">
+                <thead>
+                  <tr>
+                    <th>Nombres</th>
+                    <th>Turno</th>
+                    <th>Fecha</th>
+                    <th>Rebaja/Incremento</th>
+                    <th>Causal</th>
+                    <th>Días</th>
+                    <th>Tipo ajuste</th>
+                    <th>Monto ajuste</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-if="(ajustes) && (ajustes.length)">
+                    <nuxt-link @click.native="showReajuste(index)" v-for="(reajuste, index) in ajustes" :key="index"
+                      :class="(index_color === index ? 'row-selected' : '')" class="click" tag="tr"
+                      :to="{path: `/admin/recargas/${$route.params.id}/reajustes`, query: { id: reajuste.uuid }}">
+                      <td>{{ reajuste.nombres_funcionario != null ? reajuste.nombres_funcionario : '--' }}</td>
+                      <td><el-tag effect="dark" size="mini"
+                          :type="reajuste.es_turnante != null ? (reajuste.es_turnante ? 'warning' : 'primary') : 'danger' "
+                          disable-transitions>{{`${reajuste.es_turnante != null ? `${reajuste.es_turnante ? 'Si' :
+                          'No'}` : `Error`}`}}</el-tag></td>
+                      <td>{{ reajuste.fecha_inicio }} / {{ reajuste.fecha_termino }} ({{reajuste.dias_periodo}})</td>
+                      <td>
+                        <el-tooltip class="item" effect="dark" :content="reajuste.incremento_nombre"
+                          placement="top-start">
+                          <i class="has-text-weight-semibold"
+                            :class="(reajuste.incremento ? 'el-icon-plus has-text-link-dark' : 'el-icon-minus has-text-danger-dark')"></i>
+                        </el-tooltip>
+                      </td>
+                      <td>
+                        <template v-if="reajuste.incremento">
+                          {{ reajuste.tipo_incremento != null ? reajuste.tipo_incremento : '-' }}
+                        </template>
+                        <template v-else>
+                          {{ reajuste.tipo_ausentismo != null ? reajuste.tipo_ausentismo : '' }}
+                        </template>
+                      </td>
+                      <td><span class="has-text-weight-semibold">{{ reajuste.total_dias }}</span></td>
+                      <td><el-tag size="mini" effect="dark"
+                          :type="(reajuste.tipo_reajuste === 0 ? 'primary' : 'warning')">{{
+                          reajuste.tipo_reajuste_nombre != null ? reajuste.tipo_reajuste_nombre : '--' }}</el-tag></td>
+                      <td>
+                        <el-tooltip :disabled="!reajuste.valor_dia" class="item" effect="dark"
+                          :content="reajuste.valor_dia" placement="top-start">
+                          <span>{{ reajuste.monto_ajuste != null ? reajuste.monto_ajuste : '--' }}</span>
+                        </el-tooltip>
+                      </td>
+                      <td><el-tag effect="dark" size="mini"
+                          :type="(reajuste.status === 0 ? 'info' : (reajuste.status === 1 ? 'success' : 'danger'))">{{
+                          reajuste.status_nombre}}</el-tag></td>
+                      <td @click.stop="">
+                        <template v-if="recarga.last_status_value === 0 && hasPermission('ajuste.status')">
+                          <template v-if="reajuste.status === 0">
+                            <button @click.prevent="aprobarReajuste(index, reajuste.uuid, false)"
+                              class="button is-danger is-inverted"><span class="icon"><i
+                                  class="el-icon-close"></i></span><span>Rechazar</span></button>
+                            <el-popconfirm @confirm="aprobarReajuste(index, reajuste.uuid, true)"
+                              confirm-button-type="success" confirm-button-text='Si, aprobar' cancel-button-text='No'
+                              icon="el-icon-info" icon-color="warning" title="¿Aprobar reajuste?">
+                              <button slot="reference" class="button is-success is-inverted"
+                                :class="(indexAjuste === index ? 'is-loading' : '')"
+                                @click.prevent="changeColorSelected(index)"><span class="icon"><i
+                                    class="el-icon-check"></i></span><span>Aprobar</span></button>
+                            </el-popconfirm>
                           </template>
-                          <template v-else>
-                            {{ reajuste.tipo_ausentismo != null ? reajuste.tipo_ausentismo : '' }}
+                          <template v-if="reajuste.status === 1">
+                            <button @click.prevent="aprobarReajuste(index, reajuste.uuid, false)"
+                              class="button is-danger is-inverted"><span class="icon"><i
+                                  class="el-icon-close"></i></span><span>Rechazar</span></button>
                           </template>
-                        </td>
-                        <td><span class="has-text-weight-semibold">{{ reajuste.total_dias }}</span></td>
-                        <td><el-tag size="mini" effect="dark" :type="(reajuste.tipo_reajuste === 0 ? 'primary' : 'warning')">{{ reajuste.tipo_reajuste_nombre != null ? reajuste.tipo_reajuste_nombre : '--' }}</el-tag></td>
-                        <td>
-                          <el-tooltip :disabled="!reajuste.valor_dia" class="item" effect="dark" :content="reajuste.valor_dia" placement="top-start">
-                            <span>{{ reajuste.monto_ajuste != null ? reajuste.monto_ajuste : '--' }}</span>
-                          </el-tooltip>
-                        </td>
-                        <td><el-tag effect="dark" size="mini" :type="(reajuste.status === 0 ? 'info' : (reajuste.status === 1 ? 'success' : 'danger'))">{{ reajuste.status_nombre}}</el-tag></td>
-                        <td @click.stop="">
-                          <template v-if="recarga.last_status_value === 0 && hasPermission('ajuste.status')">
-                            <template v-if="reajuste.status === 0">
-                              <button @click.prevent="aprobarReajuste(index, reajuste.uuid, false)" class="button is-danger is-inverted"><span class="icon"><i class="el-icon-close"></i></span><span>Rechazar</span></button>
-                              <el-popconfirm
-                                  @confirm="aprobarReajuste(index, reajuste.uuid, true)"
-                                  confirm-button-type="success"
-                                  confirm-button-text='Si, aprobar'
-                                  cancel-button-text='No'
-                                  icon="el-icon-info"
-                                  icon-color="warning"
-                                  title="¿Aprobar reajuste?"
-                                  >
-                                  <button slot="reference" class="button is-success is-inverted" :class="(indexAjuste === index ? 'is-loading' : '')" @click.prevent="changeColorSelected(index)"><span class="icon"><i class="el-icon-check"></i></span><span>Aprobar</span></button>
-                              </el-popconfirm>
-                            </template>
-                            <template v-if="reajuste.status === 1">
-                              <button @click.prevent="aprobarReajuste(index, reajuste.uuid, false)" class="button is-danger is-inverted"><span class="icon"><i class="el-icon-close"></i></span><span>Rechazar</span></button>
-                            </template>
-                          </template>
-                        </td>
-                        <td>
-                          <nuxt-link :to="`/admin/esquemas/${reajuste.esquema_uuid}/ajustes`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
-                        </td>
-                      </nuxt-link>
-                    </template>
-                    <template v-else>
-                      <div class="columns">
-                        <div class="column is-full">
-                          <div class="tabs is-toggle is-toggle-rounded is-small is-centered">
-                            <el-empty class="is-centered" description="Sin resultados" :image-size="100"></el-empty>
-                          </div>
+                        </template>
+                      </td>
+                      <td>
+                        <nuxt-link :to="`/admin/esquemas/${reajuste.esquema_uuid}/ajustes`"><el-button size="mini"
+                            type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
+                      </td>
+                    </nuxt-link>
+                  </template>
+                  <template v-else>
+                    <div class="columns">
+                      <div class="column is-full">
+                        <div class="tabs is-toggle is-toggle-rounded is-small is-centered">
+                          <el-empty class="is-centered" description="Sin resultados" :image-size="100"></el-empty>
                         </div>
                       </div>
-                    </template>
-                  </tbody>
-                </table>
-                <nav class="pagination is-rounded" role="navigation" aria-label="pagination">
-                  <a class="pagination-previous" v-if="pagination.current_page > 1" @click.prevent="changePage(pagination.current_page - 1)">Volver</a>
-                  <a class="pagination-next" v-if="pagination.current_page < pagination.last_page" @click.prevent="changePage(pagination.current_page + 1)">Siguiente pagina</a>
-                  <ul class="pagination-list">
-                    <li v-for="page in pagesNumber" :key="page" class="active">
-                      <a class="pagination-link" :class="(page === isActived ? 'is-current' : '')" @click.prevent="changePage(page)" >{{page}}</a>
-                    </li>
-                  </ul>
-                </nav>
+                    </div>
+                  </template>
+                </tbody>
+              </table>
+              <nav class="pagination is-rounded" role="navigation" aria-label="pagination">
+                <a class="pagination-previous" v-if="pagination.current_page > 1"
+                  @click.prevent="changePage(pagination.current_page - 1)">Volver</a>
+                <a class="pagination-next" v-if="pagination.current_page < pagination.last_page"
+                  @click.prevent="changePage(pagination.current_page + 1)">Siguiente pagina</a>
+                <ul class="pagination-list">
+                  <li v-for="page in pagesNumber" :key="page" class="active">
+                    <a class="pagination-link" :class="(page === isActived ? 'is-current' : '')"
+                      @click.prevent="changePage(page)">{{page}}</a>
+                  </li>
+                </ul>
+              </nav>
             </div>
           </div>
         </div>
@@ -230,6 +248,7 @@ export default {
         offset:'recarga/ajustes/offset',
         tiposDeAusentismo: "modulos/modulos/tiposAusentismos",
         tiposIncrementos: "modulos/modulos/tiposIncrementos",
+        loadingDownloadAjustes: 'recarga/ajustes/loadingDownloadAjustes',
       }),
       permissions() {
         return this.$store.state.usuarios.administradores.main.permissions;
@@ -340,7 +359,8 @@ export default {
   methods:{
     ...mapActions({
         getAjustes: 'recarga/ajustes/getAjustes',
-        validateReajuste:'recarga/ajustes/validateAjuste',
+        validateReajuste: 'recarga/ajustes/validateAjuste',
+        downloadAjustesAction:'recarga/ajustes/downloadAjustes',
         getRolesPermissions:'usuarios/administradores/main/getRolesPermissions',
         getTiposAusentismos:'modulos/modulos/getTiposAusentismos',
         getTiposIncrementos:'modulos/modulos/getTiposIncrementos',
@@ -364,7 +384,6 @@ export default {
       this.getAjustes(this.$route.params.id);
     },
     aprobarReajuste:function(index, uuid, value){
-      console.log(value);
       const data = {
         uuid:uuid,
         aprobar:value,
@@ -392,6 +411,9 @@ export default {
     hasPermission:function(permission){
       return this.permissions.includes(permission);
     },
+    downloadAjustesBtn: async function () {
+      await this.downloadAjustesAction(this.$route.params.id);
+    }
   }
 }
 </script>
