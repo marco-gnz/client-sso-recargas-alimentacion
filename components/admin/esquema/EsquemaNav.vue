@@ -2,7 +2,7 @@
   <div>
     <div class="columns">
       <div class="column is-one-fifth">
-        <nuxt-link class="button is-danger is-rounded" :to="`/admin/recargas/${esquema.recarga_codigo}/resumen`"><span class="icon is-small"><i class="el-icon-arrow-left"></i></span> <span>Tabla resumen</span></nuxt-link>
+        <nuxt-link class="button is-danger is-rounded" :to="`/admin/recargas/${esquema.recarga_codigo}/resumen`"><span class="icon is-small"><i class="el-icon-arrow-left"></i></span> <span>Tabla Resumen</span></nuxt-link>
       </div>
       <div class="column">
         <div class="tabs">

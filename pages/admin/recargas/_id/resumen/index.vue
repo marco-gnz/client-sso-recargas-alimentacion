@@ -2,7 +2,7 @@
   <div v-loading.fullscreen.lock="loadingSpinner" element-loading-text="Cargando datos..."
     element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.9)">
     <template v-if="recarga">
-      <Hero namepage="Tabla general de resumen de datos" :recarga="recarga" />
+      <Hero namepage="Tabla Resumen" :recarga="recarga" />
     </template>
     <div class="container.is-fullhd">
       <ModalAddEsquema v-if="modal_add_esquema" />

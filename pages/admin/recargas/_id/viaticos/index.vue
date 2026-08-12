@@ -38,6 +38,13 @@
                         <el-checkbox :label="0">No</el-checkbox>
                       </el-checkbox-group>
                     </div>
+                    <div class="column">
+                      <label class="label">Tipo Carga</label>
+                      <el-checkbox-group @change="actionGetViaticos" v-model="tipo_carga">
+                        <el-checkbox :label="0">En periodo de descuento</el-checkbox>
+                        <el-checkbox :label="1">Fuera periodo de descuento</el-checkbox>
+                      </el-checkbox-group>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -58,6 +65,7 @@
                       <th>Motivo</th>
                       <th>Valor</th>
                       <th>Descuento L y N</th>
+                      <th>Tipo Carga</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -65,7 +73,10 @@
                       <tbody>
                         <tr v-for="(viatico, index) in viaticos" :key="index">
                           <td>{{ viatico.funcionario_nombres ? viatico.funcionario_nombres : '--'}}</td>
-                          <el-tag effect="dark" size="mini" :type="(viatico.existe_funcionario ? viatico.es_turnante_type : 'info')" disable-transitions>{{viatico.existe_funcionario ? viatico.es_turnante : '--'}}</el-tag>
+                          <td><el-tag effect="dark" size="mini"
+                            :type="(viatico.existe_funcionario ? viatico.es_turnante_type : 'info')"
+                            disable-transitions>{{ viatico.existe_funcionario ? viatico.es_turnante : '--' }}</el-tag>
+                        </td>
                           <td><span class="tag" :class="(viatico.existe_funcionario ? 'is-success' : 'is-danger')">{{ viatico.existe_funcionario ? 'Si' : 'No' }}</span></td>
                           <td>{{ viatico.fecha_inicio ? viatico.fecha_inicio : '--'}} / {{ viatico.fecha_termino ? viatico.fecha_termino : '--'}} (<strong>{{ viatico.total_dias }}</strong>d)</td>
                           <td>{{ viatico.fecha_inicio_periodo ? viatico.fecha_inicio_periodo : '--'}} / {{ viatico.fecha_termino_periodo ? viatico.fecha_termino_periodo : '--'}}</td>
@@ -76,6 +87,7 @@
                           <td>{{ viatico.motivo_viatico ? viatico.motivo_viatico : '--'}}</td>
                           <td :class="(viatico.valor_viatico <= 0 ? 'has-text-danger-dark' : 'has-text-success-dark')">{{ viatico.valor_viatico ? viatico.valor_viatico : '--'}}</td>
                           <td>{{viatico.descuento_turno_libre ? 'Si' : 'No'}}</td>
+                          <td>{{ viatico.import_type }}</td>
                           <td>
                               <nuxt-link v-if="viatico.existe_funcionario" :to="`/admin/esquemas/${viatico.esquema_uuid}/viaticos`"><el-button size="mini" type="primary" icon="el-icon-view" circle></el-button></nuxt-link>
                           </td>
@@ -153,6 +165,14 @@ export default {
       },
       set(newValue) {
         this.$store.commit('recarga/viaticos/main/SET_FILTRO_DESCUENTO_TURNO_LIBRE', newValue);
+      }
+    },
+    tipo_carga:{
+      get() {
+        return this.$store.state.recarga.viaticos.main.filtro.tipo_carga;
+      },
+      set(newValue) {
+        this.$store.commit('recarga/viaticos/main/SET_FILTRO_TIPO_CARGA', newValue);
       }
     },
     descuento:{

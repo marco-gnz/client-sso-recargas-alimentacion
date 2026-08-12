@@ -25,6 +25,7 @@
                           <th>Motivo</th>
                           <th>Valor</th>
                           <th>Descuento L y N</th>
+                          <th>Tipo Carha</th>
                         </tr>
                       </thead>
                         <template v-if="(viaticos) && (viaticos.length)">
@@ -39,6 +40,7 @@
                               <td>{{ viatico.motivo_viatico ? viatico.motivo_viatico : '--'}}</td>
                               <td :class="(viatico.valor_viatico <= 0 ? 'has-text-danger-dark' : 'has-text-success-dark')">{{ viatico.valor_viatico ? viatico.valor_viatico : '--'}}</td>
                               <td>{{viatico.descuento_turno_libre ? 'Si' : 'No'}}</td>
+                              <td>{{ viatico.import_type }}</td>
                             </tr>
                           </tbody>
                         </template>

@@ -1,24 +1,28 @@
 import { Notification } from 'element-ui';
 export const state = () => ({
-  paso:0,
-  modal:false,
-  full_screen_loading:false,
-  viaticos:[],
-  loading_table:false,
-  filtro:{
-    input:''
+  paso: 0,
+  modal: false,
+  full_screen_loading: false,
+  viaticos: [],
+  loading_table: false,
+  filtro: {
+    input: "",
   },
-  carga:{
-    file:''
+  carga: {
+    file: null,
   },
-  errors_file:null,
-  filas:[],
-  success_import:false,
-  message_success:'',
-  errors_column:''
+  errors_file: null,
+  filas: [],
+  success_import: false,
+  message_success: "",
+  errors_column: "",
+  tipo_carga:0
 });
 
 export const mutations = {
+  SET_TIPO_CARGA(state, value) {
+    state.tipo_carga = value;
+  },
   SET_MODAL(state, value){
     state.modal = value;
   },
@@ -104,30 +108,33 @@ export const actions = {
     commit('SET_SUCCESS_IMPORT', true);
   },
   errorsLoadFile({ commit }){
-    commit('SET_FILE', '');
+    commit('SET_FILE', null);
     commit('SET_VITATICOS', []);
     commit('SET_FILAS', []);
   },
   successStoreFile({ commit }){
-    commit('SET_FILE', '');
+    commit('SET_FILE', null);
     commit('SET_VITATICOS', []);
+    commit("SET_TIPO_CARGA", 0);
   },
   closeModal({ commit }){
     commit('SET_MODAL', false);
     commit('SET_POSITION_PASO_MODAL', 0);
-    commit('SET_FILE', '');
+    commit('SET_FILE', null);
     commit('SET_ERRORS_FILE', null);
     commit('SET_ERROR_COLUMN', '');
+    commit('SET_TIPO_CARGA', 0);
+    commit("SET_VITATICOS", []);
   },
   async uploadFileViaticos({ commit, dispatch }, data){
     commit('SET_LOADING', true);
-    console.log(data);
     let formData = new FormData();
     formData.append('codigo_recarga', data.recarga_codigo);
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
     formData.append('id_carga', 'viaticos');
+    formData.append("tipo_carga", data.tipo_carga);
 
     const url = '/api/admin/recargas/recarga/masivo/viaticos';
 
@@ -136,7 +143,6 @@ export const actions = {
         'Content-Type': 'multipart/form-data'
       }
     }).then(response => {
-      console.log(response);
       commit('SET_LOADING', false);
       if(response.status === 'Success'){
         dispatch('successLoadFile');
@@ -155,13 +161,13 @@ export const actions = {
   },
   async storeFileViaticos({ commit, dispatch }, data){
     commit('SET_LOADING', true);
-    console.log(data);
     let formData = new FormData();
     formData.append('codigo_recarga', data.recarga_codigo);
     formData.append('file', data.file);
     formData.append('columnas', JSON.stringify(data.columnas));
     formData.append('row_columnas', data.row_columnas);
     formData.append('id_carga', 'viaticos');
+    formData.append("tipo_carga", data.tipo_carga);
 
     const url = '/api/admin/recargas/recarga/masivo/viaticos/import';
 

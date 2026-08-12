@@ -23,7 +23,7 @@
         <nuxt-link :to="`/admin/recargas/${$route.params.id}/viaticos`"><span class="icon is-small"><i class="el-icon-shopping-cart-full"></i></span>Viáticos ({{ recarga.viaticos_count }})</nuxt-link>
       </li>
       <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/resumen` ?  'is-active'  : '' ">
-        <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen`"><span class="icon is-small"><i class="el-icon-star-on has-background-warning has-text-info"></i></span>Tabla resumen</nuxt-link>
+        <nuxt-link :to="`/admin/recargas/${$route.params.id}/resumen`"><span class="icon is-small"><i class="el-icon-star-on has-background-warning has-text-info"></i></span>Tabla Resumen</nuxt-link>
       </li>
       <li :class="currentRouteName === `/admin/recargas/${$route.params.id}/reajustes` ?  'is-active'  : '' ">
         <nuxt-link :to="`/admin/recargas/${$route.params.id}/reajustes`"><span class="icon is-small"><i class="el-icon-s-tools"></i></span>Ajustes ({{ recarga.reajustes_count }})</nuxt-link>

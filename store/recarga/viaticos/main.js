@@ -1,12 +1,13 @@
 export const state = () => ({
-  full_screen_loading:false,
-  recarga:{},
-  viaticos:[],
-  loading_table:false,
-  filtro:{
-    input:'',
-    descuento_turno_libre:[],
-    descuento:[]
+  full_screen_loading: false,
+  recarga: {},
+  viaticos: [],
+  loading_table: false,
+  filtro: {
+    input: "",
+    descuento_turno_libre: [],
+    descuento: [],
+    tipo_carga:[]
   },
   pagination: {
     total: 0,
@@ -14,36 +15,39 @@ export const state = () => ({
     per_page: 0,
     last_page: 0,
     from: 0,
-    to: 0
+    to: 0,
   },
   offset: 3,
 });
 
 export const mutations = {
-  SET_VIATICOS(state, value){
+  SET_VIATICOS(state, value) {
     state.viaticos = value;
   },
-  SET_LOADING_TABLE(state, value){
+  SET_LOADING_TABLE(state, value) {
     state.loading_table = value;
   },
-  SET_FILTRO_INPUT(state, value){
+  SET_FILTRO_INPUT(state, value) {
     state.filtro.input = value;
   },
-  SET_FILTRO_DESCUENTO_TURNO_LIBRE(state, value){
+  SET_FILTRO_DESCUENTO_TURNO_LIBRE(state, value) {
     state.filtro.descuento_turno_libre = value;
   },
-  SET_FILTRO_DESCUENTO(state, value){
+  SET_FILTRO_DESCUENTO(state, value) {
     state.filtro.descuento = value;
   },
-  SET_CURRENT_PAGE(state, value){
+  SET_CURRENT_PAGE(state, value) {
     state.pagination.current_page = value;
   },
-  SET_PAGINATION(state, value){
+  SET_PAGINATION(state, value) {
     state.pagination = value;
   },
-  SET_RECARGA(state, value){
+  SET_RECARGA(state, value) {
     state.recarga = value;
-  }
+  },
+  SET_FILTRO_TIPO_CARGA(state, value) {
+    state.filtro.tipo_carga = value;
+  },
 };
 
 export const getters = {

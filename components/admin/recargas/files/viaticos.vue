@@ -47,52 +47,62 @@
         <section v-if="paso === 1" class="modal-card-body">
           <div class="columns">
             <div class="column">
-              <el-upload
-                  class="avatar-uploader"
-                  :action="`#`"
-                  :show-file-list="false"
-                  :on-success="handleAvatarSuccess"
-                  :before-upload="beforeAvatarUpload">
+              <div class="field has-text-centered">
+                <label class="label required">Seleccione tipo de carga</label>
+                <el-radio-group v-model="tipo_carga" :disabled="(file_viaticos !== null)">
+                  <el-radio :label="0">Viáticos dentro del periodo de descuento</el-radio>
+                  <el-radio :label="1">Viáticos fuera del periodo de descuento</el-radio>
+                </el-radio-group>
+              </div>
+              <div class="field has-text-centered">
+                <label class="label required">Seleccione archivo</label>
+                  <el-upload class="avatar-uploader" :action="`#`" :show-file-list="false"
+                  :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
                   <i class="el-icon-files"></i>
-                  <div v-if="!file_viaticos" class="el-upload__text">Click para cargar archivo excel (Formato .XLSX)</div>
-                  <span v-else>{{this.file_viaticos.name}}</span>
+                  <div v-if="!file_viaticos" class="el-upload__text">Click para cargar archivo excel (Formato .XLSX)
+                  </div>
+                  <span v-else>{{ this.file_viaticos.name }}</span>
                 </el-upload>
                 <template v-if="viaticos.length && !errors_file">
-                  <el-result icon="success" title="Archivo analizado correctamente" :subTitle="`${viaticos.length} ${viaticos.length > 1 ? `registros analizados` : `registros analizado`}`">
+                  <el-result icon="success" title="Archivo analizado correctamente"
+                    :subTitle="`${viaticos.length} ${viaticos.length > 1 ? `registros analizados` : `registros analizado`}`">
                   </el-result>
                 </template>
                 <template v-if="errorColumn.status === 'Error'">
-                  <el-result icon="error" :title="errorColumn.message" subTitle="Favor verificar nuevamente el nombre de las columnas o la posición de columnas en el paso anterior.">
+                  <el-result icon="error" :title="errorColumn.message"
+                    subTitle="Favor verificar nuevamente el nombre de las columnas o la posición de columnas en el paso anterior.">
                     <template slot="extra">
-                      <el-button type="danger" size="medium">Remover archivo</el-button>
+                      <!-- <el-button type="danger" size="medium">Remover archivo</el-button> -->
                     </template>
                   </el-result>
                 </template>
                 <template v-if="errors_file != null">
-                    <el-result icon="error" title="Error al analizar archivo" :subTitle="`${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}`">
-                      <template slot="extra">
-                        <el-button type="danger" size="medium">Remover archivo</el-button>
-                        <table class="table is-fullwidth">
-                          <thead>
-                            <tr>
-                              <th>N° de fila</th>
-                              <th>Atributo</th>
-                              <th>Error</th>
-                              <th>Valores</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="(e, index) in errors_file" :key="index">
-                              <th>{{e.row}}</th>
-                              <th>{{e.attribute}}</th>
-                              <th>{{e.errors.map(m => m).join(', ')}}</th>
-                              <th>{{e.values}}</th>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </template>
-                    </el-result>
+                  <el-result icon="error" title="Error al analizar archivo"
+                    :subTitle="`${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}`">
+                    <template slot="extra">
+                      <!-- <el-button type="danger" size="medium">Remover archivo</el-button> -->
+                      <table class="table is-fullwidth">
+                        <thead>
+                          <tr>
+                            <th>N° de fila</th>
+                            <th>Atributo</th>
+                            <th>Error</th>
+                            <th>Valores</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="(e, index) in errors_file" :key="index">
+                            <th>{{ e.row }}</th>
+                            <th>{{ e.attribute }}</th>
+                            <th>{{e.errors.map(m => m).join(', ')}}</th>
+                            <th>{{ e.values }}</th>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </template>
+                  </el-result>
                 </template>
+              </div>
             </div>
           </div>
         </section>
@@ -191,6 +201,14 @@ export default {
         this.$store.commit('recargas/viaticosResumen/SET_ERRORS_FILE', newValue);
       }
     },
+    tipo_carga: {
+      get() {
+        return this.$store.state.recargas.viaticosResumen.tipo_carga;
+      },
+      set(newValue) {
+        this.$store.commit('recargas/viaticosResumen/SET_TIPO_CARGA', newValue);
+      }
+    },
     disabledButton(){
       let value = false;
       if(this.paso === 1 && !this.file_viaticos){
@@ -219,7 +237,8 @@ export default {
           recarga_codigo:this.codigo,
           file:this.file_viaticos,
           columnas:this.columnas,
-          row_columnas:this.row_columnas
+          row_columnas: this.row_columnas,
+          tipo_carga:this.tipo_carga
         };
         this.loadFileAction(data);
       }else{
@@ -245,7 +264,8 @@ export default {
           recarga_codigo:this.codigo,
           file:this.file_viaticos,
           columnas:this.columnas,
-          row_columnas:this.row_columnas
+          row_columnas: this.row_columnas,
+          tipo_carga: this.tipo_carga
         };
         this.storeFileViaticosAction(data);
       }else{
