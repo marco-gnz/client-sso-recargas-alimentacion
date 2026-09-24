@@ -140,7 +140,7 @@ export const actions = {
         commit("SET_ASISTENCIAS", response.data || []);
 
         commit("SET_ERRORS_FILE", []);
-        commit("SET_ERROR_COLUMN", null);
+        commit("SET_ERROR_COLUMN", {});
       } else {
         const failures = Array.isArray(response.failures)
           ? response.failures
@@ -151,7 +151,9 @@ export const actions = {
 
         if (failures.length > 0) {
           commit("SET_ERRORS_FILE", failures);
-          commit("SET_ERROR_COLUMN", null);
+
+          // Objeto vacío para que errorColumn.status no falle.
+          commit("SET_ERROR_COLUMN", {});
         } else {
           const message =
             response.message ||
@@ -165,7 +167,10 @@ export const actions = {
             },
           ]);
 
-          commit("SET_ERROR_COLUMN", message);
+          commit("SET_ERROR_COLUMN", {
+            status: "Error",
+            message,
+          });
         }
       }
     } catch (error) {
@@ -180,7 +185,9 @@ export const actions = {
 
       if (failures.length > 0) {
         commit("SET_ERRORS_FILE", failures);
-        commit("SET_ERROR_COLUMN", null);
+
+        // No muestra el mensaje genérico, pero mantiene un objeto.
+        commit("SET_ERROR_COLUMN", {});
       } else {
         const message =
           responseData.message ||
@@ -194,7 +201,10 @@ export const actions = {
           },
         ]);
 
-        commit("SET_ERROR_COLUMN", message);
+        commit("SET_ERROR_COLUMN", {
+          status: responseData.status || "Error",
+          message,
+        });
       }
     } finally {
       commit("SET_LOADING", false);
@@ -228,7 +238,7 @@ export const actions = {
         commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
         commit("SET_SUCCESS_IMPORT", true);
         commit("SET_ERRORS_FILE", []);
-        commit("SET_ERROR_COLUMN", null);
+        commit("SET_ERROR_COLUMN", {});
       } else {
         const failures = Array.isArray(response.failures)
           ? response.failures
@@ -238,8 +248,9 @@ export const actions = {
         commit("SET_SUCCESS_IMPORT", false);
 
         if (failures.length > 0) {
+          // Errores de validación detallados.
           commit("SET_ERRORS_FILE", failures);
-          commit("SET_ERROR_COLUMN", null);
+          commit("SET_ERROR_COLUMN", {});
         } else {
           const message =
             response.message || "Ocurrió un error al importar las asistencias.";
@@ -252,7 +263,10 @@ export const actions = {
             },
           ]);
 
-          commit("SET_ERROR_COLUMN", message);
+          commit("SET_ERROR_COLUMN", {
+            status: "Error",
+            message,
+          });
         }
       }
     } catch (error) {
@@ -266,8 +280,11 @@ export const actions = {
       commit("SET_SUCCESS_IMPORT", false);
 
       if (failures.length > 0) {
+        // Envía el detalle a la tabla o listado de errores.
         commit("SET_ERRORS_FILE", failures);
-        commit("SET_ERROR_COLUMN", null);
+
+        // Evita el mensaje genérico sin dejar el estado en null.
+        commit("SET_ERROR_COLUMN", {});
       } else {
         const message =
           responseData.message ||
@@ -281,7 +298,10 @@ export const actions = {
           },
         ]);
 
-        commit("SET_ERROR_COLUMN", message);
+        commit("SET_ERROR_COLUMN", {
+          status: responseData.status || "Error",
+          message,
+        });
       }
     } finally {
       commit("SET_LOADING", false);
