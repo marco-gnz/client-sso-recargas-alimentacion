@@ -125,54 +125,14 @@ export const actions = {
     formData.append("row_columnas", data.row_columnas);
     formData.append("id_carga", "asistencias");
 
+    let response;
+
     try {
-      const response = await this.$axios.$post(url, formData, {
+      response = await this.$axios.$post(url, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      if (response.status === "Success") {
-        dispatch("successLoadFile");
-
-        commit("SET_FILAS", response.data?.[0] || null);
-
-        commit("SET_ASISTENCIAS", response.data || []);
-
-        commit("SET_ERRORS_FILE", []);
-        commit("SET_ERROR_COLUMN", {});
-      } else {
-        const failures = Array.isArray(response.failures)
-          ? response.failures
-          : [];
-
-        dispatch("errorsLoadFile");
-        commit("SET_ASISTENCIAS", []);
-
-        if (failures.length > 0) {
-          commit("SET_ERRORS_FILE", failures);
-
-          // Objeto vacío para que errorColumn.status no falle.
-          commit("SET_ERROR_COLUMN", {});
-        } else {
-          const message =
-            response.message ||
-            "Ocurrió un error al procesar el archivo de asistencias.";
-
-          commit("SET_ERRORS_FILE", [
-            {
-              row: null,
-              attribute: null,
-              errors: [message],
-            },
-          ]);
-
-          commit("SET_ERROR_COLUMN", {
-            status: "Error",
-            message,
-          });
-        }
-      }
     } catch (error) {
       const responseData = error.response?.data || {};
 
@@ -185,8 +145,6 @@ export const actions = {
 
       if (failures.length > 0) {
         commit("SET_ERRORS_FILE", failures);
-
-        // No muestra el mensaje genérico, pero mantiene un objeto.
         commit("SET_ERROR_COLUMN", {});
       } else {
         const message =
@@ -206,8 +164,63 @@ export const actions = {
           message,
         });
       }
+
+      return;
     } finally {
       commit("SET_LOADING", false);
+    }
+
+    /*
+     * Desde este punto, la petición fue exitosa.
+     * Si ocurre un error, será visible como error del frontend
+     * y no se confundirá con un error del servidor.
+     */
+    if (response.status === "Success") {
+      commit("SET_ERRORS_FILE", []);
+      commit("SET_ERROR_COLUMN", {});
+
+      commit(
+        "SET_FILAS",
+        Array.isArray(response.data) && response.data.length > 0
+          ? response.data[0]
+          : {}
+      );
+
+      commit(
+        "SET_ASISTENCIAS",
+        Array.isArray(response.data) ? response.data : []
+      );
+
+      await dispatch("successLoadFile");
+
+      return;
+    }
+
+    const failures = Array.isArray(response.failures) ? response.failures : [];
+
+    dispatch("errorsLoadFile");
+    commit("SET_ASISTENCIAS", []);
+
+    if (failures.length > 0) {
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_ERROR_COLUMN", {});
+    } else {
+      const message =
+        response.message ||
+        "Ocurrió un error al procesar el archivo de asistencias.";
+
+      commit("SET_ERRORS_FILE", [
+        {
+          row: null,
+          attribute: null,
+          errors: [message],
+        },
+      ]);
+
+      commit("SET_ERROR_COLUMN", {
+        status: "Error",
+        message,
+      });
     }
   },
 
