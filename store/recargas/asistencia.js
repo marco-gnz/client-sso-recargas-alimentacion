@@ -89,94 +89,118 @@ export const getters = {
 };
 
 export const actions = {
-    successLoadFile({ commit }){
-        commit('SET_ASISTENCIAS', []);
-        commit('SET_ERRORS_FILE', null);
-        commit('SET_ERROR_COLUMN', '');
-        commit('SET_SUCCESS_IMPORT', true);
-    },
-    errorsLoadFile({ commit }){
-        commit('SET_FILE', '');
-        commit('SET_ASISTENCIAS', []);
-        commit('SET_FILAS', []);
-    },
-    successStoreFile({ commit }){
-        commit('SET_FILE', '');
-        commit('SET_ASISTENCIAS', []);
-    },
-    closeModal({ commit }){
-        commit('SET_MODAL', false);
-        commit('SET_POSITION_PASO_MODAL', 0);
-        commit('SET_FILE', '');
-        commit('SET_ERRORS_FILE', null);
-        commit('SET_ERROR_COLUMN', '');
-    },
-    async uploadFileAsistencia({commit, dispatch}, data){
-        commit('SET_LOADING', true);
-        const url = '/api/admin/recargas/recarga/masivo/asistencia';
+  successLoadFile({ commit }) {
+    commit("SET_ASISTENCIAS", []);
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERROR_COLUMN", "");
+    commit("SET_SUCCESS_IMPORT", true);
+  },
+  errorsLoadFile({ commit }) {
+    commit("SET_FILE", "");
+    commit("SET_ASISTENCIAS", []);
+    commit("SET_FILAS", []);
+  },
+  successStoreFile({ commit }) {
+    commit("SET_FILE", "");
+    commit("SET_ASISTENCIAS", []);
+  },
+  closeModal({ commit }) {
+    commit("SET_MODAL", false);
+    commit("SET_POSITION_PASO_MODAL", 0);
+    commit("SET_FILE", "");
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERROR_COLUMN", "");
+  },
+  async uploadFileAsistencia({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
 
-        let formData = new FormData();
-        formData.append('codigo_recarga', data.recarga_codigo);
-        formData.append('grupo_id', data.grupo_id);
-        formData.append('file', data.file);
-        formData.append('columnas', JSON.stringify(data.columnas));
-        formData.append('row_columnas', data.row_columnas);
-        formData.append('id_carga', 'asistencias');
+    const url = "/api/admin/recargas/recarga/masivo/asistencia";
+    const formData = new FormData();
 
-        await this.$axios.$post(url, formData, {
-            headers:{
-                'Content-Type': 'multipart/form-data'
-            }
-        }).then(response => {
-          commit('SET_LOADING', false);
-            if(response.status === 'Success'){
-                dispatch('successLoadFile');
-                commit('SET_FILAS', response.data[0]);
-                commit('SET_ASISTENCIAS', response.data);
-              }else{
-                dispatch('errorsLoadFile');
-                commit('SET_ERRORS_FILE', response[1]);
-              }
-        }).catch(error => {
-            console.log(error);
-            dispatch('errorsLoadFile');
-            commit('SET_LOADING', false);
-            commit('SET_ERRORS_FILE', error[1]);
-            commit('SET_ERROR_COLUMN', error.response.data);
-        });
-    },
-    async storeFileAsistencia({commit, dispatch}, data){
-      commit('SET_LOADING', true);
-        const url = '/api/admin/recargas/recarga/masivo/asistencia/import';
+    formData.append("codigo_recarga", data.recarga_codigo);
+    formData.append("grupo_id", data.grupo_id);
+    formData.append("file", data.file);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", "asistencias");
 
-        let formData = new FormData();
-        formData.append('codigo_recarga', data.recarga_codigo);
-        formData.append('file', data.file);
-        formData.append('columnas', JSON.stringify(data.columnas));
-        formData.append('row_columnas', data.row_columnas);
-        formData.append('id_carga', 'asistencias');
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-        await this.$axios.$post(url, formData, {
-            headers:{
-                'Content-Type': 'multipart/form-data'
-            }
-        }).then(response => {
-          commit('SET_LOADING', false);
-            if(response.status === 'Success'){
-                dispatch('successStoreFile');
-                commit('SET_POSITION_PASO_MODAL', 3);
-                commit('SET_SUCCESS_MESSAGE_IMPORT', response.message);
-              }else{
-                dispatch('errorsLoadFile');
-                commit('SET_ERRORS_FILE', response[1]);
-                commit('SET_SUCCESS_IMPORT', false);
-              }
-        }).catch(error => {
-            console.log(error);
-            dispatch('errorsLoadFile');
-            commit('SET_LOADING', false);
-            commit('SET_ERRORS_FILE', error[1]);
-            commit('SET_SUCCESS_IMPORT', false);
-        });
+      if (response.status === "Success") {
+        dispatch("successLoadFile");
+        commit("SET_FILAS", response.data[0]);
+        commit("SET_ASISTENCIAS", response.data);
+        commit("SET_ERRORS_FILE", []);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_ERRORS_FILE", response.failures || []);
+      }
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [];
+
+      dispatch("errorsLoadFile");
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_ERROR_COLUMN", responseData.message || null);
+    } finally {
+      commit("SET_LOADING", false);
     }
+  },
+
+  async storeFileAsistencia({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
+
+    const url = "/api/admin/recargas/recarga/masivo/asistencia/import";
+    const formData = new FormData();
+
+    formData.append("codigo_recarga", data.recarga_codigo);
+    formData.append("file", data.file);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", "asistencias");
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successStoreFile");
+        commit("SET_POSITION_PASO_MODAL", 3);
+        commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
+        commit("SET_SUCCESS_IMPORT", true);
+        commit("SET_ERRORS_FILE", []);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_ERRORS_FILE", response.failures || []);
+        commit("SET_SUCCESS_IMPORT", false);
+      }
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [];
+
+      dispatch("errorsLoadFile");
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_SUCCESS_IMPORT", false);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
 };

@@ -86,91 +86,135 @@ export const getters = {
 };
 
 export const actions = {
-  successLoadFile({ commit }){
-    commit('SET_FUNCIONARIOS', []);
-    commit('SET_ERRORS_FILE', null);
-    commit('SET_SUCCESS_IMPORT', true);
-    commit('SET_ERROR_COLUMN', '');
+  successLoadFile({ commit }) {
+    commit("SET_FUNCIONARIOS", []);
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_SUCCESS_IMPORT", true);
+    commit("SET_ERROR_COLUMN", "");
   },
-  errorsLoadFile({ commit }){
-    commit('SET_FUNCIONARIOS', []);
-    commit('SET_FILE_FUNCIONARIOS', '');
+  errorsLoadFile({ commit }) {
+    commit("SET_FUNCIONARIOS", []);
+    commit("SET_FILE_FUNCIONARIOS", "");
   },
-  successStoreFile({ commit }){
-    commit('SET_SUCCESS_IMPORT', true);
-    commit('SET_FILE_FUNCIONARIOS', '');
+  successStoreFile({ commit }) {
+    commit("SET_SUCCESS_IMPORT", true);
+    commit("SET_FILE_FUNCIONARIOS", "");
   },
-  closeModal({ commit }){
-    commit('SET_MODAL_FUNCIONARIOS', false);
-    commit('SET_POSITION_PASO_MODAL_FUNCIONARIO', 0);
+  closeModal({ commit }) {
+    commit("SET_MODAL_FUNCIONARIOS", false);
+    commit("SET_POSITION_PASO_MODAL_FUNCIONARIO", 0);
   },
-  async uploadFileFuncionarios({ commit, dispatch }, data){
-    commit('SET_LOADING', true);
-    let formData = new FormData();
-    formData.append('file', data.file);
-    formData.append('codigo_recarga', data.codigo_recarga);
-    formData.append('columnas', JSON.stringify(data.columnas));
-    formData.append('row_columnas', data.row_columnas);
-    formData.append('id_carga', 'funcionarios');
-    const url = `/api/admin/recargas/recarga/masivo/funcionarios`;
+  async uploadFileFuncionarios({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
 
-    this.$axios.$post(url, formData, {
-      headers:{
-        'Content-Type': 'multipart/form-data'
+    const formData = new FormData();
+
+    formData.append("file", data.file);
+    formData.append("codigo_recarga", data.codigo_recarga);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", "funcionarios");
+
+    const url = "/api/admin/recargas/recarga/masivo/funcionarios";
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successLoadFile");
+
+        commit("SET_FILAS", response.data?.[0] || null);
+
+        commit("SET_FUNCIONARIOS", response.data || []);
+
+        commit("SET_ERRORS_FILE", []);
+        commit("SET_ERROR_COLUMN", null);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_FUNCIONARIOS", []);
+        commit("SET_ERRORS_FILE", response.failures || []);
       }
-    }).then(response => {
-      commit('SET_LOADING', false);
-      if(response.status === 'Success'){
-        dispatch('successLoadFile');
-        commit('SET_FILAS', response.data[0]);
-        commit('SET_FUNCIONARIOS', response.data);
-      }else{
-        dispatch('errorsLoadFile');
-        commit('SET_ERRORS_FILE', response[1]);
-      }
-    }).catch(error => {
-      commit('SET_ERROR_COLUMN', error.response.data);
-      commit('SET_FUNCIONARIOS', []);
-      commit('SET_LOADING', false);
-      commit('SET_ERRORS_FILE', error[1]);
-      console.log(error);
-    });
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [
+            {
+              errors: [
+                "Ocurrió un error al procesar el archivo de funcionarios.",
+              ],
+            },
+          ];
+
+      dispatch("errorsLoadFile");
+
+      commit("SET_FUNCIONARIOS", []);
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_ERROR_COLUMN", responseData.message || null);
+    } finally {
+      commit("SET_LOADING", false);
+    }
   },
 
-  async uploadFuncionariosStore({ commit, dispatch }, data){
-    commit('SET_LOADING', true);
+  async uploadFuncionariosStore({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
 
-    let formData = new FormData();
-    formData.append('file', data.file);
-    formData.append('codigo_recarga', data.codigo_recarga);
-    formData.append('columnas', JSON.stringify(data.columnas));
-    formData.append('row_columnas', data.row_columnas);
-    formData.append('id_carga', 'funcionarios');
-    const url = `/api/admin/recargas/recarga/masivo/funcionarios/import`;
+    const formData = new FormData();
 
-    await this.$axios.$post(url, formData, {
-      headers:{
-        'Content-Type': 'multipart/form-data'
+    formData.append("file", data.file);
+    formData.append("codigo_recarga", data.codigo_recarga);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", "funcionarios");
+
+    const url = "/api/admin/recargas/recarga/masivo/funcionarios/import";
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successLoadFile");
+
+        commit("SET_FILE_FUNCIONARIOS", "");
+        commit("SET_POSITION_PASO_MODAL_FUNCIONARIO", 3);
+        commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
+        commit("SET_SUCCESS_IMPORT", true);
+        commit("SET_ERRORS_FILE", []);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_ERRORS_FILE", response.failures || []);
+        commit("SET_SUCCESS_IMPORT", false);
       }
-    }).then(response => {
-      commit('SET_LOADING', false);
-      if(response.status === 'Success'){
-        dispatch('successLoadFile');
-        commit('SET_FILE_FUNCIONARIOS', '');
-        commit('SET_POSITION_PASO_MODAL_FUNCIONARIO', 3);
-        commit('SET_SUCCESS_MESSAGE_IMPORT', response.message);
-      }else{
-        dispatch('errorsLoadFile');
-        commit('SET_ERRORS_FILE', response[1]);
-        commit('SET_SUCCESS_IMPORT', false);
-      }
+    } catch (error) {
+      const responseData = error.response?.data || {};
 
-    }).catch(error => {
-      dispatch('errorsLoadFile');
-      commit('SET_LOADING', false);
-      commit('SET_ERRORS_FILE', error[1]);
-      commit('SET_SUCCESS_IMPORT', false);
-      console.log(error);
-    });
-  }
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [
+            {
+              errors: ["Ocurrió un error al importar los funcionarios."],
+            },
+          ];
+
+      dispatch("errorsLoadFile");
+
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_SUCCESS_IMPORT", false);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
 };

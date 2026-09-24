@@ -171,178 +171,240 @@ export const getters = {
 };
 
 export const actions = {
-  async getReajustes({ commit }, data){
-    commit('SET_LOADING_REAJUSTES', true);
+  async getReajustes({ commit }, data) {
+    commit("SET_LOADING_REAJUSTES", true);
     const url = `/api/admin/recargas/recarga/${data.id}/funcionario/${data.funcionario}/reajustes`;
-    await this.$axios.$get(url).then(response => {
-      console.log(response);
-      commit('SET_LOADING_REAJUSTES', false);
-      if(response.status === 'Success'){
-        commit('SET_REAJUSTES', response.reajustes);
-        commit('SET_RECARGA', response.recarga);
-      }
-    }).catch(error => {
-      console.log(error);
-      commit('SET_LOADING_REAJUSTES', false);
-      if(error.response.status === 400){
-        Notification.error(
-          {type: "error", message: error.response.data.message}
-        );
-      }
-    });
+    await this.$axios
+      .$get(url)
+      .then((response) => {
+        console.log(response);
+        commit("SET_LOADING_REAJUSTES", false);
+        if (response.status === "Success") {
+          commit("SET_REAJUSTES", response.reajustes);
+          commit("SET_RECARGA", response.recarga);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        commit("SET_LOADING_REAJUSTES", false);
+        if (error.response.status === 400) {
+          Notification.error({
+            type: "error",
+            message: error.response.data.message,
+          });
+        }
+      });
   },
-  async getReajuste({commit}, data){
-    commit('SET_LOADING_REAJUSTE', true);
+  async getReajuste({ commit }, data) {
+    commit("SET_LOADING_REAJUSTE", true);
     const url = `/api/admin/recargas/reajuste/${data}`;
-    await this.$axios.$get(url).then(response => {
-      commit('SET_LOADING_REAJUSTE', false);
-      if(response.status === 'Success'){
-        commit('SET_REAJUSTE', response.data);
-      }
-    }).catch(error => {
-      commit('SET_LOADING_REAJUSTE', false);
-      console.log(error);
-    });
+    await this.$axios
+      .$get(url)
+      .then((response) => {
+        commit("SET_LOADING_REAJUSTE", false);
+        if (response.status === "Success") {
+          commit("SET_REAJUSTE", response.data);
+        }
+      })
+      .catch((error) => {
+        commit("SET_LOADING_REAJUSTE", false);
+        console.log(error);
+      });
   },
-  async validateReajuste({ commit }, data){
+  async validateReajuste({ commit }, data) {
     const url = `/api/admin/recargas/reajuste/${data.uuid}`;
-    commit('SET_INDEX_REAJUSTES', data.index_reajuste);
-    commit('SET_LOADING_RECHAZAR', true);
-    await this.$axios.$put(url, data).then(response => {
-      commit('SET_INDEX_REAJUSTES', undefined);
-      commit('SET_LOADING_RECHAZAR', false);
-      console.log(response);
-      if(response.status === 'Success'){
-        commit('SET_MODAL_RECHAZAR', false);
-        commit('SET_OBSERVACION_RECHAZAR', '');
-        commit('SET_UPDATE_REAJUSTE', response.data);
-        commit('SET_ERRORS', '');
-        Notification.success(
-          {type: "success", title: response.title}
+    commit("SET_INDEX_REAJUSTES", data.index_reajuste);
+    commit("SET_LOADING_RECHAZAR", true);
+    await this.$axios
+      .$put(url, data)
+      .then((response) => {
+        commit("SET_INDEX_REAJUSTES", undefined);
+        commit("SET_LOADING_RECHAZAR", false);
+        console.log(response);
+        if (response.status === "Success") {
+          commit("SET_MODAL_RECHAZAR", false);
+          commit("SET_OBSERVACION_RECHAZAR", "");
+          commit("SET_UPDATE_REAJUSTE", response.data);
+          commit("SET_ERRORS", "");
+          Notification.success({ type: "success", title: response.title });
+        }
+      })
+      .catch((error) => {
+        commit("SET_LOADING_RECHAZAR", false);
+        commit("SET_INDEX_REAJUSTES", undefined);
+        console.log(error);
+        commit("SET_ERRORS", error.response.data.errors);
+      });
+  },
+  async storeReajuste({ commit }, data) {
+    commit("recargas/resumen/SET_LOADING_REAJUSTE", true, { root: true });
+    console.log(data);
+    const url = "/api/admin/recargas/reajuste";
+    await this.$axios
+      .$post(url, data)
+      .then((response) => {
+        commit("recargas/resumen/SET_LOADING_REAJUSTE", false, { root: true });
+        console.log(response);
+        if (response.status === "Success") {
+          Notification.success({
+            type: "success",
+            title: response.title,
+            message: response.message,
+          });
+          commit("SET_ADD_REAJUSTE", response.data);
+          commit("recargas/resumen/REFRESH_CAMPOS_REAJUSTE", null, {
+            root: true,
+          });
+          commit("recargas/resumen/SET_MODAL_REAJUSTE", false, { root: true });
+          commit("recargas/resumen/SET_REAJUSTE_ERRORS", {}, { root: true });
+        }
+      })
+      .catch((error) => {
+        commit(
+          "recargas/resumen/SET_REAJUSTE_ERRORS",
+          error.response.data.errors,
+          { root: true }
         );
-      }
-    }).catch(error => {
-      commit('SET_LOADING_RECHAZAR', false);
-      commit('SET_INDEX_REAJUSTES', undefined);
-      console.log(error);
-      commit('SET_ERRORS', error.response.data.errors);
-    });
+        commit("recargas/resumen/SET_LOADING_REAJUSTE", false, { root: true });
+        console.log(error);
+      });
   },
-  async storeReajuste({ commit}, data){
-    commit('recargas/resumen/SET_LOADING_REAJUSTE', true, {root: true});
-    console.log(data);
-    const url = '/api/admin/recargas/reajuste';
-    await this.$axios.$post(url, data).then(response => {
-      commit('recargas/resumen/SET_LOADING_REAJUSTE', false, {root: true});
-      console.log(response);
-      if(response.status === 'Success'){
-        Notification.success(
-          {type: "success", title: response.title, message: response.message}
-        );
-        commit('SET_ADD_REAJUSTE', response.data);
-        commit('recargas/resumen/REFRESH_CAMPOS_REAJUSTE', null, {root: true});
-        commit('recargas/resumen/SET_MODAL_REAJUSTE', false, {root: true});
-        commit('recargas/resumen/SET_REAJUSTE_ERRORS', {}, {root: true});
-      }
-    }).catch(error => {
-      commit('recargas/resumen/SET_REAJUSTE_ERRORS', error.response.data.errors, {root: true});
-      commit('recargas/resumen/SET_LOADING_REAJUSTE', false, {root: true});
-      console.log(error);
-    });
+  successLoadFile({ commit }) {
+    commit("SET_AJUSTES_LOAD", []);
+    commit("SET_AJUSTES_LOAD_SOBRANTE", []);
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERROR_COLUMN", "");
+    commit("SET_SUCCESS_IMPORT", true);
   },
-  successLoadFile({ commit }){
-    commit('SET_AJUSTES_LOAD', []);
-    commit('SET_AJUSTES_LOAD_SOBRANTE', []);
-    commit('SET_ERRORS_FILE', null);
-    commit('SET_ERROR_COLUMN', '');
-    commit('SET_SUCCESS_IMPORT', true);
+  errorsLoadFile({ commit }) {
+    commit("SET_FILE", "");
+    commit("SET_AJUSTES_LOAD", []);
+    commit("SET_AJUSTES_LOAD_SOBRANTE", []);
+    commit("SET_FILAS", []);
   },
-  errorsLoadFile({ commit }){
-    commit('SET_FILE', '');
-    commit('SET_AJUSTES_LOAD', []);
-    commit('SET_AJUSTES_LOAD_SOBRANTE', []);
-    commit('SET_FILAS', []);
+  successStoreFile({ commit }) {
+    commit("SET_FILE", "");
+    commit("SET_AJUSTES_LOAD", []);
+    commit("SET_AJUSTES_LOAD_SOBRANTE", []);
   },
-  successStoreFile({ commit }){
-    commit('SET_FILE', '');
-    commit('SET_AJUSTES_LOAD', []);
-    commit('SET_AJUSTES_LOAD_SOBRANTE', []);
+  closeModal: function ({ commit }) {
+    commit("SET_MODAL_CARGA", false);
+    commit("SET_POSITION_PASO_MODAL", 0);
+    commit("SET_FILE", "");
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERROR_COLUMN", "");
   },
-  closeModal:function({ commit }){
-    commit('SET_MODAL_CARGA', false);
-    commit('SET_POSITION_PASO_MODAL', 0);
-    commit('SET_FILE', '');
-    commit('SET_ERRORS_FILE', null);
-    commit('SET_ERROR_COLUMN', '');
-  },
-  async uploadFileAjustes({ commit, dispatch }, data){
-    console.log(data);
-    commit('SET_LOADING', true);
-    console.log(data);
-    let formData = new FormData();
-    formData.append('codigo_recarga', data.recarga_codigo);
-    formData.append('file', data.file);
-    formData.append('columnas', JSON.stringify(data.columnas));
-    formData.append('row_columnas', data.row_columnas);
-    formData.append('id_carga', 'ajustes');
+  async uploadFileAjustes({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
 
-    const url = '/api/admin/recargas/recarga/masivo/ajustes';
+    const formData = new FormData();
 
-    await this.$axios.$post(url, formData, {
-      headers:{
-        'Content-Type': 'multipart/form-data'
+    formData.append("codigo_recarga", data.recarga_codigo);
+    formData.append("file", data.file);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", "ajustes");
+
+    const url = "/api/admin/recargas/recarga/masivo/ajustes";
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successLoadFile");
+
+        commit("SET_FILAS", response.ajustes?.[0] || null);
+
+        commit("SET_AJUSTES_LOAD", response.ajustes || []);
+
+        commit("SET_AJUSTES_LOAD_SOBRANTE", response.ajustes_sobrante || []);
+
+        commit("SET_ERRORS_FILE", []);
+        commit("SET_ERROR_COLUMN", null);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_AJUSTES_LOAD", []);
+        commit("SET_AJUSTES_LOAD_SOBRANTE", []);
+        commit("SET_ERRORS_FILE", response.failures || []);
       }
-    }).then(response => {
-      console.log(response);
-      commit('SET_LOADING', false);
-      if(response.status === 'Success'){
-        dispatch('successLoadFile');
-        commit('SET_FILAS', response.ajustes[0]);
-        commit('SET_AJUSTES_LOAD', response.ajustes);
-        commit('SET_AJUSTES_LOAD_SOBRANTE', response.ajustes_sobrante);
-      }else{
-        dispatch('errorsLoadFile');
-        commit('SET_ERRORS_FILE', response[1]);
-      }
-    }).catch(error => {
-      commit('SET_LOADING', false);
-      dispatch('errorsLoadFile');
-      commit('SET_ERRORS_FILE', error[1]);
-      commit('SET_ERROR_COLUMN', error.response.data);
-    });
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [
+            {
+              errors: ["Ocurrió un error al procesar el archivo de ajustes."],
+            },
+          ];
+
+      dispatch("errorsLoadFile");
+
+      commit("SET_AJUSTES_LOAD", []);
+      commit("SET_AJUSTES_LOAD_SOBRANTE", []);
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_ERROR_COLUMN", responseData.message || null);
+    } finally {
+      commit("SET_LOADING", false);
+    }
   },
-  async storeFileAjustes({ commit, dispatch }, data){
-    commit('SET_LOADING', true);
-    console.log(data);
-    let formData = new FormData();
-    formData.append('codigo_recarga', data.recarga_codigo);
-    formData.append('file', data.file);
-    formData.append('columnas', JSON.stringify(data.columnas));
-    formData.append('row_columnas', data.row_columnas);
-    formData.append('id_carga', 'ajustes');
 
-    const url = '/api/admin/recargas/recarga/masivo/ajustes/import';
+  async storeFileAjustes({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
 
-    await this.$axios.$post(url, formData, {
-      headers:{
-        'Content-Type': 'multipart/form-data'
+    const formData = new FormData();
+
+    formData.append("codigo_recarga", data.recarga_codigo);
+    formData.append("file", data.file);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", "ajustes");
+
+    const url = "/api/admin/recargas/recarga/masivo/ajustes/import";
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successStoreFile");
+
+        commit("SET_POSITION_PASO_MODAL", 3);
+        commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
+        commit("SET_SUCCESS_IMPORT", true);
+        commit("SET_ERRORS_FILE", []);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_ERRORS_FILE", response.failures || []);
+        commit("SET_SUCCESS_IMPORT", false);
       }
-    }).then(response => {
-      commit('SET_LOADING', false);
-      if(response.status === 'Success'){
-        dispatch('successStoreFile');
-        commit('SET_POSITION_PASO_MODAL', 3);
-        commit('SET_SUCCESS_MESSAGE_IMPORT', response.message);
-      }else{
-        dispatch('errorsLoadFile');
-        commit('SET_ERRORS_FILE', response[1]);
-        commit('SET_SUCCESS_IMPORT', false);
-      }
-    }).catch(error => {
-      dispatch('errorsLoadFile');
-      commit('SET_LOADING', false);
-      commit('SET_ERRORS_FILE', error[1]);
-      commit('SET_SUCCESS_IMPORT', false);
-    });
-  }
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [
+            {
+              errors: ["Ocurrió un error al importar los ajustes."],
+            },
+          ];
+
+      dispatch("errorsLoadFile");
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_SUCCESS_IMPORT", false);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
 };

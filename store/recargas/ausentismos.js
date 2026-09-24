@@ -106,146 +106,226 @@ export const getters = {
 };
 
 export const actions = {
-  successLoadFile({ commit }){
-    commit('SET_AUSENTISMOS', []);
-    commit('SET_ERRORS_FILE', null);
-    commit('SET_ERROR_COLUMN', '');
-    commit('SET_SUCCESS_IMPORT', true);
-    commit('SET_AUSENTISMOS_SOBRANTE', []);
+  successLoadFile({ commit }) {
+    commit("SET_AUSENTISMOS", []);
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERROR_COLUMN", "");
+    commit("SET_SUCCESS_IMPORT", true);
+    commit("SET_AUSENTISMOS_SOBRANTE", []);
   },
-  errorsLoadFile({ commit }){
-    commit('SET_FILE', '');
+  errorsLoadFile({ commit }) {
+    commit("SET_FILE", "");
     /* commit('SET_GRUPO', ''); */
-    commit('SET_AUSENTISMOS', []);
-    commit('SET_FILAS', []);
+    commit("SET_AUSENTISMOS", []);
+    commit("SET_FILAS", []);
   },
-  successStoreFile({ commit }){
-    commit('SET_FILE', '');
-    commit('SET_GRUPO', '');
-    commit('SET_REGLAS', []);
-    commit('SET_GRUPO', '');
-    commit('SET_AUSENTISMOS', []);
-    commit('SET_AUSENTISMOS_SOBRANTE', []);
+  successStoreFile({ commit }) {
+    commit("SET_FILE", "");
+    commit("SET_GRUPO", "");
+    commit("SET_REGLAS", []);
+    commit("SET_GRUPO", "");
+    commit("SET_AUSENTISMOS", []);
+    commit("SET_AUSENTISMOS_SOBRANTE", []);
   },
-  closeModal({ commit }){
-    commit('SET_MODAL', false);
-    commit('SET_POSITION_PASO_MODAL', 0);
-    commit('SET_FILE', '');
-    commit('SET_GRUPO', '');
-    commit('SET_REGLAS', []);
-    commit('SET_ERRORS_FILE', null);
-    commit('SET_ERROR_COLUMN', '');
-    commit('SET_AUSENTISMOS_SOBRANTE', []);
+  closeModal({ commit }) {
+    commit("SET_MODAL", false);
+    commit("SET_POSITION_PASO_MODAL", 0);
+    commit("SET_FILE", "");
+    commit("SET_GRUPO", "");
+    commit("SET_REGLAS", []);
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERROR_COLUMN", "");
+    commit("SET_AUSENTISMOS_SOBRANTE", []);
   },
-  async getReglas({ commit }, data){
-    commit('SET_LOADING_REGLAS', true);
+  async getReglas({ commit }, data) {
+    commit("SET_LOADING_REGLAS", true);
     const url = `/api/admin/recargas/grupo/reglas`;
 
-    await this.$axios.$get(url, {params:data}).then(response => {
-      commit('SET_LOADING_REGLAS', false);
-      console.log(response.reglas);
-      if(response.status === 'Success'){
-        commit('SET_REGLAS', response.reglas)
-      }
-    }).catch(error => {
-      commit('SET_LOADING_REGLAS', false);
-      console.log(error);
-    });
+    await this.$axios
+      .$get(url, { params: data })
+      .then((response) => {
+        commit("SET_LOADING_REGLAS", false);
+        console.log(response.reglas);
+        if (response.status === "Success") {
+          commit("SET_REGLAS", response.reglas);
+        }
+      })
+      .catch((error) => {
+        commit("SET_LOADING_REGLAS", false);
+        console.log(error);
+      });
   },
-  async uploadFileAusentismo({ commit, dispatch }, data){
-    console.log(data);
-    commit('SET_LOADING', true);
-    let formData = new FormData();
-    formData.append('codigo_recarga', data.recarga_codigo);
-    formData.append('grupo_id', data.grupo_id);
-    formData.append('file', data.file);
-    formData.append('columnas', JSON.stringify(data.columnas));
-    formData.append('row_columnas', data.row_columnas);
+  async uploadFileAusentismo({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
 
-    let grupo_selected = null;
-    let id_carga       = null;
-    if(data.grupo_id === 1){
-      grupo_selected = 'uno';
-      id_carga       = 'ausentismos_grupo_uno';
-    }else if(data.grupo_id === 2){
-      grupo_selected = 'dos';
-      id_carga       = 'ausentismos_grupo_dos';
-    }else if(data.grupo_id === 3){
-      grupo_selected = 'tres';
-      id_carga       = 'ausentismos_grupo_tres';
-    }
-    formData.append('id_carga', id_carga);
+    const grupos = {
+      1: {
+        nombre: "uno",
+        idCarga: "ausentismos_grupo_uno",
+      },
+      2: {
+        nombre: "dos",
+        idCarga: "ausentismos_grupo_dos",
+      },
+      3: {
+        nombre: "tres",
+        idCarga: "ausentismos_grupo_tres",
+      },
+    };
 
-    const url = `/api/admin/recargas/recarga/masivo/grupo/${grupo_selected}`;
-    await this.$axios.$post(url, formData, {
-      headers:{
-        'Content-Type': 'multipart/form-data'
-      }
-    }).then(response => {
-      commit('SET_LOADING', false);
-      console.log(response);
-      if(response.status === 'Success'){
-        dispatch('successLoadFile');
-        commit('SET_FILAS', response.ausentismos[0]);
-        commit('SET_AUSENTISMOS', response.ausentismos);
-        commit('SET_AUSENTISMOS_SOBRANTE', response.ausentismos_sobrante);
-      }else{
-        dispatch('errorsLoadFile');
-        commit('SET_ERRORS_FILE', response[1]);
-      }
-    }).catch(error => {
-      dispatch('errorsLoadFile');
-      commit('SET_LOADING', false);
-      commit('SET_ERRORS_FILE', error[1]);
-      commit('SET_ERROR_COLUMN', error.response.data);
-      console.log(error);
-    });
-  },
-  async storeFileGrupoUno({ commit, dispatch }, data){
-    let grupo_selected = null;
-    let id_carga       = null;
-    if(data.grupo_id === 1){
-      grupo_selected = 'uno';
-      id_carga       = 'ausentismos_grupo_uno';
-    }else if(data.grupo_id === 2){
-      grupo_selected = 'dos';
-      id_carga       = 'ausentismos_grupo_dos';
-    }else if(data.grupo_id === 3){
-      grupo_selected = 'tres';
-      id_carga       = 'ausentismos_grupo_tres';
+    const grupo = grupos[Number(data.grupo_id)];
+
+    if (!grupo) {
+      dispatch("errorsLoadFile");
+
+      commit("SET_ERRORS_FILE", [
+        {
+          errors: ["El grupo de ausentismo seleccionado no es válido."],
+        },
+      ]);
+
+      commit("SET_LOADING", false);
+
+      return;
     }
 
-    commit('SET_LOADING', true);
-    const url = `/api/admin/recargas/recarga/masivo/grupo/${grupo_selected}/import`;
+    const formData = new FormData();
 
-    let formData = new FormData();
-    formData.append('codigo_recarga', data.recarga_codigo);
-    formData.append('grupo_id', data.grupo_id);
-    formData.append('file', data.file);
-    formData.append('columnas', JSON.stringify(data.columnas));
-    formData.append('row_columnas', data.row_columnas);
-    formData.append('id_carga', id_carga);
-    await this.$axios.$post(url, formData, {
-      headers:{
-        'Content-Type': 'multipart/form-data'
+    formData.append("codigo_recarga", data.recarga_codigo);
+    formData.append("grupo_id", data.grupo_id);
+    formData.append("file", data.file);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", grupo.idCarga);
+
+    const url = `/api/admin/recargas/recarga/masivo/grupo/${grupo.nombre}`;
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successLoadFile");
+
+        commit("SET_FILAS", response.ausentismos?.[0] || null);
+
+        commit("SET_AUSENTISMOS", response.ausentismos || []);
+
+        commit("SET_AUSENTISMOS_SOBRANTE", response.ausentismos_sobrante || []);
+
+        commit("SET_ERRORS_FILE", []);
+      } else {
+        dispatch("errorsLoadFile");
+
+        commit("SET_ERRORS_FILE", response.failures || []);
       }
-    }).then(response => {
-      commit('SET_LOADING', false);
-      if(response.status === 'Success'){
-        dispatch('successStoreFile');
-        commit('SET_POSITION_PASO_MODAL', 4);
-        commit('SET_SUCCESS_MESSAGE_IMPORT', response.message);
-      }else{
-        dispatch('errorsLoadFile');
-        commit('SET_ERRORS_FILE', response[1]);
-        commit('SET_SUCCESS_IMPORT', false);
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [
+            {
+              errors: ["Ocurrió un error al procesar el archivo."],
+            },
+          ];
+
+      dispatch("errorsLoadFile");
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_ERROR_COLUMN", responseData.message || null);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
+
+  async storeFileGrupoUno({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
+
+    const grupos = {
+      1: {
+        nombre: "uno",
+        idCarga: "ausentismos_grupo_uno",
+      },
+      2: {
+        nombre: "dos",
+        idCarga: "ausentismos_grupo_dos",
+      },
+      3: {
+        nombre: "tres",
+        idCarga: "ausentismos_grupo_tres",
+      },
+    };
+
+    const grupo = grupos[Number(data.grupo_id)];
+
+    if (!grupo) {
+      dispatch("errorsLoadFile");
+
+      commit("SET_ERRORS_FILE", [
+        {
+          errors: ["El grupo de ausentismo seleccionado no es válido."],
+        },
+      ]);
+
+      commit("SET_SUCCESS_IMPORT", false);
+      commit("SET_LOADING", false);
+
+      return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("codigo_recarga", data.recarga_codigo);
+    formData.append("grupo_id", data.grupo_id);
+    formData.append("file", data.file);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", grupo.idCarga);
+
+    const url = `/api/admin/recargas/recarga/masivo/grupo/${grupo.nombre}/import`;
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successStoreFile");
+
+        commit("SET_POSITION_PASO_MODAL", 4);
+        commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
+        commit("SET_SUCCESS_IMPORT", true);
+        commit("SET_ERRORS_FILE", []);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_ERRORS_FILE", response.failures || []);
+        commit("SET_SUCCESS_IMPORT", false);
       }
-    }).catch(error => {
-      console.log(error);
-      dispatch('errorsLoadFile');
-      commit('SET_LOADING', false);
-      commit('SET_ERRORS_FILE', error[1]);
-      commit('SET_SUCCESS_IMPORT', false);
-    });
-  }
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [
+            {
+              errors: ["Ocurrió un error al importar el archivo."],
+            },
+          ];
+
+      dispatch("errorsLoadFile");
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_SUCCESS_IMPORT", false);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
 };

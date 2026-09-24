@@ -81,91 +81,135 @@ export const getters = {
 };
 
 export const actions = {
-  successLoadFile({ commit }){
-    commit('SET_TURNOS', []);
-    commit('SET_ERRORS_FILE', null);
-    commit('SET_ERROR_COLUMN', '');
-    commit('SET_SUCCESS_IMPORT', true);
+  successLoadFile({ commit }) {
+    commit("SET_TURNOS", []);
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERROR_COLUMN", "");
+    commit("SET_SUCCESS_IMPORT", true);
   },
-  errorsLoadFile({ commit }){
-    commit('SET_FILE', '');
-    commit('SET_TURNOS', []);
-    commit('SET_FILAS', []);
+  errorsLoadFile({ commit }) {
+    commit("SET_FILE", "");
+    commit("SET_TURNOS", []);
+    commit("SET_FILAS", []);
   },
-  successStoreFile({ commit }){
-    commit('SET_FILE', '');
-    commit('SET_TURNOS', []);
+  successStoreFile({ commit }) {
+    commit("SET_FILE", "");
+    commit("SET_TURNOS", []);
   },
-  closeModal({ commit }){
-    commit('SET_MODAL', false);
-    commit('SET_POSITION_PASO_MODAL', 0);
-    commit('SET_FILE', '');
-    commit('SET_ERRORS_FILE', null);
-    commit('SET_ERROR_COLUMN', '');
+  closeModal({ commit }) {
+    commit("SET_MODAL", false);
+    commit("SET_POSITION_PASO_MODAL", 0);
+    commit("SET_FILE", "");
+    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERROR_COLUMN", "");
   },
-  async uploadFileTurnos({ commit, dispatch }, data){
-    commit('SET_LOADING', true);
-    let formData = new FormData();
-    formData.append('codigo_recarga', data.recarga_codigo);
-    formData.append('file', data.file);
-    formData.append('columnas', JSON.stringify(data.columnas));
-    formData.append('row_columnas', data.row_columnas);
-    formData.append('id_carga', 'asignaciones');
+  async uploadFileTurnos({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
 
-    const url = '/api/admin/recargas/recarga/masivo/turnos';
+    const formData = new FormData();
 
-    await this.$axios.$post(url, formData, {
-      headers:{
-        'Content-Type': 'multipart/form-data'
+    formData.append("codigo_recarga", data.recarga_codigo);
+    formData.append("file", data.file);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", "asignaciones");
+
+    const url = "/api/admin/recargas/recarga/masivo/turnos";
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successLoadFile");
+
+        commit("SET_FILAS", response.data?.[0] || null);
+
+        commit("SET_TURNOS", response.data || []);
+
+        commit("SET_ERRORS_FILE", []);
+        commit("SET_ERROR_COLUMN", null);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_TURNOS", []);
+        commit("SET_ERRORS_FILE", response.failures || []);
       }
-    }).then(response => {
-      commit('SET_LOADING', false);
-      if(response.status === 'Success'){
-        dispatch('successLoadFile');
-        commit('SET_FILAS', response.data[0]);
-        commit('SET_TURNOS', response.data);
-      }else{
-        dispatch('errorsLoadFile');
-        commit('SET_ERRORS_FILE', response[1]);
-      }
-    }).catch(error => {
-      commit('SET_LOADING', false);
-      dispatch('errorsLoadFile');
-      commit('SET_ERRORS_FILE', error[1]);
-      commit('SET_ERROR_COLUMN', error.response.data);
-    });
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [
+            {
+              errors: ["Ocurrió un error al procesar el archivo de turnos."],
+            },
+          ];
+
+      dispatch("errorsLoadFile");
+
+      commit("SET_TURNOS", []);
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_ERROR_COLUMN", responseData.message || null);
+    } finally {
+      commit("SET_LOADING", false);
+    }
   },
-  async storeFileTurnos({ commit, dispatch }, data){
-    commit('SET_LOADING', true);
-    let formData = new FormData();
-    formData.append('codigo_recarga', data.recarga_codigo);
-    formData.append('file', data.file);
-    formData.append('columnas', JSON.stringify(data.columnas));
-    formData.append('row_columnas', data.row_columnas);
-    formData.append('id_carga', 'asignaciones');
 
-    const url = '/api/admin/recargas/recarga/masivo/turnos/import';
+  async storeFileTurnos({ commit, dispatch }, data) {
+    commit("SET_LOADING", true);
 
-    await this.$axios.$post(url, formData, {
-      headers:{
-        'Content-Type': 'multipart/form-data'
+    const formData = new FormData();
+
+    formData.append("codigo_recarga", data.recarga_codigo);
+    formData.append("file", data.file);
+    formData.append("columnas", JSON.stringify(data.columnas));
+    formData.append("row_columnas", data.row_columnas);
+    formData.append("id_carga", "asignaciones");
+
+    const url = "/api/admin/recargas/recarga/masivo/turnos/import";
+
+    try {
+      const response = await this.$axios.$post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === "Success") {
+        dispatch("successStoreFile");
+
+        commit("SET_POSITION_PASO_MODAL", 3);
+        commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
+        commit("SET_SUCCESS_IMPORT", true);
+        commit("SET_ERRORS_FILE", []);
+      } else {
+        dispatch("errorsLoadFile");
+        commit("SET_ERRORS_FILE", response.failures || []);
+        commit("SET_SUCCESS_IMPORT", false);
       }
-    }).then(response => {
-      commit('SET_LOADING', false);
-      if(response.status === 'Success'){
-        dispatch('successStoreFile');
-        commit('SET_POSITION_PASO_MODAL', 3);
-        commit('SET_SUCCESS_MESSAGE_IMPORT', response.message);
-      }else{
-        dispatch('errorsLoadFile');
-        commit('SET_ERRORS_FILE', response[1]);
-        commit('SET_SUCCESS_IMPORT', false);
-      }
-    }).catch(error => {
-      dispatch('errorsLoadFile');
-      commit('SET_LOADING', false);
-      commit('SET_ERRORS_FILE', error[1]);
-      commit('SET_SUCCESS_IMPORT', false);
-    });
-  }
+    } catch (error) {
+      const responseData = error.response?.data || {};
+
+      const failures = responseData.failures?.length
+        ? responseData.failures
+        : responseData.message
+        ? [{ errors: [responseData.message] }]
+        : [
+            {
+              errors: ["Ocurrió un error al importar los turnos."],
+            },
+          ];
+
+      dispatch("errorsLoadFile");
+      commit("SET_ERRORS_FILE", failures);
+      commit("SET_SUCCESS_IMPORT", false);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
 };
