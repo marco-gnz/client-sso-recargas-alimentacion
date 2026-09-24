@@ -133,28 +133,57 @@ export const actions = {
         commit("SET_ERRORS_FILE", []);
         commit("SET_ERROR_COLUMN", null);
       } else {
+        const failures = Array.isArray(response.failures)
+          ? response.failures
+          : [];
+
         dispatch("errorsLoadFile");
+
         commit("SET_TURNOS", []);
-        commit("SET_ERRORS_FILE", response.failures || []);
+        commit("SET_ERRORS_FILE", failures);
+
+        if (failures.length > 0) {
+          commit("SET_ERROR_COLUMN", null);
+        } else {
+          commit(
+            "SET_ERROR_COLUMN",
+            response.message ||
+              "Ocurrió un error al procesar el archivo de turnos."
+          );
+        }
       }
     } catch (error) {
       const responseData = error.response?.data || {};
 
-      const failures = responseData.failures?.length
+      const failures = Array.isArray(responseData.failures)
         ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
-        : [
-            {
-              errors: ["Ocurrió un error al procesar el archivo de turnos."],
-            },
-          ];
+        : [];
 
       dispatch("errorsLoadFile");
 
       commit("SET_TURNOS", []);
-      commit("SET_ERRORS_FILE", failures);
-      commit("SET_ERROR_COLUMN", responseData.message || null);
+
+      if (failures.length > 0) {
+        // Envía los errores detallados de Laravel Excel.
+        commit("SET_ERRORS_FILE", failures);
+
+        // Evita que el mensaje genérico tape el detalle.
+        commit("SET_ERROR_COLUMN", null);
+      } else {
+        const message =
+          responseData.message ||
+          "Ocurrió un error al procesar el archivo de turnos.";
+
+        commit("SET_ERRORS_FILE", [
+          {
+            row: null,
+            attribute: null,
+            errors: [message],
+          },
+        ]);
+
+        commit("SET_ERROR_COLUMN", message);
+      }
     } finally {
       commit("SET_LOADING", false);
     }
@@ -187,27 +216,61 @@ export const actions = {
         commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
         commit("SET_SUCCESS_IMPORT", true);
         commit("SET_ERRORS_FILE", []);
+        commit("SET_ERROR_COLUMN", null);
       } else {
+        const failures = Array.isArray(response.failures)
+          ? response.failures
+          : [];
+
         dispatch("errorsLoadFile");
-        commit("SET_ERRORS_FILE", response.failures || []);
         commit("SET_SUCCESS_IMPORT", false);
+
+        if (failures.length > 0) {
+          commit("SET_ERRORS_FILE", failures);
+          commit("SET_ERROR_COLUMN", null);
+        } else {
+          const message =
+            response.message || "Ocurrió un error al importar los turnos.";
+
+          commit("SET_ERRORS_FILE", [
+            {
+              row: null,
+              attribute: null,
+              errors: [message],
+            },
+          ]);
+
+          commit("SET_ERROR_COLUMN", message);
+        }
       }
     } catch (error) {
       const responseData = error.response?.data || {};
 
-      const failures = responseData.failures?.length
+      const failures = Array.isArray(responseData.failures)
         ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
-        : [
-            {
-              errors: ["Ocurrió un error al importar los turnos."],
-            },
-          ];
+        : [];
 
       dispatch("errorsLoadFile");
-      commit("SET_ERRORS_FILE", failures);
       commit("SET_SUCCESS_IMPORT", false);
+
+      if (failures.length > 0) {
+        // Mantiene los seis errores, o los que correspondan.
+        commit("SET_ERRORS_FILE", failures);
+        commit("SET_ERROR_COLUMN", null);
+      } else {
+        const message =
+          responseData.message || "Ocurrió un error al importar los turnos.";
+
+        commit("SET_ERRORS_FILE", [
+          {
+            row: null,
+            attribute: null,
+            errors: [message],
+          },
+        ]);
+
+        commit("SET_ERROR_COLUMN", message);
+      }
     } finally {
       commit("SET_LOADING", false);
     }

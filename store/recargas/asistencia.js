@@ -115,6 +115,7 @@ export const actions = {
     commit("SET_LOADING", true);
 
     const url = "/api/admin/recargas/recarga/masivo/asistencia";
+
     const formData = new FormData();
 
     formData.append("codigo_recarga", data.recarga_codigo);
@@ -133,25 +134,68 @@ export const actions = {
 
       if (response.status === "Success") {
         dispatch("successLoadFile");
-        commit("SET_FILAS", response.data[0]);
-        commit("SET_ASISTENCIAS", response.data);
+
+        commit("SET_FILAS", response.data?.[0] || null);
+
+        commit("SET_ASISTENCIAS", response.data || []);
+
         commit("SET_ERRORS_FILE", []);
+        commit("SET_ERROR_COLUMN", null);
       } else {
+        const failures = Array.isArray(response.failures)
+          ? response.failures
+          : [];
+
         dispatch("errorsLoadFile");
-        commit("SET_ERRORS_FILE", response.failures || []);
+        commit("SET_ASISTENCIAS", []);
+
+        if (failures.length > 0) {
+          commit("SET_ERRORS_FILE", failures);
+          commit("SET_ERROR_COLUMN", null);
+        } else {
+          const message =
+            response.message ||
+            "Ocurrió un error al procesar el archivo de asistencias.";
+
+          commit("SET_ERRORS_FILE", [
+            {
+              row: null,
+              attribute: null,
+              errors: [message],
+            },
+          ]);
+
+          commit("SET_ERROR_COLUMN", message);
+        }
       }
     } catch (error) {
       const responseData = error.response?.data || {};
 
-      const failures = responseData.failures?.length
+      const failures = Array.isArray(responseData.failures)
         ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
         : [];
 
       dispatch("errorsLoadFile");
-      commit("SET_ERRORS_FILE", failures);
-      commit("SET_ERROR_COLUMN", responseData.message || null);
+      commit("SET_ASISTENCIAS", []);
+
+      if (failures.length > 0) {
+        commit("SET_ERRORS_FILE", failures);
+        commit("SET_ERROR_COLUMN", null);
+      } else {
+        const message =
+          responseData.message ||
+          "Ocurrió un error al procesar el archivo de asistencias.";
+
+        commit("SET_ERRORS_FILE", [
+          {
+            row: null,
+            attribute: null,
+            errors: [message],
+          },
+        ]);
+
+        commit("SET_ERROR_COLUMN", message);
+      }
     } finally {
       commit("SET_LOADING", false);
     }
@@ -161,6 +205,7 @@ export const actions = {
     commit("SET_LOADING", true);
 
     const url = "/api/admin/recargas/recarga/masivo/asistencia/import";
+
     const formData = new FormData();
 
     formData.append("codigo_recarga", data.recarga_codigo);
@@ -178,27 +223,66 @@ export const actions = {
 
       if (response.status === "Success") {
         dispatch("successStoreFile");
+
         commit("SET_POSITION_PASO_MODAL", 3);
         commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
         commit("SET_SUCCESS_IMPORT", true);
         commit("SET_ERRORS_FILE", []);
+        commit("SET_ERROR_COLUMN", null);
       } else {
+        const failures = Array.isArray(response.failures)
+          ? response.failures
+          : [];
+
         dispatch("errorsLoadFile");
-        commit("SET_ERRORS_FILE", response.failures || []);
         commit("SET_SUCCESS_IMPORT", false);
+
+        if (failures.length > 0) {
+          commit("SET_ERRORS_FILE", failures);
+          commit("SET_ERROR_COLUMN", null);
+        } else {
+          const message =
+            response.message || "Ocurrió un error al importar las asistencias.";
+
+          commit("SET_ERRORS_FILE", [
+            {
+              row: null,
+              attribute: null,
+              errors: [message],
+            },
+          ]);
+
+          commit("SET_ERROR_COLUMN", message);
+        }
       }
     } catch (error) {
       const responseData = error.response?.data || {};
 
-      const failures = responseData.failures?.length
+      const failures = Array.isArray(responseData.failures)
         ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
         : [];
 
       dispatch("errorsLoadFile");
-      commit("SET_ERRORS_FILE", failures);
       commit("SET_SUCCESS_IMPORT", false);
+
+      if (failures.length > 0) {
+        commit("SET_ERRORS_FILE", failures);
+        commit("SET_ERROR_COLUMN", null);
+      } else {
+        const message =
+          responseData.message ||
+          "Ocurrió un error al importar las asistencias.";
+
+        commit("SET_ERRORS_FILE", [
+          {
+            row: null,
+            attribute: null,
+            errors: [message],
+          },
+        ]);
+
+        commit("SET_ERROR_COLUMN", message);
+      }
     } finally {
       commit("SET_LOADING", false);
     }
