@@ -1,81 +1,81 @@
 export const state = () => ({
-  open_modal:false,
-  full_screen_loading:false,
-  paso:0,
-  carga:{
-    grupo_id:'',
-    file:''
+  open_modal: false,
+  full_screen_loading: false,
+  paso: 0,
+  carga: {
+    grupo_id: "",
+    file: "",
   },
-  errors_file:null,
-  turnos:[],
-  filas:[],
-  success_import:false,
-  message_success:'',
-  errors_column:''
+  errors_file: [],
+  turnos: [],
+  filas: [],
+  success_import: false,
+  message_success: "",
+  errors_column: {},
 });
 
 export const mutations = {
-  SET_MODAL(state, value){
+  SET_MODAL(state, value) {
     state.open_modal = value;
   },
-  SET_LOADING(state, value){
+  SET_LOADING(state, value) {
     state.full_screen_loading = value;
   },
-  SET_NEGATIVE_PASO_MODAL(state){
+  SET_NEGATIVE_PASO_MODAL(state) {
     state.paso--;
   },
-  SET_POSITIVE_PASO_MODAL(state){
+  SET_POSITIVE_PASO_MODAL(state) {
     state.paso++;
   },
-  SET_POSITION_PASO_MODAL(state, value){
+  SET_POSITION_PASO_MODAL(state, value) {
     state.paso = value;
   },
-  SET_FILE(state, value){
+  SET_FILE(state, value) {
     state.carga.file = value;
   },
-  SET_ERRORS_FILE(state, value){
-    state.errors_file = value;
+  SET_ERRORS_FILE(state, value) {
+    state.errors_file = Array.isArray(value) ? value : [];
   },
-  SET_SUCCESS_IMPORT(state, value){
+  SET_SUCCESS_IMPORT(state, value) {
     state.success_import = value;
   },
-  SET_SUCCESS_MESSAGE_IMPORT(state, value){
+  SET_SUCCESS_MESSAGE_IMPORT(state, value) {
     state.message_success = value;
   },
-  SET_ERROR_COLUMN(state, value){
-    state.errors_column = value;
+  SET_ERROR_COLUMN(state, value) {
+    state.errors_column = value && typeof value === "object" ? value : {};
   },
-  SET_FILAS(state, value){
+  SET_FILAS(state, value) {
     state.filas = value;
   },
-  SET_TURNOS(state, value){
+  SET_TURNOS(state, value) {
     state.turnos = value;
-  }
+  },
 };
 
 export const getters = {
-  modal(state){
+  modal(state) {
     return state.open_modal;
   },
-  paso(state){
+  paso(state) {
     return state.paso;
   },
-  fullScreenLoading(state){
+  fullScreenLoading(state) {
     return state.full_screen_loading;
   },
-  successImport(state){
+  successImport(state) {
     return state.success_import;
   },
-  successMessagge(state){
+  successMessagge(state) {
     return state.message_success;
   },
-  errorsColumn(state){
+  errorsColumn(state) {
     return state.errors_column;
   },
-  turnos(state){
+  turnos(state) {
     return state.turnos;
   },
-  filas(state){
+  filas(state) {
     return state.filas;
   },
 };
@@ -83,8 +83,8 @@ export const getters = {
 export const actions = {
   successLoadFile({ commit }) {
     commit("SET_TURNOS", []);
-    commit("SET_ERRORS_FILE", null);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERRORS_FILE", []);
+    commit("SET_ERROR_COLUMN", {});
     commit("SET_SUCCESS_IMPORT", true);
   },
   errorsLoadFile({ commit }) {
@@ -100,8 +100,8 @@ export const actions = {
     commit("SET_MODAL", false);
     commit("SET_POSITION_PASO_MODAL", 0);
     commit("SET_FILE", "");
-    commit("SET_ERRORS_FILE", null);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERRORS_FILE", []);
+    commit("SET_ERROR_COLUMN", {});
   },
   async uploadFileTurnos({ commit, dispatch }, data) {
     commit("SET_LOADING", true);
@@ -126,9 +126,10 @@ export const actions = {
       if (response.status === "Success") {
         dispatch("successLoadFile");
 
-        commit("SET_FILAS", response.data?.[0] || null);
+        const turnos = Array.isArray(response.data) ? response.data : [];
+        commit("SET_FILAS", turnos.length ? turnos[0] : {});
 
-        commit("SET_TURNOS", response.data || []);
+        commit("SET_TURNOS", turnos);
 
         commit("SET_ERRORS_FILE", []);
         commit("SET_ERROR_COLUMN", null);
@@ -153,7 +154,8 @@ export const actions = {
         }
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
       const failures = Array.isArray(responseData.failures)
         ? responseData.failures
@@ -244,7 +246,8 @@ export const actions = {
         }
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
       const failures = Array.isArray(responseData.failures)
         ? responseData.failures

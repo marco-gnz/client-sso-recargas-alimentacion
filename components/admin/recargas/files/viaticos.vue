@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="modal is-large" :class="openModalViaticos ? 'is-active' : '' ">
+    <div class="modal is-large" :class="openModalViaticos ? 'is-active' : ''">
       <div class="modal-background" @click.prevent="hideViaticosModal"></div>
       <div class="modal-card" style="width: 80%;">
         <header class="modal-card-head">
@@ -36,9 +36,10 @@
               <tbody>
                 <tr v-for="(columna, index) in columnas" :key="index">
                   <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna" v-lowercase></td>
-                  <td>{{columna.formato}}</td>
-                  <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{`${columna.required ? 'Si' : 'No'}`}}</el-tag></td>
-                  <td>{{columna.descripcion}}</td>
+                  <td>{{ columna.formato }}</td>
+                  <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{ `${columna.required
+                      ? 'Si' : 'No'}`}}</el-tag></td>
+                  <td>{{ columna.descripcion }}</td>
                 </tr>
               </tbody>
             </table>
@@ -56,19 +57,19 @@
               </div>
               <div class="field has-text-centered">
                 <label class="label required">Seleccione archivo</label>
-                  <el-upload class="avatar-uploader" :action="`#`" :show-file-list="false"
+                <el-upload class="avatar-uploader" :action="`#`" :show-file-list="false"
                   :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
                   <i class="el-icon-files"></i>
                   <div v-if="!file_viaticos" class="el-upload__text">Click para cargar archivo excel (Formato .XLSX)
                   </div>
                   <span v-else>{{ this.file_viaticos.name }}</span>
                 </el-upload>
-                <template v-if="viaticos.length && !errors_file">
+                <template v-if="archivoAnalizadoCorrectamente">
                   <el-result icon="success" title="Archivo analizado correctamente"
                     :subTitle="`${viaticos.length} ${viaticos.length > 1 ? `registros analizados` : `registros analizado`}`">
                   </el-result>
                 </template>
-                <template v-if="errorColumn.status === 'Error'">
+                <template v-if="hasColumnError">
                   <el-result icon="error" :title="errorColumn.message"
                     subTitle="Favor verificar nuevamente el nombre de las columnas o la posición de columnas en el paso anterior.">
                     <template slot="extra">
@@ -76,7 +77,7 @@
                     </template>
                   </el-result>
                 </template>
-                <template v-if="errors_file != null">
+                <template v-if="hasFileErrors">
                   <el-result icon="error" title="Error al analizar archivo"
                     :subTitle="`${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}`">
                     <template slot="extra">
@@ -94,8 +95,8 @@
                           <tr v-for="(e, index) in errors_file" :key="index">
                             <th>{{ e.row }}</th>
                             <th>{{ e.attribute }}</th>
-                            <th>{{e.errors.map(m => m).join(', ')}}</th>
-                            <th>{{ e.values }}</th>
+                            <th>{{ formatErrors(e.errors) }}</th>
+                            <th>{{ formatValues(e.values) }}</th>
                           </tr>
                         </tbody>
                       </table>
@@ -111,16 +112,17 @@
             <div class="column">
               <template v-if="viaticos.length">
                 <h4 class="title is-4">Listado de registros</h4>
-                <span class="tag is-primary is-light">{{`${viaticos.length} ${viaticos.length > 1 ? `registros` : `registro` }`}}</span>
+                <span class="tag is-primary is-light">{{ `${viaticos.length} ${viaticos.length > 1 ? `registros` :
+                  `registro` }`}}</span>
                 <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
                   <thead>
                     <tr>
-                      <th v-for="(fila, index) in filas" :key="index">{{index}}</th>
+                      <th v-for="(fila, index) in filas" :key="index">{{ index }}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="(viatico, index) in viaticos" :key="index">
-                      <td v-for="(a, index) in viatico" :key="index">{{a}}</td>
+                      <td v-for="(a, index) in viatico" :key="index">{{ a }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -144,10 +146,14 @@
           </div>
         </section>
         <footer class="modal-card-foot buttons is-right">
-          <button v-if="paso === 3 && successImport" @click.prevent="hideViaticosModal" class="button is-rounded">Cerrar</button>
-          <button :disabled="paso === 0" v-if="paso != 3" @click.prevent="volver" class="button is-rounded">Volver</button>
-          <button v-if="paso < 2" :disabled="disabledButton" @click.prevent="siguiente" v-loading.fullscreen.lock="loadingSpinner" class="button is-info is-rounded">Siguiente</button>
-          <button :disabled="!successImport" v-if="paso === 2" class="button is-primary is-rounded" v-loading.fullscreen.lock="loadingSpinner" @click.prevent="storeViaticos">Cargar datos</button>
+          <button v-if="paso === 3 && successImport" @click.prevent="hideViaticosModal"
+            class="button is-rounded">Cerrar</button>
+          <button :disabled="paso === 0" v-if="paso != 3" @click.prevent="volver"
+            class="button is-rounded">Volver</button>
+          <button v-if="paso < 2" :disabled="disabledButton" @click.prevent="siguiente"
+            v-loading.fullscreen.lock="loadingSpinner" class="button is-info is-rounded">Siguiente</button>
+          <button :disabled="!successImport" v-if="paso === 2" class="button is-primary is-rounded"
+            v-loading.fullscreen.lock="loadingSpinner" @click.prevent="storeViaticos">Cargar datos</button>
         </footer>
       </div>
     </div>
@@ -155,29 +161,29 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 export default {
-  props:['codigo'],
-  data(){
+  props: ['codigo'],
+  data() {
     return {
-      columnas:[]
+      columnas: []
     };
   },
-  mounted(){
+  mounted() {
     this.getColumnsViaticos();
   },
-  computed:{
+  computed: {
     ...mapGetters({
-      loadingSpinner:'recargas/viaticosResumen/fullScreenLoading',
+      loadingSpinner: 'recargas/viaticosResumen/fullScreenLoading',
       paso: "recargas/viaticosResumen/paso",
       viaticos: "recargas/viaticosResumen/viaticos",
-      openModalViaticos:'recargas/viaticosResumen/openModalViaticos',
+      openModalViaticos: 'recargas/viaticosResumen/openModalViaticos',
       successImport: "recargas/viaticosResumen/successImport",
       errorColumn: "recargas/viaticosResumen/errorsColumn",
       filas: "recargas/viaticosResumen/filas",
       successMessagge: "recargas/viaticosResumen/successMessagge",
     }),
-    row_columnas:{
+    row_columnas: {
       get() {
         return this.$store.state.modulos.columnasexcel.row_columnas_viaticos;
       },
@@ -185,7 +191,7 @@ export default {
         this.$store.commit('modulos/columnasexcel/SET_COLUMNA_VIATICOS', newValue);
       }
     },
-    file_viaticos:{
+    file_viaticos: {
       get() {
         return this.$store.state.recargas.viaticosResumen.carga.file;
       },
@@ -193,14 +199,18 @@ export default {
         this.$store.commit('recargas/viaticosResumen/SET_FILE', newValue);
       }
     },
-    errors_file:{
+    errors_file: {
       get() {
-        return this.$store.state.recargas.viaticosResumen.errors_file;
+        const errors = this.$store.state.recargas.viaticosResumen.errors_file;
+        return Array.isArray(errors) ? errors : [];
       },
       set(newValue) {
         this.$store.commit('recargas/viaticosResumen/SET_ERRORS_FILE', newValue);
       }
     },
+    hasFileErrors() { return this.errors_file.length > 0; },
+    hasColumnError() { return Boolean(this.errorColumn && typeof this.errorColumn === 'object' && this.errorColumn.status === 'Error'); },
+    archivoAnalizadoCorrectamente() { return Boolean(this.file_viaticos && this.viaticos.length > 0 && !this.hasFileErrors && !this.hasColumnError); },
     tipo_carga: {
       get() {
         return this.$store.state.recargas.viaticosResumen.tipo_carga;
@@ -209,45 +219,43 @@ export default {
         this.$store.commit('recargas/viaticosResumen/SET_TIPO_CARGA', newValue);
       }
     },
-    disabledButton(){
+    disabledButton() {
       let value = false;
-      if(this.paso === 1 && !this.file_viaticos){
-        value = true;
-      }else if((this.paso === 1 && this.errors_file) || (this.paso === 1 && this.errorColumn)){
+      if (this.paso === 1 && !this.archivoAnalizadoCorrectamente) {
         value = true;
       }
 
       return value;
     }
   },
-  methods:{
+  methods: {
     ...mapActions({
-      closeModal:'recargas/viaticosResumen/closeModal',
-      loadFileAction:'recargas/viaticosResumen/uploadFileViaticos',
-      storeFileViaticosAction:'recargas/viaticosResumen/storeFileViaticos'
+      closeModal: 'recargas/viaticosResumen/closeModal',
+      loadFileAction: 'recargas/viaticosResumen/uploadFileViaticos',
+      storeFileViaticosAction: 'recargas/viaticosResumen/storeFileViaticos'
     }),
-    async getColumnsViaticos(){
-      const url       = '/api/admin/modulos/columnas/viaticos';
-      const response  = await this.$axios.$get(url);
-      this.columnas   = response;
+    async getColumnsViaticos() {
+      const url = '/api/admin/modulos/columnas/viaticos';
+      const response = await this.$axios.$get(url);
+      this.columnas = response;
     },
-    uploadFileHtml:function(){
-      if(this.file_viaticos){
+    uploadFileHtml: function () {
+      if (this.file_viaticos) {
         const data = {
-          recarga_codigo:this.codigo,
-          file:this.file_viaticos,
-          columnas:this.columnas,
+          recarga_codigo: this.codigo,
+          file: this.file_viaticos,
+          columnas: this.columnas,
           row_columnas: this.row_columnas,
-          tipo_carga:this.tipo_carga
+          tipo_carga: this.tipo_carga
         };
         this.loadFileAction(data);
-      }else{
+      } else {
         this.$message.error('Por favor seleccione archivo');
       }
     },
     handleAvatarSuccess(res, file) {
       this.file_viaticos = file.raw;
-      if(this.file_viaticos){
+      if (this.file_viaticos) {
         this.uploadFileHtml();
       }
     },
@@ -258,17 +266,17 @@ export default {
       }
       return isXLSX;
     },
-    storeViaticos:function(){
-      if(this.file_viaticos){
+    storeViaticos: function () {
+      if (this.file_viaticos) {
         const data = {
-          recarga_codigo:this.codigo,
-          file:this.file_viaticos,
-          columnas:this.columnas,
+          recarga_codigo: this.codigo,
+          file: this.file_viaticos,
+          columnas: this.columnas,
           row_columnas: this.row_columnas,
           tipo_carga: this.tipo_carga
         };
         this.storeFileViaticosAction(data);
-      }else{
+      } else {
         this.$message.error('Por favor seleccione archivo');
       }
     },
@@ -279,19 +287,23 @@ export default {
       }
       this.$forceUpdate()
     },
-    hideViaticosModal:function(){
+    hideViaticosModal: function () {
       this.closeModal();
     },
-    volver:function(){
+    volver: function () {
       this.$store.commit('recargas/viaticosResumen/SET_NEGATIVE_PASO_MODAL_FUNCIONARIO');
     },
-    siguiente:function(){
+    siguiente: function () {
       this.$store.commit('recargas/viaticosResumen/SET_POSITIVE_PASO_MODAL_FUNCIONARIO');
+    },
+    formatErrors(errors) { return Array.isArray(errors) ? errors.join(', ') : (errors || 'Error de validación.'); },
+    formatValues(values) {
+      if (values === null || typeof values === 'undefined') return '--';
+      if (typeof values === 'object') return Object.keys(values).map(key => `${key}: ${values[key]}`).join(', ');
+      return String(values).replace(/[{}]/g, '');
     }
   }
 }
 </script>
 
-<style>
-
-</style>
+<style></style>

@@ -1,123 +1,123 @@
 export const state = () => ({
-  full_screen_loading:false,
-  loading_reglas:false,
-  open_modal:false,
-  paso:0,
-  carga:{
-    grupo_id:'',
-    file:''
+  full_screen_loading: false,
+  loading_reglas: false,
+  open_modal: false,
+  paso: 0,
+  carga: {
+    grupo_id: "",
+    file: "",
   },
-  errors_file:null,
-  reglas:[],
-  ausentismos:[],
-  ausentismos_sobrante:[],
-  filas:[],
-  success_import:false,
-  message_success:'',
-  errors_column:'',
-  cookie_grupo:1
+  errors_file: [],
+  reglas: [],
+  ausentismos: [],
+  ausentismos_sobrante: [],
+  filas: [],
+  success_import: false,
+  message_success: "",
+  errors_column: {},
+  cookie_grupo: 1,
 });
 
 export const mutations = {
-  SET_MODAL(state, value){
+  SET_MODAL(state, value) {
     state.open_modal = value;
   },
-  SET_LOADING(state, value){
+  SET_LOADING(state, value) {
     state.full_screen_loading = value;
   },
-  SET_NEGATIVE_PASO_MODAL(state){
+  SET_NEGATIVE_PASO_MODAL(state) {
     state.paso--;
   },
-  SET_POSITIVE_PASO_MODAL(state){
+  SET_POSITIVE_PASO_MODAL(state) {
     state.paso++;
   },
-  SET_POSITION_PASO_MODAL(state, value){
+  SET_POSITION_PASO_MODAL(state, value) {
     state.paso = value;
   },
-  SET_REGLAS(state, value){
+  SET_REGLAS(state, value) {
     state.reglas = value;
   },
-  SET_GRUPO(state, value){
+  SET_GRUPO(state, value) {
     state.carga.grupo_id = value;
   },
-  SET_FILE(state, value){
+  SET_FILE(state, value) {
     state.carga.file = value;
   },
-  SET_LOADING_REGLAS(state, value){
+  SET_LOADING_REGLAS(state, value) {
     state.loading_reglas = value;
   },
-  SET_ERRORS_FILE(state, value){
-    state.errors_file = value;
+  SET_ERRORS_FILE(state, value) {
+    state.errors_file = Array.isArray(value) ? value : [];
   },
-  SET_AUSENTISMOS(state, value){
+  SET_AUSENTISMOS(state, value) {
     state.ausentismos = value;
   },
-  SET_AUSENTISMOS_SOBRANTE(state, value){
+  SET_AUSENTISMOS_SOBRANTE(state, value) {
     state.ausentismos_sobrante = value;
   },
-  SET_FILAS(state, value){
+  SET_FILAS(state, value) {
     state.filas = value;
   },
-  SET_SUCCESS_IMPORT(state, value){
+  SET_SUCCESS_IMPORT(state, value) {
     state.success_import = value;
   },
-  SET_SUCCESS_MESSAGE_IMPORT(state, value){
+  SET_SUCCESS_MESSAGE_IMPORT(state, value) {
     state.message_success = value;
   },
-  SET_ERROR_COLUMN(state, value){
-    state.errors_column = value;
-  }
+  SET_ERROR_COLUMN(state, value) {
+    state.errors_column = value && typeof value === "object" ? value : {};
+  },
 };
 
 export const getters = {
-  modal(state){
+  modal(state) {
     return state.open_modal;
   },
-  paso(state){
+  paso(state) {
     return state.paso;
   },
-  fullScreenLoading(state){
+  fullScreenLoading(state) {
     return state.full_screen_loading;
   },
-  reglas(state){
+  reglas(state) {
     return state.reglas;
   },
-  loadingReglas(state){
+  loadingReglas(state) {
     return state.loading_reglas;
   },
-  ausentismos(state){
+  ausentismos(state) {
     return state.ausentismos;
   },
-  filas(state){
+  filas(state) {
     return state.filas;
   },
-  successImport(state){
+  successImport(state) {
     return state.success_import;
   },
-  successMessagge(state){
+  successMessagge(state) {
     return state.message_success;
   },
-  errorsColumn(state){
+  errorsColumn(state) {
     return state.errors_column;
   },
-  ausentismosSobrante(state){
+  ausentismosSobrante(state) {
     return state.ausentismos_sobrante;
-  }
+  },
 };
 
 export const actions = {
   successLoadFile({ commit }) {
     commit("SET_AUSENTISMOS", []);
-    commit("SET_ERRORS_FILE", null);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERRORS_FILE", []);
+    commit("SET_ERROR_COLUMN", {});
     commit("SET_SUCCESS_IMPORT", true);
     commit("SET_AUSENTISMOS_SOBRANTE", []);
   },
   errorsLoadFile({ commit }) {
-    commit("SET_FILE", "");
-    /* commit('SET_GRUPO', ''); */
     commit("SET_AUSENTISMOS", []);
+    commit("SET_AUSENTISMOS_SOBRANTE", []);
     commit("SET_FILAS", []);
+    commit("SET_SUCCESS_IMPORT", false);
   },
   successStoreFile({ commit }) {
     commit("SET_FILE", "");
@@ -133,8 +133,10 @@ export const actions = {
     commit("SET_FILE", "");
     commit("SET_GRUPO", "");
     commit("SET_REGLAS", []);
-    commit("SET_ERRORS_FILE", null);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERRORS_FILE", []);
+    commit("SET_ERROR_COLUMN", {});
+    commit("SET_FILAS", []);
+    commit("SET_SUCCESS_IMPORT", false);
     commit("SET_AUSENTISMOS_SOBRANTE", []);
   },
   async getReglas({ commit }, data) {
@@ -210,34 +212,54 @@ export const actions = {
       if (response.status === "Success") {
         dispatch("successLoadFile");
 
-        commit("SET_FILAS", response.ausentismos?.[0] || null);
+        const ausentismos = Array.isArray(response.ausentismos)
+          ? response.ausentismos
+          : [];
 
-        commit("SET_AUSENTISMOS", response.ausentismos || []);
+        commit("SET_FILAS", ausentismos.length > 0 ? ausentismos[0] : {});
+        commit("SET_AUSENTISMOS", ausentismos);
 
-        commit("SET_AUSENTISMOS_SOBRANTE", response.ausentismos_sobrante || []);
+        commit(
+          "SET_AUSENTISMOS_SOBRANTE",
+          Array.isArray(response.ausentismos_sobrante)
+            ? response.ausentismos_sobrante
+            : []
+        );
 
         commit("SET_ERRORS_FILE", []);
+        commit("SET_ERROR_COLUMN", {});
       } else {
         dispatch("errorsLoadFile");
+        const failures = Array.isArray(response.failures)
+          ? response.failures
+          : [];
+        const message =
+          response.message || "Ocurrió un error al procesar el archivo.";
 
-        commit("SET_ERRORS_FILE", response.failures || []);
+        commit(
+          "SET_ERRORS_FILE",
+          failures.length ? failures : [{ errors: [message] }]
+        );
+        commit("SET_ERROR_COLUMN", {});
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
-      const failures = responseData.failures?.length
-        ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
-        : [
-            {
-              errors: ["Ocurrió un error al procesar el archivo."],
-            },
-          ];
+      const failures =
+        Array.isArray(responseData.failures) && responseData.failures.length
+          ? responseData.failures
+          : responseData.message
+          ? [{ errors: [responseData.message] }]
+          : [
+              {
+                errors: ["Ocurrió un error al procesar el archivo."],
+              },
+            ];
 
       dispatch("errorsLoadFile");
       commit("SET_ERRORS_FILE", failures);
-      commit("SET_ERROR_COLUMN", responseData.message || null);
+      commit("SET_ERROR_COLUMN", {});
     } finally {
       commit("SET_LOADING", false);
     }
@@ -303,23 +325,35 @@ export const actions = {
         commit("SET_SUCCESS_MESSAGE_IMPORT", response.message);
         commit("SET_SUCCESS_IMPORT", true);
         commit("SET_ERRORS_FILE", []);
+        commit("SET_ERROR_COLUMN", {});
       } else {
         dispatch("errorsLoadFile");
-        commit("SET_ERRORS_FILE", response.failures || []);
+        const failures = Array.isArray(response.failures)
+          ? response.failures
+          : [];
+        const message =
+          response.message || "Ocurrió un error al importar el archivo.";
+        commit(
+          "SET_ERRORS_FILE",
+          failures.length ? failures : [{ errors: [message] }]
+        );
+        commit("SET_ERROR_COLUMN", {});
         commit("SET_SUCCESS_IMPORT", false);
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
-      const failures = responseData.failures?.length
-        ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
-        : [
-            {
-              errors: ["Ocurrió un error al importar el archivo."],
-            },
-          ];
+      const failures =
+        Array.isArray(responseData.failures) && responseData.failures.length
+          ? responseData.failures
+          : responseData.message
+          ? [{ errors: [responseData.message] }]
+          : [
+              {
+                errors: ["Ocurrió un error al importar el archivo."],
+              },
+            ];
 
       dispatch("errorsLoadFile");
       commit("SET_ERRORS_FILE", failures);

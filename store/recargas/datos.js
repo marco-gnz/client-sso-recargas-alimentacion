@@ -1,96 +1,96 @@
 export const state = () => ({
-  full_screen_loading:false,
-  open_funcionarios:false,
-  paso_modal_funcionario:0,
-  files:{
-    funcionarios:''
+  full_screen_loading: false,
+  open_funcionarios: false,
+  paso_modal_funcionario: 0,
+  files: {
+    funcionarios: "",
   },
-  errors_file:null,
-  filas:[],
-  funcionarios:[],
-  success_import:false,
-  message_success:'',
-  errors_column:''
+  errors_file: [],
+  filas: [],
+  funcionarios: [],
+  success_import: false,
+  message_success: "",
+  errors_column: {},
 });
 
 export const mutations = {
-  SET_FILE_FUNCIONARIOS(state, value){
+  SET_FILE_FUNCIONARIOS(state, value) {
     state.files.funcionarios = value;
   },
-  SET_MODAL_FUNCIONARIOS(state, value){
+  SET_MODAL_FUNCIONARIOS(state, value) {
     state.open_funcionarios = value;
   },
-  SET_NEGATIVE_PASO_MODAL_FUNCIONARIO(state){
+  SET_NEGATIVE_PASO_MODAL_FUNCIONARIO(state) {
     state.paso_modal_funcionario--;
   },
-  SET_POSITIVE_PASO_MODAL_FUNCIONARIO(state){
+  SET_POSITIVE_PASO_MODAL_FUNCIONARIO(state) {
     state.paso_modal_funcionario++;
   },
-  SET_POSITION_PASO_MODAL_FUNCIONARIO(state, value){
+  SET_POSITION_PASO_MODAL_FUNCIONARIO(state, value) {
     state.paso_modal_funcionario = value;
   },
-  SET_ERRORS_FILE(state, value){
-    state.errors_file = value;
+  SET_ERRORS_FILE(state, value) {
+    state.errors_file = Array.isArray(value) ? value : [];
   },
-  SET_LOADING(state, value){
+  SET_LOADING(state, value) {
     state.full_screen_loading = value;
   },
-  SET_FUNCIONARIOS(state, value){
+  SET_FUNCIONARIOS(state, value) {
     state.funcionarios = value;
   },
-  SET_FILAS(state, value){
+  SET_FILAS(state, value) {
     state.filas = value;
   },
-  SET_SUCCESS_IMPORT(state, value){
+  SET_SUCCESS_IMPORT(state, value) {
     state.success_import = value;
   },
-  SET_SUCCESS_MESSAGE_IMPORT(state, value){
+  SET_SUCCESS_MESSAGE_IMPORT(state, value) {
     state.message_success = value;
   },
-  SET_ERROR_COLUMN(state, value){
-    state.errors_column = value;
-  }
+  SET_ERROR_COLUMN(state, value) {
+    state.errors_column = value && typeof value === "object" ? value : {};
+  },
 };
 
 export const getters = {
-  pasoModalFuncionario(state){
+  pasoModalFuncionario(state) {
     return state.paso_modal_funcionario;
   },
-  modalFuncionarios(state){
+  modalFuncionarios(state) {
     return state.open_funcionarios;
   },
-  formFiles(state){
+  formFiles(state) {
     return state.fyles;
   },
-  errorsFile(state){
+  errorsFile(state) {
     return state.errors_file;
   },
-  fullScreenLoading(state){
+  fullScreenLoading(state) {
     return state.full_screen_loading;
   },
-  funcionarios(state){
+  funcionarios(state) {
     return state.funcionarios;
   },
-  filas(state){
+  filas(state) {
     return state.filas;
   },
-  successImport(state){
+  successImport(state) {
     return state.success_import;
   },
-  successMessagge(state){
+  successMessagge(state) {
     return state.message_success;
   },
-  errorsColumn(state){
+  errorsColumn(state) {
     return state.errors_column;
-  }
+  },
 };
 
 export const actions = {
   successLoadFile({ commit }) {
     commit("SET_FUNCIONARIOS", []);
-    commit("SET_ERRORS_FILE", null);
+    commit("SET_ERRORS_FILE", []);
     commit("SET_SUCCESS_IMPORT", true);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERROR_COLUMN", {});
   },
   errorsLoadFile({ commit }) {
     commit("SET_FUNCIONARIOS", []);
@@ -127,9 +127,10 @@ export const actions = {
       if (response.status === "Success") {
         dispatch("successLoadFile");
 
-        commit("SET_FILAS", response.data?.[0] || null);
+        const funcionarios = Array.isArray(response.data) ? response.data : [];
+        commit("SET_FILAS", funcionarios.length ? funcionarios[0] : {});
 
-        commit("SET_FUNCIONARIOS", response.data || []);
+        commit("SET_FUNCIONARIOS", funcionarios);
 
         commit("SET_ERRORS_FILE", []);
         commit("SET_ERROR_COLUMN", null);
@@ -139,19 +140,21 @@ export const actions = {
         commit("SET_ERRORS_FILE", response.failures || []);
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
-      const failures = responseData.failures?.length
-        ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
-        : [
-            {
-              errors: [
-                "Ocurrió un error al procesar el archivo de funcionarios.",
-              ],
-            },
-          ];
+      const failures =
+        Array.isArray(responseData.failures) && responseData.failures.length
+          ? responseData.failures
+          : responseData.message
+          ? [{ errors: [responseData.message] }]
+          : [
+              {
+                errors: [
+                  "Ocurrió un error al procesar el archivo de funcionarios.",
+                ],
+              },
+            ];
 
       dispatch("errorsLoadFile");
 
@@ -197,17 +200,19 @@ export const actions = {
         commit("SET_SUCCESS_IMPORT", false);
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
-      const failures = responseData.failures?.length
-        ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
-        : [
-            {
-              errors: ["Ocurrió un error al importar los funcionarios."],
-            },
-          ];
+      const failures =
+        Array.isArray(responseData.failures) && responseData.failures.length
+          ? responseData.failures
+          : responseData.message
+          ? [{ errors: [responseData.message] }]
+          : [
+              {
+                errors: ["Ocurrió un error al importar los funcionarios."],
+              },
+            ];
 
       dispatch("errorsLoadFile");
 

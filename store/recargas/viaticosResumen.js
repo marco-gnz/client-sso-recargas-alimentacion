@@ -11,11 +11,11 @@ export const state = () => ({
   carga: {
     file: null,
   },
-  errors_file: null,
+  errors_file: [],
   filas: [],
   success_import: false,
   message_success: "",
-  errors_column: "",
+  errors_column: {},
   tipo_carga: 0,
 });
 
@@ -51,7 +51,7 @@ export const mutations = {
     state.carga.file = value;
   },
   SET_ERRORS_FILE(state, value) {
-    state.errors_file = value;
+    state.errors_file = Array.isArray(value) ? value : [];
   },
   SET_SUCCESS_IMPORT(state, value) {
     state.success_import = value;
@@ -60,7 +60,7 @@ export const mutations = {
     state.message_success = value;
   },
   SET_ERROR_COLUMN(state, value) {
-    state.errors_column = value;
+    state.errors_column = value && typeof value === "object" ? value : {};
   },
   SET_FILAS(state, value) {
     state.filas = value;
@@ -103,8 +103,8 @@ export const getters = {
 export const actions = {
   successLoadFile({ commit }) {
     commit("SET_VITATICOS", []);
-    commit("SET_ERRORS_FILE", null);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERRORS_FILE", []);
+    commit("SET_ERROR_COLUMN", {});
     commit("SET_SUCCESS_IMPORT", true);
   },
   errorsLoadFile({ commit }) {
@@ -121,8 +121,8 @@ export const actions = {
     commit("SET_MODAL", false);
     commit("SET_POSITION_PASO_MODAL", 0);
     commit("SET_FILE", null);
-    commit("SET_ERRORS_FILE", null);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERRORS_FILE", []);
+    commit("SET_ERROR_COLUMN", {});
     commit("SET_TIPO_CARGA", 0);
     commit("SET_VITATICOS", []);
   },
@@ -161,7 +161,8 @@ export const actions = {
     } catch (error) {
       dispatch("errorsLoadFile");
 
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
       const failures = responseData.failures || [];
 
@@ -210,7 +211,8 @@ export const actions = {
         commit("SET_SUCCESS_IMPORT", false);
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
       dispatch("errorsLoadFile");
 

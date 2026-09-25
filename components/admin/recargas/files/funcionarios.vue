@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="modal is-large" :class="openModalFuncionarios ? 'is-active' : '' ">
+    <div class="modal is-large" :class="openModalFuncionarios ? 'is-active' : ''">
       <div class="modal-background" @click.prevent="hideProductModal"></div>
       <div class="modal-card" style="width: 80%;">
         <header class="modal-card-head">
@@ -36,67 +36,67 @@
               <tbody>
                 <tr v-for="(columna, index) in columnas" :key="index">
                   <td><input type="text" class="input is-rounded" v-model="columna.nombre_columna" v-lowercase></td>
-                  <td>{{columna.formato}}</td>
-                  <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{`${columna.required ? 'Si' : 'No'}`}}</el-tag></td>
-                  <td>{{columna.descripcion}}</td>
+                  <td>{{ columna.formato }}</td>
+                  <td><el-tag :type="columna.required ? 'success' : 'warning'" disable-transitions>{{ `${columna.required
+                      ? 'Si' : 'No'}`}}</el-tag></td>
+                  <td>{{ columna.descripcion }}</td>
                 </tr>
               </tbody>
-          </table>
+            </table>
           </div>
         </section>
         <section v-if="paso === 1" class="modal-card-body">
           <div class="columns">
             <div class="column">
               <div class="field">
-                <el-upload
-                  class="avatar-uploader"
-                  :action="`#`"
-                  :show-file-list="false"
-                  :on-success="handleAvatarSuccess"
-                  :before-upload="beforeAvatarUpload">
+                <el-upload class="avatar-uploader" :action="`#`" :show-file-list="false"
+                  :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
                   <i class="el-icon-files"></i>
-                  <div v-if="!file_funcionario" class="el-upload__text">Click para cargar archivo excel (Formato .XLSX)</div>
-                  <span v-else>{{this.file_funcionario.name}}</span>
+                  <div v-if="!file_funcionario" class="el-upload__text">Click para cargar archivo excel (Formato .XLSX)
+                  </div>
+                  <span v-else>{{ this.file_funcionario.name }}</span>
                 </el-upload>
-                <template v-if="funcionarios.length">
-                  <el-result icon="success" title="Archivo analizado correctamente" :subTitle="`${funcionarios.length} ${funcionarios.length > 1 ? `registros analizados` : `registros analizado`}`">
+                <template v-if="archivoAnalizadoCorrectamente">
+                  <el-result icon="success" title="Archivo analizado correctamente"
+                    :subTitle="`${funcionarios.length} ${funcionarios.length > 1 ? `registros analizados` : `registros analizado`}`">
                     <template slot="extra">
                       <el-button type="danger" size="medium" @click.prevent="removeFile">Remover archivo</el-button>
                     </template>
                   </el-result>
                 </template>
-                <template v-if="errorColumn.status === 'Error'">
-                  <el-result icon="error" :title="errorColumn.message" subTitle="Favor verificar nuevamente el nombre de las columnas en el paso anterior.">
+                <template v-if="hasColumnError">
+                  <el-result icon="error" :title="errorColumn.message"
+                    subTitle="Favor verificar nuevamente el nombre de las columnas en el paso anterior.">
                     <template slot="extra">
                       <el-button type="danger" size="medium">Remover archivo</el-button>
                     </template>
                   </el-result>
                 </template>
-                <template v-if="errors_file != null">
-                    <el-result icon="error" title="Error al analizar archivo">
-                      <template slot="extra">
-                        <el-button type="danger" size="medium" @click.prevent="removeFile">Remover archivo</el-button>
-                        {{`${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}`}}
-                        <table class="table is-fullwidth">
-                          <thead>
-                            <tr>
-                              <th>N° de fila</th>
-                              <th>Atributo</th>
-                              <th>Error</th>
-                              <th>Valores</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="(e, index) in errors_file" :key="index">
-                              <th>{{e.row}}</th>
-                              <th>{{e.attribute}}</th>
-                              <th>{{e.errors.map(m => m).join(', ')}}</th>
-                              <th>{{e.values}}</th>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </template>
-                    </el-result>
+                <template v-if="hasFileErrors">
+                  <el-result icon="error" title="Error al analizar archivo">
+                    <template slot="extra">
+                      <el-button type="danger" size="medium" @click.prevent="removeFile">Remover archivo</el-button>
+                      {{ `${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}` }}
+                      <table class="table is-fullwidth">
+                        <thead>
+                          <tr>
+                            <th>N° de fila</th>
+                            <th>Atributo</th>
+                            <th>Error</th>
+                            <th>Valores</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="(e, index) in errors_file" :key="index">
+                            <th>{{ e.row }}</th>
+                            <th>{{ e.attribute }}</th>
+                            <th>{{ formatErrors(e.errors) }}</th>
+                            <th>{{ formatValues(e.values) }}</th>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </template>
+                  </el-result>
                 </template>
               </div>
             </div>
@@ -107,24 +107,26 @@
             <div class="column">
               <template v-if="funcionarios.length">
                 <h4 class="title is-4">Listado de registros</h4>
-                <span class="tag is-primary is-light">{{`${funcionarios.length} ${funcionarios.length > 1 ? `registros` : `registro` }`}}</span>
+                <span class="tag is-primary is-light">{{ `${funcionarios.length} ${funcionarios.length > 1 ? `registros`
+                  : `registro` }`}}</span>
                 <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
                   <thead>
                     <tr>
-                      <th v-for="(fila, index) in filas" :key="index">{{index}}</th>
+                      <th v-for="(fila, index) in filas" :key="index">{{ index }}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(funcionario, index) in funcionarios" :key="index" :class="funcionario.existe === 'Si' ? 'existe' : '' ">
-                      <th v-for="(f, index) in funcionario" :key="index">{{f}}</th>
+                    <tr v-for="(funcionario, index) in funcionarios" :key="index"
+                      :class="funcionario.existe === 'Si' ? 'existe' : ''">
+                      <th v-for="(f, index) in funcionario" :key="index">{{ f }}</th>
                     </tr>
                   </tbody>
                 </table>
               </template>
-              <template v-if="errors_file != null">
+              <template v-if="hasFileErrors">
                 <el-result icon="error" title="Error al cargar archivo">
                   <template slot="extra">
-                    {{`${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}`}}
+                    {{ `${errors_file.length} ${errors_file.length > 1 ? `errores` : `error`}` }}
                     <table class="table is-fullwidth">
                       <thead>
                         <tr>
@@ -136,10 +138,10 @@
                       </thead>
                       <tbody>
                         <tr v-for="(e, index) in errors_file" :key="index">
-                          <th>{{e.row}}</th>
-                          <th>{{e.attribute}}</th>
-                          <th>{{e.errors.map(m => m).join(', ')}}</th>
-                          <th>{{e.values}}</th>
+                          <th>{{ e.row }}</th>
+                          <th>{{ e.attribute }}</th>
+                          <th>{{ formatErrors(e.errors) }}</th>
+                          <th>{{ formatValues(e.values) }}</th>
                         </tr>
                       </tbody>
                     </table>
@@ -165,10 +167,14 @@
           </div>
         </section>
         <footer class="modal-card-foot buttons is-right">
-          <button v-if="paso === 3 && successImport" @click.prevent="hideProductModal" class="button is-rounded">Cerrar</button>
-          <button :disabled="paso === 0" v-if="paso != 3" @click.prevent="volver" class="button is-rounded">Volver</button>
-          <button v-if="paso < 2" :disabled="disabledButton" @click.prevent="siguiente" v-loading.fullscreen.lock="loadingSpinner" class="button is-info is-rounded">Siguiente</button>
-          <button :disabled="!successImport" v-if="paso === 2" class="button is-primary is-rounded" v-loading.fullscreen.lock="loadingSpinner" @click.prevent="loadAndStoreFuncionario">Cargar datos</button>
+          <button v-if="paso === 3 && successImport" @click.prevent="hideProductModal"
+            class="button is-rounded">Cerrar</button>
+          <button :disabled="paso === 0" v-if="paso != 3" @click.prevent="volver"
+            class="button is-rounded">Volver</button>
+          <button v-if="paso < 2" :disabled="disabledButton" @click.prevent="siguiente"
+            v-loading.fullscreen.lock="loadingSpinner" class="button is-info is-rounded">Siguiente</button>
+          <button :disabled="!successImport" v-if="paso === 2" class="button is-primary is-rounded"
+            v-loading.fullscreen.lock="loadingSpinner" @click.prevent="loadAndStoreFuncionario">Cargar datos</button>
         </footer>
       </div>
     </div>
@@ -176,21 +182,21 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 export default {
-  data(){
-    return{
-      url:process.env.BASE_URL,
-      imageUrl:'',
-      columnas:[]
+  data() {
+    return {
+      url: process.env.BASE_URL,
+      imageUrl: '',
+      columnas: []
     };
   },
-  mounted(){
+  mounted() {
     this.getColumnsFuncionarios();
   },
-  computed:{
+  computed: {
     ...mapGetters({
-      loadingSpinner:'recargas/datos/fullScreenLoading',
+      loadingSpinner: 'recargas/datos/fullScreenLoading',
       paso: "recargas/datos/pasoModalFuncionario",
       openModalFuncionarios: "recargas/datos/modalFuncionarios",
       recarga: "recargas/recargas/recarga",
@@ -199,53 +205,55 @@ export default {
       successImport: "recargas/datos/successImport",
       successMessagge: "recargas/datos/successMessagge",
       errorColumn: "recargas/datos/errorsColumn",
-      }),
-      row_columnas:{
-        get() {
-          return this.$store.state.modulos.columnasexcel.row_columnas_funcionarios;
-        },
-        set(newValue) {
-          this.$store.commit('modulos/columnasexcel/SET_COLUMNA_FUNCIONARIOS', newValue);
-        }
+    }),
+    row_columnas: {
+      get() {
+        return this.$store.state.modulos.columnasexcel.row_columnas_funcionarios;
       },
-      errors_file:{
-        get() {
-          return this.$store.state.recargas.datos.errors_file;
-        },
-        set(newValue) {
-          this.$store.commit('recargas/datos/SET_ERRORS_FILE', newValue);
-        }
-      },
-      file_funcionario:{
-        get() {
-          return this.$store.state.recargas.datos.files.funcionarios;
-        },
-        set(newValue) {
-          this.$store.commit('recargas/datos/SET_FILE_FUNCIONARIOS', newValue);
-        }
-      },
-      disabledButton(){
-        let value = false;
-        if(this.paso === 1 && !this.file_funcionario){
-          value = true;
-        }else if((this.paso === 1 && this.errors_file) || (this.paso === 1 && this.errorColumn)){
-          value = true;
-        }
-
-        return value;
+      set(newValue) {
+        this.$store.commit('modulos/columnasexcel/SET_COLUMNA_FUNCIONARIOS', newValue);
       }
+    },
+    errors_file: {
+      get() {
+        const errors = this.$store.state.recargas.datos.errors_file;
+        return Array.isArray(errors) ? errors : [];
+      },
+      set(newValue) {
+        this.$store.commit('recargas/datos/SET_ERRORS_FILE', newValue);
+      }
+    },
+    hasFileErrors() { return this.errors_file.length > 0; },
+    hasColumnError() { return Boolean(this.errorColumn && typeof this.errorColumn === 'object' && this.errorColumn.status === 'Error'); },
+    archivoAnalizadoCorrectamente() { return Boolean(this.file_funcionario && this.funcionarios.length > 0 && !this.hasFileErrors && !this.hasColumnError); },
+    file_funcionario: {
+      get() {
+        return this.$store.state.recargas.datos.files.funcionarios;
+      },
+      set(newValue) {
+        this.$store.commit('recargas/datos/SET_FILE_FUNCIONARIOS', newValue);
+      }
+    },
+    disabledButton() {
+      let value = false;
+      if (this.paso === 1 && !this.archivoAnalizadoCorrectamente) {
+        value = true;
+      }
+
+      return value;
+    }
   },
-  methods:{
+  methods: {
     ...mapActions({
-      loadFileAction:'recargas/datos/uploadFileFuncionarios',
-      uploadFuncionariosStoreAction:'recargas/datos/uploadFuncionariosStore',
-      closeModal:'recargas/datos/closeModal',
+      loadFileAction: 'recargas/datos/uploadFileFuncionarios',
+      uploadFuncionariosStoreAction: 'recargas/datos/uploadFuncionariosStore',
+      closeModal: 'recargas/datos/closeModal',
 
     }),
-    async getColumnsFuncionarios(){
-      const url       = '/api/admin/modulos/columnas/funcionarios';
-      const response  = await this.$axios.$get(url);
-      this.columnas   = response;
+    async getColumnsFuncionarios() {
+      const url = '/api/admin/modulos/columnas/funcionarios';
+      const response = await this.$axios.$get(url);
+      this.columnas = response;
     },
     updateValue(event) {
       const value = event.target.value
@@ -254,39 +262,39 @@ export default {
       }
       this.$forceUpdate()
     },
-    hideProductModal:function(){
+    hideProductModal: function () {
       this.closeModal();
     },
-    uploadFileHtml:function(){
-      if(this.file_funcionario){
+    uploadFileHtml: function () {
+      if (this.file_funcionario) {
         const data = {
-          codigo_recarga:this.recarga.codigo,
-          file:this.file_funcionario,
-          columnas:this.columnas,
-          row_columnas:this.row_columnas
+          codigo_recarga: this.recarga.codigo,
+          file: this.file_funcionario,
+          columnas: this.columnas,
+          row_columnas: this.row_columnas
         };
         this.loadFileAction(data);
-      }else{
+      } else {
         this.$message.error('Por favor seleccione archivo');
       }
     },
-    loadAndStoreFuncionario:function(){
-      if(this.file_funcionario){
+    loadAndStoreFuncionario: function () {
+      if (this.file_funcionario) {
         const data = {
-          codigo_recarga:this.recarga.codigo,
-          file:this.file_funcionario,
-          columnas:this.columnas,
-          row_columnas:this.row_columnas
+          codigo_recarga: this.recarga.codigo,
+          file: this.file_funcionario,
+          columnas: this.columnas,
+          row_columnas: this.row_columnas
         };
         this.uploadFuncionariosStoreAction(data);
-      }else{
+      } else {
         this.$message.error('Por favor seleccione archivo');
       }
     },
     handleAvatarSuccess(res, file) {
       this.file_funcionario = file.raw;
       this.imageUrl = URL.createObjectURL(file.raw);
-      if(this.file_funcionario){
+      if (this.file_funcionario) {
         this.uploadFileHtml();
       }
     },
@@ -297,15 +305,24 @@ export default {
       }
       return isXLSX;
     },
-    removeFile:function(){
-        this.file_funcionario = '';
-        this.errors_file = null;
-        this.$store.commit('recargas/datos/SET_FUNCIONARIOS', []);
+    removeFile: function () {
+      this.file_funcionario = '';
+      this.errors_file = [];
+      this.$store.commit('recargas/datos/SET_ERROR_COLUMN', {});
+      this.$store.commit('recargas/datos/SET_FILAS', []);
+      this.$store.commit('recargas/datos/SET_SUCCESS_IMPORT', false);
+      this.$store.commit('recargas/datos/SET_FUNCIONARIOS', []);
     },
-    volver:function(){
+    formatErrors(errors) { return Array.isArray(errors) ? errors.join(', ') : (errors || 'Error de validación.'); },
+    formatValues(values) {
+      if (values === null || typeof values === 'undefined') return '--';
+      if (typeof values === 'object') return Object.keys(values).map(key => `${key}: ${values[key]}`).join(', ');
+      return String(values).replace(/[{}]/g, '');
+    },
+    volver: function () {
       this.$store.commit('recargas/datos/SET_NEGATIVE_PASO_MODAL_FUNCIONARIO');
     },
-    siguiente:function(){
+    siguiente: function () {
       this.$store.commit('recargas/datos/SET_POSITIVE_PASO_MODAL_FUNCIONARIO');
     }
   }
@@ -313,41 +330,47 @@ export default {
 </script>
 
 <style>
-.modal-card-foot{
+.modal-card-foot {
   justify-content: flex-end;
 }
+
 .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    width: 100%;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
   margin: auto;
-  }
-  .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
-  .existe{
-    outline: 1px rgba(221, 110, 110, 0.342) solid !important;
-    background-color: rgba(221, 110, 110, 0.342) !important;
-  }
-  .table .is-scrollable tbody{
-    overflow-y: scroll;
-      width: auto;
-      position: absolute;
-  }
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+
+.existe {
+  outline: 1px rgba(221, 110, 110, 0.342) solid !important;
+  background-color: rgba(221, 110, 110, 0.342) !important;
+}
+
+.table .is-scrollable tbody {
+  overflow-y: scroll;
+  width: auto;
+  position: absolute;
+}
 </style>

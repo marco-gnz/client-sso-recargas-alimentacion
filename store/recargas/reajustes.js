@@ -1,173 +1,173 @@
-import { Notification } from 'element-ui';
+import { Notification } from "element-ui";
 export const state = () => ({
-  full_screen_loading:false,
-  open_modal:false,
-  modal_show:false,
-  modal_rechazar:false,
-  loading_show_reajuste:false,
-  errors_file:null,
-  reajustes:[],
-  reajuste:'',
-  observacion_rechazo:'',
-  errors:{},
-  loading_rechazar_reajuste:false,
-  loading_table_asistencia:false,
-  index_reajuste:undefined,
-  recarga:'',
-  modal_carga:false,
-  carga:{
-    file:''
+  full_screen_loading: false,
+  open_modal: false,
+  modal_show: false,
+  modal_rechazar: false,
+  loading_show_reajuste: false,
+  errors_file: [],
+  reajustes: [],
+  reajuste: "",
+  observacion_rechazo: "",
+  errors: {},
+  loading_rechazar_reajuste: false,
+  loading_table_asistencia: false,
+  index_reajuste: undefined,
+  recarga: "",
+  modal_carga: false,
+  carga: {
+    file: "",
   },
-  errors_column:'',
-  paso:0,
-  full_screen_loading:false,
-  success_import:false,
-  filas:[],
-  message_success:'',
-  reajustes_load:[],
-  reajustes_load_sobrante:[],
+  errors_column: {},
+  paso: 0,
+  full_screen_loading: false,
+  success_import: false,
+  filas: [],
+  message_success: "",
+  reajustes_load: [],
+  reajustes_load_sobrante: [],
 });
 
 export const mutations = {
-  SET_POSITION_PASO_MODAL(state, value){
-      state.paso = value;
+  SET_POSITION_PASO_MODAL(state, value) {
+    state.paso = value;
   },
-  SET_MODAL_SHOW(state, value){
+  SET_MODAL_SHOW(state, value) {
     state.modal_show = value;
   },
-  SET_MODAL_CARGA(state, value){
+  SET_MODAL_CARGA(state, value) {
     state.modal_carga = value;
   },
-  SET_REAJUSTES(state, value){
+  SET_REAJUSTES(state, value) {
     state.reajustes = value;
   },
-  SET_REAJUSTE(state, value){
+  SET_REAJUSTE(state, value) {
     state.reajuste = value;
   },
-  SET_UPDATE_REAJUSTE(state, value){
-    const indice = state.reajustes.findIndex(r => r.uuid === value.uuid);
+  SET_UPDATE_REAJUSTE(state, value) {
+    const indice = state.reajustes.findIndex((r) => r.uuid === value.uuid);
     state.reajustes.splice(indice, 1, value);
   },
-  SET_ADD_REAJUSTE(state, value){
+  SET_ADD_REAJUSTE(state, value) {
     state.reajustes.unshift(value);
   },
-  SET_LOADING_REAJUSTE(state, value){
+  SET_LOADING_REAJUSTE(state, value) {
     state.loading_show_reajuste = value;
   },
-  SET_MODAL_RECHAZAR(state, value){
+  SET_MODAL_RECHAZAR(state, value) {
     state.modal_rechazar = value;
   },
-  SET_OBSERVACION_RECHAZAR(state, value){
+  SET_OBSERVACION_RECHAZAR(state, value) {
     state.observacion_rechazo = value;
   },
-  SET_LOADING_RECHAZAR(state, value){
+  SET_LOADING_RECHAZAR(state, value) {
     state.loading_rechazar_reajuste = value;
   },
-  SET_ERRORS(state, value){
+  SET_ERRORS(state, value) {
     state.errors = value;
   },
-  SET_LOADING_REAJUSTES(state, value){
+  SET_LOADING_REAJUSTES(state, value) {
     state.loading_table_asistencia = value;
   },
-  SET_INDEX_REAJUSTES(state, value){
+  SET_INDEX_REAJUSTES(state, value) {
     state.index_reajuste = value;
   },
-  SET_RECARGA(state, value){
+  SET_RECARGA(state, value) {
     state.recarga = value;
   },
-  SET_FILE(state, value){
+  SET_FILE(state, value) {
     state.carga.file = value;
   },
-  SET_ERRORS_FILE(state, value){
-    state.errors_file = value;
+  SET_ERRORS_FILE(state, value) {
+    state.errors_file = Array.isArray(value) ? value : [];
   },
-  SET_ERROR_COLUMN(state, value){
-    state.errors_column = value;
+  SET_ERROR_COLUMN(state, value) {
+    state.errors_column = value && typeof value === "object" ? value : {};
   },
-  SET_NEGATIVE_PASO_MODAL_FUNCIONARIO(state, value){
+  SET_NEGATIVE_PASO_MODAL_FUNCIONARIO(state, value) {
     state.paso--;
   },
-  SET_POSITIVE_PASO_MODAL_FUNCIONARIO(state, value){
+  SET_POSITIVE_PASO_MODAL_FUNCIONARIO(state, value) {
     state.paso++;
   },
-  SET_LOADING(state, value){
+  SET_LOADING(state, value) {
     state.full_screen_loading = value;
   },
-  SET_SUCCESS_IMPORT(state, value){
+  SET_SUCCESS_IMPORT(state, value) {
     state.success_import = value;
   },
-  SET_FILAS(state, value){
+  SET_FILAS(state, value) {
     state.filas = value;
   },
-  SET_SUCCESS_MESSAGE_IMPORT(state, value){
+  SET_SUCCESS_MESSAGE_IMPORT(state, value) {
     state.message_success = value;
   },
-  SET_AJUSTES_LOAD(state, value){
-    return state.reajustes_load = value;
+  SET_AJUSTES_LOAD(state, value) {
+    return (state.reajustes_load = value);
   },
-  SET_AJUSTES_LOAD_SOBRANTE(state, value){
-    return state.reajustes_load_sobrante = value;
-  }
+  SET_AJUSTES_LOAD_SOBRANTE(state, value) {
+    return (state.reajustes_load_sobrante = value);
+  },
 };
 
 export const getters = {
-  modalShow(state){
+  modalShow(state) {
     return state.modal_show;
   },
-  reajustes(state){
+  reajustes(state) {
     return state.reajustes;
   },
-  reajuste(state){
+  reajuste(state) {
     return state.reajuste;
   },
-  modalShowReajuste(state){
+  modalShowReajuste(state) {
     return state.loading_show_reajuste;
   },
-  modalRechazarReajuste(state){
+  modalRechazarReajuste(state) {
     return state.modal_rechazar;
   },
-  errors(state){
+  errors(state) {
     return state.errors;
   },
-  loadingRechazarReajuste(state){
+  loadingRechazarReajuste(state) {
     return state.loading_rechazar_reajuste;
   },
-  loadingTableAsistencia(state){
+  loadingTableAsistencia(state) {
     return state.loading_table_asistencias;
   },
-  indexReajustes(state){
+  indexReajustes(state) {
     return state.index_reajuste;
   },
-  recarga(state){
+  recarga(state) {
     return state.recarga;
   },
-  carga(state){
+  carga(state) {
     return state.modal_carga;
   },
-  errorsColumn(state){
+  errorsColumn(state) {
     return state.errors_column;
   },
-  paso(state){
+  paso(state) {
     return state.paso;
   },
-  fullScreenLoading(state){
+  fullScreenLoading(state) {
     return state.full_screen_loading;
   },
-  successImport(state){
+  successImport(state) {
     return state.success_import;
   },
-  filas(state){
+  filas(state) {
     return state.filas;
   },
-  successMessagge(state){
+  successMessagge(state) {
     return state.message_success;
   },
-  reajustesLoad(state){
+  reajustesLoad(state) {
     return state.reajustes_load;
   },
-  reajustesLoadSobrante(state){
+  reajustesLoadSobrante(state) {
     return state.reajustes_load_sobrante;
-  }
+  },
 };
 
 export const actions = {
@@ -272,8 +272,8 @@ export const actions = {
   successLoadFile({ commit }) {
     commit("SET_AJUSTES_LOAD", []);
     commit("SET_AJUSTES_LOAD_SOBRANTE", []);
-    commit("SET_ERRORS_FILE", null);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERRORS_FILE", []);
+    commit("SET_ERROR_COLUMN", {});
     commit("SET_SUCCESS_IMPORT", true);
   },
   errorsLoadFile({ commit }) {
@@ -291,8 +291,8 @@ export const actions = {
     commit("SET_MODAL_CARGA", false);
     commit("SET_POSITION_PASO_MODAL", 0);
     commit("SET_FILE", "");
-    commit("SET_ERRORS_FILE", null);
-    commit("SET_ERROR_COLUMN", "");
+    commit("SET_ERRORS_FILE", []);
+    commit("SET_ERROR_COLUMN", {});
   },
   async uploadFileAjustes({ commit, dispatch }, data) {
     commit("SET_LOADING", true);
@@ -332,17 +332,19 @@ export const actions = {
         commit("SET_ERRORS_FILE", response.failures || []);
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
-      const failures = responseData.failures?.length
-        ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
-        : [
-            {
-              errors: ["Ocurrió un error al procesar el archivo de ajustes."],
-            },
-          ];
+      const failures =
+        Array.isArray(responseData.failures) && responseData.failures.length
+          ? responseData.failures
+          : responseData.message
+          ? [{ errors: [responseData.message] }]
+          : [
+              {
+                errors: ["Ocurrió un error al procesar el archivo de ajustes."],
+              },
+            ];
 
       dispatch("errorsLoadFile");
 
@@ -388,17 +390,19 @@ export const actions = {
         commit("SET_SUCCESS_IMPORT", false);
       }
     } catch (error) {
-      const responseData = error.response?.data || {};
+      const responseData =
+        error.response && error.response.data ? error.response.data : {};
 
-      const failures = responseData.failures?.length
-        ? responseData.failures
-        : responseData.message
-        ? [{ errors: [responseData.message] }]
-        : [
-            {
-              errors: ["Ocurrió un error al importar los ajustes."],
-            },
-          ];
+      const failures =
+        Array.isArray(responseData.failures) && responseData.failures.length
+          ? responseData.failures
+          : responseData.message
+          ? [{ errors: [responseData.message] }]
+          : [
+              {
+                errors: ["Ocurrió un error al importar los ajustes."],
+              },
+            ];
 
       dispatch("errorsLoadFile");
       commit("SET_ERRORS_FILE", failures);
